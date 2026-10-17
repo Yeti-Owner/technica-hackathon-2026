@@ -1,4 +1,5 @@
 # Python environments and bytecode
+# Machine-specific: recreated automatically by python run.py after cloning.
 .venv/
 venv/
 env/

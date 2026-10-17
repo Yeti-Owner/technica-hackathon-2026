@@ -1,30 +1,20 @@
 # Browser studio
 
-Visible Chromium controlled by Python: scroll, follow links, move focus with Tab/Shift+Tab, read pages, and capture images.
+Visible Chromium controlled by Python: scrolling, keyboard focus, links, page reading, and image capture.
 
 ## Run
 
-```powershell
-.\.venv\Scripts\python.exe -m browserkit
+Install Python 3.10+, clone this repo, then run:
+
+```sh
+python run.py
 ```
 
-First-time setup:
+First launch installs dependencies and Chromium (internet required). Type `help` for controls or `quit` to exit. Linux may also need Playwright's system dependencies installed.
 
-```powershell
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe -m playwright install chromium
-```
+- Home/themes/bookmarks: `ui/`
+- Python controls: `browserkit/controller.py`
+- Repair dependencies: `python run.py --setup`
+- Windows smoke test: `.venv\Scripts\python.exe smoke_test.py`
 
-Type `help` in the terminal for controls, or `quit` to exit.
-
-## Customize
-
-- `ui/home.html`, `ui/theme.css`: home page and themes.
-- `ui/bookmarks.js`: bookmarks.
-- `ui/inject.css`, `ui/inject.js`: page styling and behavior; restart after editing.
-- `browserkit/controller.py`: Python browser controls.
-
-Themes change page content; native Chromium tabs/address bar need a custom shell. Sessions aren't saved.
-
-Test: `.\.venv\Scripts\python.exe smoke_test.py`
+Git shares source and requirements; each machine creates its own `.venv` and browser installation. Captures, caches, and secrets stay local. Themes style pages, not Chromium's native toolbar.
