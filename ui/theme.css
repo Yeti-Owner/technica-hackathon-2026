@@ -173,6 +173,10 @@ body {
 .sky-cloud-2 { top: 18vh; right: -3vw; width: clamp(280px, 28vw, 440px); animation: floatDrift2 38s ease-in-out infinite alternate; }
 .sky-cloud-3 { top: 58vh; left: 4vw;   width: clamp(200px, 18vw, 300px); animation: floatDrift1 42s ease-in-out infinite alternate; opacity: 0.8; }
 .sky-cloud-4 { top: 75vh; right: 8vw;  width: clamp(240px, 22vw, 360px); animation: floatDrift2 35s ease-in-out infinite alternate; opacity: 0.85; }
+.sky-cloud-5 { top: 92vh; right: 4vw;  width: clamp(230px, 22vw, 350px); animation: floatDrift1 36s ease-in-out infinite alternate; opacity: 0.82; }
+.sky-cloud-6 { top: 125vh; left: -2vw; width: clamp(260px, 25vw, 400px); animation: floatDrift2 40s ease-in-out infinite alternate; opacity: 0.85; }
+.sky-cloud-7 { top: 165vh; right: 2vw; width: clamp(220px, 20vw, 340px); animation: floatDrift1 34s ease-in-out infinite alternate; opacity: 0.8; }
+
 
 .cloud-img {
   width: 100%;
@@ -911,13 +915,16 @@ main {
   z-index: 10;
   width: 100%;
   margin-top: 40px;
+  overflow-x: hidden;
 }
 
 .wave-cloud-divider {
+  position: relative;
   width: 100%;
   line-height: 0;
   color: var(--night-base);
   margin-bottom: -2px;
+  overflow: visible;
 }
 
 .wave-cloud-divider svg {
@@ -926,11 +933,70 @@ main {
   display: block;
 }
 
+/* ── Soft Fluffy Transition Seam Clouds (Day to Night boundary) ──── */
+.transition-seam-clouds {
+  position: absolute;
+  top: -55px;
+  left: 0;
+  width: 100%;
+  height: 130px;
+  pointer-events: none;
+  z-index: 2;
+  overflow: hidden;
+}
+
+.seam-cloud {
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.14));
+  opacity: 0.95;
+  will-change: transform;
+}
+
+.seam-cloud-1 {
+  left: -2%;
+  top: -15px;
+  width: clamp(240px, 24vw, 360px);
+  animation: seamFloat1 18s ease-in-out infinite alternate;
+}
+
+.seam-cloud-2 {
+  left: 28%;
+  top: 10px;
+  width: clamp(260px, 26vw, 390px);
+  animation: seamFloat2 22s ease-in-out infinite alternate;
+}
+
+.seam-cloud-3 {
+  left: 60%;
+  top: -25px;
+  width: clamp(220px, 22vw, 340px);
+  animation: seamFloat1 20s ease-in-out infinite alternate;
+}
+
+.seam-cloud-4 {
+  right: -3%;
+  top: 5px;
+  width: clamp(250px, 25vw, 380px);
+  animation: seamFloat2 24s ease-in-out infinite alternate;
+}
+
+@keyframes seamFloat1 {
+  0%   { transform: translate(0, 0); }
+  100% { transform: translate(14px, -8px); }
+}
+
+@keyframes seamFloat2 {
+  0%   { transform: translate(0, 0); }
+  100% { transform: translate(-12px, 9px); }
+}
+
 .night-sky-section {
   position: relative;
   background: linear-gradient(180deg, var(--night-base) 0%, var(--night-deep) 100%);
   color: var(--night-text);
-  padding: 40px 24px 80px;
+  padding: 40px 24px 100px;
   overflow: hidden;
 }
 
@@ -958,13 +1024,215 @@ main {
   50%      { opacity: 1;   transform: scale(1.3); }
 }
 
+/* ── Night Clouds Artwork Layer (Framing & 3-Layer Bottom Bank) ──── */
+.night-clouds-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+  overflow: hidden;
+}
+
+/* Framing Edges & Corners (Surrounding content, partially cropped) */
+.nc-frame {
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+  opacity: 0.68;
+  filter: drop-shadow(0 15px 35px rgba(0, 0, 0, 0.4));
+  will-change: transform;
+}
+
+.nc-top-left {
+  top: 30px;
+  left: -110px;
+  width: clamp(280px, 32vw, 480px);
+  height: auto;
+  animation: ncFloat1 24s ease-in-out infinite alternate;
+}
+
+.nc-top-right {
+  top: 70px;
+  right: -120px;
+  width: clamp(300px, 34vw, 520px);
+  height: auto;
+  animation: ncFloat2 28s ease-in-out infinite alternate;
+}
+
+.nc-mid-left {
+  top: 38%;
+  left: -130px;
+  width: clamp(260px, 28vw, 440px);
+  height: auto;
+  opacity: 0.52;
+  animation: ncFloat2 26s ease-in-out infinite alternate;
+}
+
+.nc-mid-right {
+  top: 42%;
+  right: -130px;
+  width: clamp(280px, 30vw, 460px);
+  height: auto;
+  opacity: 0.52;
+  animation: ncFloat1 30s ease-in-out infinite alternate;
+}
+
+.nc-bottom-left {
+  bottom: 80px;
+  left: -120px;
+  width: clamp(320px, 35vw, 540px);
+  height: auto;
+  opacity: 0.78;
+  animation: ncFloat1 22s ease-in-out infinite alternate;
+}
+
+.nc-bottom-right {
+  bottom: 95px;
+  right: -120px;
+  width: clamp(300px, 33vw, 500px);
+  height: auto;
+  opacity: 0.78;
+  animation: ncFloat2 25s ease-in-out infinite alternate;
+}
+
+@keyframes ncFloat1 {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  50%  { transform: translate(18px, -12px) rotate(1deg); }
+  100% { transform: translate(-10px, 14px) rotate(-1deg); }
+}
+
+@keyframes ncFloat2 {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  50%  { transform: translate(-16px, 15px) rotate(-1deg); }
+  100% { transform: translate(14px, -10px) rotate(1deg); }
+}
+
+/* Bottom Overlapping Cloud Bank: 3 Depth Layers */
+.nc-bottom-row {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  pointer-events: none;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  will-change: transform;
+}
+
+.nc-bottom-cloud {
+  flex-shrink: 0;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+  animation: ncbFloat 14s ease-in-out infinite alternate;
+}
+
+@keyframes ncbFloat {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(-12px); }
+}
+
+/* Layer 1: Back - Darker, subtle blur, low opacity */
+.nc-row-back {
+  z-index: 1;
+  bottom: 50px;
+  opacity: 0.58;
+  filter: blur(3px) brightness(0.72) saturate(0.92);
+}
+
+.nc-row-back .ncb-1 { width: clamp(340px, 34vw, 560px); margin-left: -8vw; margin-bottom: 25px; }
+.nc-row-back .ncb-2 { width: clamp(380px, 38vw, 620px); margin-left: -5vw; }
+.nc-row-back .ncb-3 { width: clamp(360px, 36vw, 600px); margin-left: -4vw; margin-bottom: 30px; }
+.nc-row-back .ncb-4 { width: clamp(320px, 32vw, 540px); margin-right: -8vw; }
+
+/* Layer 2: Mid - Natural teal shading, gentle depth */
+.nc-row-mid {
+  z-index: 2;
+  bottom: 20px;
+  opacity: 0.8;
+  filter: blur(1px) brightness(0.9) saturate(1.05);
+}
+
+.nc-row-mid .ncm-1 { width: clamp(320px, 32vw, 540px); margin-left: -4vw; }
+.nc-row-mid .ncm-2 { width: clamp(350px, 35vw, 580px); margin-left: -2vw; margin-bottom: 15px; }
+.nc-row-mid .ncm-3 { width: clamp(360px, 36vw, 590px); margin-left: -3vw; }
+.nc-row-mid .ncm-4 { width: clamp(300px, 30vw, 520px); margin-right: -4vw; margin-bottom: 25px; }
+
+/* Layer 3: Front - Crisp, brighter teal-blue, rich shadows */
+.nc-row-front {
+  z-index: 3;
+  bottom: -20px;
+  opacity: 0.94;
+  filter: brightness(1.05) saturate(1.15) drop-shadow(0 -10px 30px rgba(7, 24, 43, 0.65));
+}
+
+.nc-row-front .ncf-1 { width: clamp(380px, 38vw, 620px); margin-left: -6vw; }
+.nc-row-front .ncf-2 { width: clamp(350px, 35vw, 580px); margin-left: -3vw; margin-bottom: 10px; }
+.nc-row-front .ncf-3 { width: clamp(340px, 34vw, 560px); margin-left: -2vw; }
+.nc-row-front .ncf-4 { width: clamp(360px, 36vw, 580px); margin-right: -6vw; margin-bottom: 15px; }
+
+/* ── Small Pink & Lavender Stars Sitting Among Bottom Clouds ─────── */
+.bottom-pastel-stars {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 260px;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.pastel-star {
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+  display: inline-block;
+  line-height: 1;
+  font-size: 1.15rem;
+  filter: drop-shadow(0 0 10px currentColor);
+  animation: pastelTwinkle 3.5s ease-in-out infinite alternate;
+}
+
+.p-star-1, .p-star-4 {
+  color: #fbb6ce; /* Soft blush pink */
+  text-shadow: 0 0 14px rgba(251, 182, 206, 0.95);
+  animation-duration: 3.2s;
+  animation-delay: 0.2s;
+}
+
+.p-star-2, .p-star-5 {
+  color: #d8b4fe; /* Lavender */
+  text-shadow: 0 0 14px rgba(216, 180, 254, 0.95);
+  font-size: 1.35rem;
+  animation-duration: 4.1s;
+  animation-delay: 1.4s;
+}
+
+.p-star-3, .p-star-6 {
+  color: #fef08a; /* Pastel warm cream */
+  text-shadow: 0 0 12px rgba(254, 240, 138, 0.9);
+  font-size: 1.05rem;
+  animation-duration: 3.7s;
+  animation-delay: 0.8s;
+}
+
+@keyframes pastelTwinkle {
+  0%   { opacity: 0.35; transform: scale(0.85) rotate(0deg); }
+  50%  { opacity: 1;    transform: scale(1.2) rotate(15deg); }
+  100% { opacity: 0.55; transform: scale(0.95) rotate(-10deg); }
+}
+
 /* ── Crescent Moon with Radial Halo ──────────────────────────────── */
 .crescent-moon-wrapper {
   position: absolute;
-  top: -20px;
-  right: -120px;
-  width: 175px;
-  height: 175px;
+  top: -30px;
+  right: -130px;
+  width: 210px;
+  height: 210px;
   pointer-events: none;
   z-index: 2;
   will-change: transform;
@@ -973,44 +1241,41 @@ main {
 @media (max-width: 1040px) {
   .crescent-moon-wrapper {
     position: static;
-    margin: 30px auto 0;
-    width: 150px;
-    height: 150px;
+    margin: 35px auto 0;
+    width: 180px;
+    height: 180px;
   }
 }
 
-
 .moon-halo {
   position: absolute;
-  top: -20px;
-  left: -20px;
-  width: 220px;
-  height: 220px;
+  top: -40px;
+  left: -40px;
+  width: 290px;
+  height: 290px;
   border-radius: 50%;
-  background: radial-gradient(circle, var(--moon-glow) 0%, rgba(255, 240, 180, 0.18) 45%, transparent 75%);
-  filter: blur(18px);
-  animation: haloPulse 6s ease-in-out infinite alternate;
+  background: radial-gradient(circle, rgba(255, 245, 205, 0.55) 0%, rgba(255, 235, 170, 0.3) 38%, rgba(216, 180, 254, 0.18) 55%, transparent 75%);
+  filter: blur(24px);
+  animation: haloPulse 5s ease-in-out infinite alternate;
 }
 
 .moon-img {
-  width: 165px;
-  height: 165px;
+  width: 195px;
+  height: 195px;
   object-fit: contain;
   display: block;
   margin: 0 auto;
-  filter: drop-shadow(0 0 28px rgba(255, 240, 180, 0.7)) drop-shadow(0 0 55px rgba(255, 243, 194, 0.4));
+  filter: drop-shadow(0 0 32px rgba(255, 245, 195, 0.85)) drop-shadow(0 0 65px rgba(253, 224, 71, 0.45)) drop-shadow(0 0 90px rgba(216, 180, 254, 0.3));
   pointer-events: none;
   user-select: none;
   transform: rotate(-6deg);
   animation: moonFloat 8s ease-in-out infinite alternate;
 }
 
-
 @keyframes moonFloat {
   0%   { transform: rotate(-6deg) translateY(0); }
   100% { transform: rotate(-2deg) translateY(-8px); }
 }
-
 
 .sparkle {
   position: absolute;
@@ -1022,6 +1287,7 @@ main {
 .sparkle-1 { top: -10px; left: 10px; font-size: 1.4rem; animation-delay: 0.5s; }
 .sparkle-2 { top: 75px;  left: -20px; font-size: 1.1rem; animation-delay: 1.8s; }
 .sparkle-3 { top: 95px;  right: 15px; font-size: 1.3rem; animation-delay: 2.7s; }
+.sparkle-4 { top: 130px; left: 20px;  font-size: 1.15rem; animation-delay: 3.2s; }
 
 @keyframes haloPulse {
   0%   { transform: scale(0.95); opacity: 0.7; }
@@ -1036,7 +1302,7 @@ main {
 /* ── Night Content Container ─────────────────────────────────────── */
 .night-content-container {
   position: relative;
-  z-index: 3;
+  z-index: 5;
   max-width: 1140px;
   margin: 0 auto;
 }
@@ -1298,9 +1564,25 @@ main {
   }
 
   .crescent-moon-wrapper {
-    top: 30px;
-    right: 20px;
-    transform: scale(0.75);
+    top: 20px;
+    right: 15px;
+    transform: scale(0.85);
+  }
+
+  .nc-frame {
+    opacity: 0.45;
+  }
+
+  .nc-mid-left, .nc-mid-right {
+    display: none;
+  }
+
+  .nc-row-back {
+    display: none;
+  }
+
+  .transition-seam-clouds {
+    height: 90px;
   }
 }
 
@@ -1342,7 +1624,15 @@ main {
   .curtain-left,
   .curtain-right,
   .horizontal-track,
-  .crescent-moon-wrapper {
+  .crescent-moon-wrapper,
+  .seam-cloud,
+  .nc-frame,
+  .nc-bottom-row,
+  .nc-bottom-cloud,
+  .pastel-star,
+  .moon-halo,
+  .moon-img,
+  .sparkle {
     transform: none !important;
     animation: none !important;
   }

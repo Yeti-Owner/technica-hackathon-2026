@@ -42,7 +42,20 @@
   <div class="sky-cloud sky-cloud-4" data-speed="0.35">
     <img src="../Images for ui/Cloud 2.png" alt="" class="cloud-img" width="320" height="240" loading="lazy">
   </div>
+
+  <div class="sky-cloud sky-cloud-5" data-speed="0.28">
+    <img src="../Images for ui/Cloud 1.png" alt="" class="cloud-img" width="330" height="250" loading="lazy">
+  </div>
+
+  <div class="sky-cloud sky-cloud-6" data-speed="0.40">
+    <img src="../Images for ui/Cloud 2.png" alt="" class="cloud-img" width="360" height="270" loading="lazy">
+  </div>
+
+  <div class="sky-cloud sky-cloud-7" data-speed="0.22">
+    <img src="../Images for ui/Cloud 1.png" alt="" class="cloud-img" width="300" height="230" loading="lazy">
+  </div>
 </div>
+
 
 <!-- ── Navigation Bar ──────────────────────────────────────── -->
 <header class="site-header">
@@ -123,7 +136,7 @@
       </section>
 
       <div class="keyboard-hint" aria-hidden="true">
-        <span>💡 Tip: Navigate with <kbd>Tab</kbd>, reverse with <kbd>Shift</kbd> + <kbd>Tab</kbd>, select with <kbd>Enter</kbd></span>
+        <span>Tip: Navigate with <kbd>Tab</kbd>, reverse with <kbd>Shift</kbd> + <kbd>Tab</kbd>, select with <kbd>Enter</kbd></span>
       </div>
     </div>
   </section>
@@ -229,8 +242,14 @@
 <!-- ═══ NIGHT SKY TRANSITION (SCALLOPED EDGE + MOON + TEAM) ═══ -->
 <div class="night-transition-wrapper">
 
-  <!-- Fluffy Cloud Scalloped Wave SVG Transition -->
+  <!-- Fluffy Cloud Scalloped Wave SVG Transition + Seam Clouds -->
   <div class="wave-cloud-divider" aria-hidden="true">
+    <div class="transition-seam-clouds">
+      <img src="../Images for ui/Cloud 1.png" alt="" class="seam-cloud seam-cloud-1" width="340" height="250" loading="lazy">
+      <img src="../Images for ui/Cloud 2.png" alt="" class="seam-cloud seam-cloud-2" width="380" height="270" loading="lazy">
+      <img src="../Images for ui/Cloud 1.png" alt="" class="seam-cloud seam-cloud-3" width="320" height="240" loading="lazy">
+      <img src="../Images for ui/Cloud 2.png" alt="" class="seam-cloud seam-cloud-4" width="360" height="260" loading="lazy">
+    </div>
     <svg viewBox="0 0 1440 180" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M0,180 L0,70
         C60,95 120,115 180,105
@@ -252,6 +271,51 @@
     <!-- Twinkling Stars & Sparkles Layer -->
     <div class="night-stars-layer" id="night-stars-container" aria-hidden="true"></div>
 
+    <!-- Night Clouds: Edge Framing, Corners & Multi-Layer Bottom Bank -->
+    <div class="night-clouds-layer" aria-hidden="true">
+      <!-- Framing Edges & Corners (Partially cropped off-screen) -->
+      <img src="assets/clouds/night-clouds-1.png" alt="" class="nc-frame nc-top-left" width="460" height="460" loading="lazy">
+      <img src="assets/clouds/night-clouds-3.png" alt="" class="nc-frame nc-top-right" width="500" height="380" loading="lazy">
+      <img src="assets/clouds/night-clouds-2.png" alt="" class="nc-frame nc-mid-left" width="420" height="320" loading="lazy">
+      <img src="assets/clouds/night-clouds-1.png" alt="" class="nc-frame nc-mid-right" width="460" height="460" loading="lazy">
+      <img src="assets/clouds/night-clouds-3.png" alt="" class="nc-frame nc-bottom-left" width="520" height="400" loading="lazy">
+      <img src="assets/clouds/night-clouds-2.png" alt="" class="nc-frame nc-bottom-right" width="480" height="360" loading="lazy">
+
+      <!-- Bottom Overlapping Cloud Bank: Layer 1 (Back - Darker, Subtle Blur) -->
+      <div class="nc-bottom-row nc-row-back">
+        <img src="assets/clouds/night-clouds-2.png" alt="" class="nc-bottom-cloud ncb-1" width="560" height="400" loading="lazy">
+        <img src="assets/clouds/night-clouds-1.png" alt="" class="nc-bottom-cloud ncb-2" width="620" height="600" loading="lazy">
+        <img src="assets/clouds/night-clouds-3.png" alt="" class="nc-bottom-cloud ncb-3" width="600" height="420" loading="lazy">
+        <img src="assets/clouds/night-clouds-2.png" alt="" class="nc-bottom-cloud ncb-4" width="540" height="380" loading="lazy">
+      </div>
+
+      <!-- Bottom Overlapping Cloud Bank: Layer 2 (Mid - Natural Shading) -->
+      <div class="nc-bottom-row nc-row-mid">
+        <img src="assets/clouds/night-clouds-3.png" alt="" class="nc-bottom-cloud ncm-1" width="540" height="380" loading="lazy">
+        <img src="assets/clouds/night-clouds-2.png" alt="" class="nc-bottom-cloud ncm-2" width="580" height="420" loading="lazy">
+        <img src="assets/clouds/night-clouds-1.png" alt="" class="nc-bottom-cloud ncm-3" width="590" height="570" loading="lazy">
+        <img src="assets/clouds/night-clouds-3.png" alt="" class="nc-bottom-cloud ncm-4" width="520" height="370" loading="lazy">
+      </div>
+
+      <!-- Bottom Overlapping Cloud Bank: Layer 3 (Front - Brighter, Rolling Foreground) -->
+      <div class="nc-bottom-row nc-row-front">
+        <img src="assets/clouds/night-clouds-1.png" alt="" class="nc-bottom-cloud ncf-1" width="620" height="600" loading="lazy">
+        <img src="assets/clouds/night-clouds-3.png" alt="" class="nc-bottom-cloud ncf-2" width="580" height="410" loading="lazy">
+        <img src="assets/clouds/night-clouds-2.png" alt="" class="nc-bottom-cloud ncf-3" width="560" height="400" loading="lazy">
+        <img src="assets/clouds/night-clouds-1.png" alt="" class="nc-bottom-cloud ncf-4" width="580" height="560" loading="lazy">
+      </div>
+
+      <!-- Small Pink & Lavender Stars Sitting Among the Bottom Clouds -->
+      <div class="bottom-pastel-stars" aria-hidden="true">
+        <span class="pastel-star p-star-1" style="left: 10%; bottom: 130px;">★</span>
+        <span class="pastel-star p-star-2" style="left: 24%; bottom: 175px;">✦</span>
+        <span class="pastel-star p-star-3" style="left: 42%; bottom: 145px;">★</span>
+        <span class="pastel-star p-star-4" style="left: 58%; bottom: 190px;">✦</span>
+        <span class="pastel-star p-star-5" style="left: 74%; bottom: 160px;">★</span>
+        <span class="pastel-star p-star-6" style="left: 88%; bottom: 135px;">✦</span>
+      </div>
+    </div>
+
     <div class="night-content-container">
 
       <!-- Closing Accent Headline (Reference Style: "Any thoughts?") -->
@@ -269,12 +333,14 @@
         <!-- Glowing Crescent Moon with Radial Halo -->
         <div class="crescent-moon-wrapper" id="night-moon" aria-hidden="true">
           <div class="moon-halo"></div>
-          <img src="../Images for ui/moon.png" alt="" class="moon-img" width="160" height="160">
+          <img src="../Images for ui/moon.png" alt="" class="moon-img" width="200" height="200">
           <div class="sparkle sparkle-1">✦</div>
           <div class="sparkle sparkle-2">★</div>
           <div class="sparkle sparkle-3">✦</div>
+          <div class="sparkle sparkle-4">★</div>
         </div>
       </div>
+
 
 
       <hr class="night-divider" aria-hidden="true">

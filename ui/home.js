@@ -329,6 +329,72 @@ function initAnimations() {
       }
     }
   );
+
+  // ── G. Night Clouds Scroll Parallax (Multi-tier Depth) ───────────
+  // Back row moves slower, mid row moves moderately, front row moves faster
+  if (document.querySelector('.nc-row-back')) {
+    gsap.to('.nc-row-back', {
+      y: 25,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '.night-sky-section',
+        start: 'top 85%',
+        end: 'bottom bottom',
+        scrub: 1.8
+      }
+    });
+  }
+
+  if (document.querySelector('.nc-row-mid')) {
+    gsap.to('.nc-row-mid', {
+      y: 50,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '.night-sky-section',
+        start: 'top 85%',
+        end: 'bottom bottom',
+        scrub: 1.4
+      }
+    });
+  }
+
+  if (document.querySelector('.nc-row-front')) {
+    gsap.to('.nc-row-front', {
+      y: 80,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '.night-sky-section',
+        start: 'top 85%',
+        end: 'bottom bottom',
+        scrub: 1.0
+      }
+    });
+  }
+
+  // Framing corner clouds subtle scroll parallax
+  if (document.querySelector('.nc-frame')) {
+    gsap.to('.nc-top-left, .nc-bottom-left', {
+      y: 35,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '.night-sky-section',
+        start: 'top 85%',
+        end: 'bottom bottom',
+        scrub: 1.5
+      }
+    });
+
+    gsap.to('.nc-top-right, .nc-bottom-right', {
+      y: -25,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '.night-sky-section',
+        start: 'top 85%',
+        end: 'bottom bottom',
+        scrub: 1.5
+      }
+    });
+  }
 }
 
 /* ── DOM Ready Initialization ────────────────────────────────────── */
