@@ -4,27 +4,6 @@
    Accessibility: WCAG AA, full keyboard navigation, reduced motion
    =================================================================== */
 
-/* ── 1. Bookmarks Population (Playwright Compatible) ─────────────── */
-function initBookmarks() {
-  const container = document.querySelector('#bookmarks');
-  if (!container) return;
-
-  const bookmarks = window.BOOKMARKS || [];
-  for (const item of bookmarks) {
-    const link = document.createElement('a');
-    link.href = item.url;
-    link.setAttribute('tabindex', '0');
-
-    const title = document.createElement('strong');
-    title.textContent = item.title;
-
-    const desc = document.createElement('span');
-    desc.textContent = item.description;
-
-    link.append(title, desc);
-    container.append(link);
-  }
-}
 
 /* ── 2. Theme Toggle (Light / Dark Mode) ─────────────────────────── */
 function initThemeToggle() {
@@ -425,8 +404,8 @@ function initNavScroll() {
 
       const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       const navHeader = document.querySelector('.site-header');
-      const navHeight = navHeader ? navHeader.offsetHeight : 72;
-      const breathingRoom = 24;
+      const navHeight = navHeader ? navHeader.offsetHeight : 90;
+      const breathingRoom = 26;
       const offset = navHeight + breathingRoom;
 
       // If ScrollTrigger is active, ensure layout coordinates are fresh
@@ -520,7 +499,6 @@ function initNavScroll() {
 
 /* ── DOM Ready Initialization ────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
-  initBookmarks();
   initThemeToggle();
   initNightStars();
   initAnimations();

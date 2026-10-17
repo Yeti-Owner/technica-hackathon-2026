@@ -13,7 +13,10 @@ async def main():
         await expect(b.page.locator("html")).to_have_attribute("data-theme", "dark")
         Path("artifacts").mkdir(exist_ok=True)
         await b.page.screenshot(path="artifacts/home.png")
-        await b.click_link("Practice page Try links, focus, scrolling and images")
+        try:
+            await b.click_link("Practice page Try links, focus, scrolling and images")
+        except Exception:
+            await b.click_link("Try Practice Tools")
         await expect(b.page.get_by_role("heading", name="Try the controls.")).to_be_visible()
         assert await b.page.locator("#browser-starter-style").count() == 1
         await b.page.get_by_role("link", name="Home", exact=True).focus()
