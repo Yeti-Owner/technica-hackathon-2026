@@ -89,36 +89,50 @@ function initAnimations() {
   }
 
   // ── A. Hero Load Entrance Animation ─────────────────────────────
-  const heroWords = document.querySelectorAll('.hero-title .word');
-  
-  if (heroWords.length > 0) {
-    gsap.from(heroWords, {
-      y: 25,
-      opacity: 0.2,
-      duration: 0.6,
-      stagger: 0.08,
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (!prefersReducedMotion) {
+    const heroTl = gsap.timeline({ defaults: { ease: 'power2.out' } });
+
+    // Logo fades and rises in first, then headline, then search bar (staggered ~0.12s)
+    heroTl
+      .from('.hero-logo-wrapper', {
+        opacity: 0,
+        y: 26,
+        duration: 0.75,
+        clearProps: 'opacity'
+      })
+      .from('.hero-title', {
+        opacity: 0,
+        y: 20,
+        duration: 0.7,
+        clearProps: 'opacity'
+      }, '-=0.62')
+      .from('.hero-search', {
+        opacity: 0,
+        y: 18,
+        duration: 0.7,
+        clearProps: 'opacity'
+      }, '-=0.58');
+
+    gsap.from('.hero-cloud-back', {
+      scale: 0.9,
+      y: 20,
+      duration: 1.0,
+      stagger: 0.1,
       ease: 'power2.out',
-      clearProps: 'all'
+      clearProps: 'transform'
+    });
+
+    gsap.from('.hero-cloud-front', {
+      scale: 0.85,
+      y: 25,
+      duration: 0.9,
+      stagger: 0.1,
+      ease: 'power2.out',
+      clearProps: 'transform'
     });
   }
-
-  gsap.from('.hero-cloud-back', {
-    scale: 0.9,
-    y: 20,
-    duration: 1.0,
-    stagger: 0.1,
-    ease: 'power2.out',
-    clearProps: 'transform'
-  });
-
-  gsap.from('.hero-cloud-front', {
-    scale: 0.85,
-    y: 25,
-    duration: 0.9,
-    stagger: 0.1,
-    ease: 'power2.out',
-    clearProps: 'transform'
-  });
 
 
   // ── B. Desktop Mouse-Move Parallax for Hero Clouds ───────────────

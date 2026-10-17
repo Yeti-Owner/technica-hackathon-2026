@@ -19,6 +19,7 @@
 
   /* Text & Accents (Light / Day Mode) */
   --hero-title-color: #0a0a0a;           /* Required: near-black, ultra-high contrast */
+  --hero-logo-filter: drop-shadow(0 14px 28px rgba(8, 42, 56, 0.10));
   --text-main:        #081c26;           /* Crisp dark body text for WCAG AA */
   --text-muted:       #14384a;           /* Secondary text */
   --text-subtle:      #2a556d;
@@ -110,6 +111,7 @@
 
   /* Brand Logo subtle glow in dark theme for high contrast */
   --brand-logo-filter: drop-shadow(0 0 1px #ffffff) drop-shadow(0 0 8px rgba(255, 255, 255, 0.75)) drop-shadow(0 0 16px rgba(98, 233, 255, 0.5));
+  --hero-logo-filter: drop-shadow(0 0 24px rgba(255, 255, 255, 0.35)) drop-shadow(0 0 45px rgba(98, 233, 255, 0.22)) drop-shadow(0 14px 30px rgba(0, 0, 0, 0.6));
 
   /* Search Bar Tokens (Dark Theme - High Contrast Aqua Button) */
   --search-box-bg:           rgba(15, 38, 52, 0.75);
@@ -394,12 +396,12 @@ main {
 /* ── HERO SECTION & NESTLED CLOUDS ───────────────────────────────── */
 .hero-section {
   position: relative;
-  min-height: calc(100vh - 90px);
+  min-height: calc(100vh - 76px);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 24px 60px;
+  padding: 30px 24px 50px;
   overflow: hidden;
 }
 
@@ -492,79 +494,82 @@ main {
   position: relative;
   z-index: 10;
   max-width: 840px;
+  width: 100%;
   margin: 0 auto;
   text-align: center;
-}
-
-.hero-badge {
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 7px 20px;
-  font-family: var(--font-body);
-  font-size: 0.82rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--badge-text);
-  background: var(--badge-bg);
-  border: 1.5px solid var(--badge-border);
-  border-radius: var(--radius-full);
-  margin-bottom: 24px;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: var(--badge-glow);
-  transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.hero-badge::before {
-  content: "";
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--badge-dot);
-  box-shadow: 0 0 8px var(--badge-dot);
-  flex-shrink: 0;
+/* ── HERO LOGO (CENTRAL VISUAL HERO) ─────────────────────────────── */
+.hero-logo-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: clamp(18px, 2.5vw, 28px);
+  will-change: transform, opacity;
 }
 
-/* ── HERO HEADLINE: BLACK, EXTRA-BOLD, TIGHT LETTER-SPACING ──────── */
+.hero-logo {
+  height: clamp(140px, 22vw, 300px);
+  width: auto;
+  max-width: min(90vw, 520px);
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+  filter: var(--hero-logo-filter);
+  animation: heroLogoFloat 6s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes heroLogoFloat {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(-7px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-logo {
+    animation: none;
+  }
+}
+
+/* ── HERO HEADLINE: HARMONIOUS SIZE UNDER LOGO ───────────────────── */
 .hero-title {
   font-family: var(--font-display);
-  font-size: clamp(3.2rem, 8vw, 6.4rem);
+  font-size: clamp(2rem, 4.5vw, 3.5rem);
   font-weight: 700;
-  line-height: 1.04;
-  letter-spacing: -0.04em;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
   color: var(--hero-title-color);
-  margin-bottom: 22px;
+  margin-bottom: clamp(28px, 3.5vw, 42px);
   text-shadow: 0 2px 20px rgba(255, 255, 255, 0.5);
   position: relative;
+  will-change: transform, opacity;
 }
 
 :root[data-theme="dark"] .hero-title {
   text-shadow: 0 4px 30px rgba(0, 0, 0, 0.6);
 }
 
-.hero-title .word {
-  display: inline-block;
-  will-change: transform, opacity;
+@media (min-width: 560px) {
+  .hero-title {
+    white-space: nowrap;
+  }
 }
 
-.hero-tagline {
-  font-size: clamp(1.15rem, 2.2vw, 1.38rem);
-  line-height: 1.62;
-  color: var(--text-muted);
-  max-width: 680px;
-  margin: 0 auto 36px;
-  font-weight: 500;
+.hero-title .word {
+  display: inline-block;
 }
 
 /* ── Accessible Search Form ──────────────────────────────────────── */
 .hero-search {
   position: relative;
   z-index: 10;
+  width: 100%;
   max-width: 640px;
   margin: 0 auto 0;
+  will-change: transform, opacity;
 }
 
 .search-label {
