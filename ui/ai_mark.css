@@ -1,0 +1,13 @@
+/* Loud debug marks for images the AI checker flags. */
+.ai-mark-outline { outline: 6px solid #ff1744 !important; outline-offset: -1px !important; }
+.ai-mark-banner {
+  position: absolute;
+  background: #ff1744;
+  color: #fff;
+  font: 700 18px/1.2 'Segoe UI', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: .02em;
+  padding: 6px 10px;
+  z-index: 2147483000;
+  pointer-events: none;
+}

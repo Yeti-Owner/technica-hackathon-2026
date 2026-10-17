@@ -22,6 +22,7 @@ Hold **ooo** to scroll down or **aaa** to scroll up; these are vowels, not low/h
 - `browserkit/voice_control.py`: independent audio/browser loops, active-tab routing, microphone selection.
 - `ui/voice.js`: status badge, frame-based scrolling, focus checks, controller watchdog.
 - Other `ui/` files: home, practice page, themes, bookmarks, and shared page styling.
+- `ui/image-lab.html`: debug lab; its card list is generated from `test_images.txt` at browser start.
 
 ## Collaboration notes
 

@@ -7,6 +7,21 @@ from playwright.async_api import async_playwright
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def lab_urls(text):
+    """Absolute URLs from test_images.txt text: one URL per line, # comments and blanks ignored, exact duplicates dropped (keep first)."""
+    urls = []
+    for line in text.splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if not line.startswith(("http://", "https://")):
+            print(f"Ignoring bad lab URL: {line}")
+            continue
+        if line not in urls:
+            urls.append(line)
+    return urls
+
+
 class BrowserController:
     async def __aenter__(self):
         self.playwright = await async_playwright().start()
@@ -16,11 +31,20 @@ class BrowserController:
             self.context.set_default_timeout(8000)
             # One script establishes order; runs again on navigation and in new tabs.
             css = (ROOT / "ui/inject.css").read_text(encoding="utf-8")
+            css += "\n" + (ROOT / "ui/ai_mark.css").read_text(encoding="utf-8")
             script = (ROOT / "ui/inject.js").read_text(encoding="utf-8")
             script += "\n" + (ROOT / "ui/voice.js").read_text(encoding="utf-8")
+            script += "\n" + (ROOT / "ui/ai_scan.js").read_text(encoding="utf-8")
             await self.context.add_init_script(script="window.__starterCSS = " + json.dumps(css) + ";\n" + script)
             self.context.on("page", self._select_page)
             self.page = await self.context.new_page()
+            lab_source = ROOT / "test_images.txt"
+            if lab_source.exists():
+                urls = lab_urls(lab_source.read_text(encoding="utf-8"))
+                artifacts = ROOT / "artifacts"
+                artifacts.mkdir(exist_ok=True)
+                (artifacts / "lab-urls.js").write_text(
+                    "window.LAB_URLS = " + json.dumps(urls) + ";", encoding="utf-8")
             await self.home()
             return self
         except BaseException:

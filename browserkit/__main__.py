@@ -7,6 +7,7 @@ from playwright.async_api import Error
 from .controller import BrowserController
 from .voice_control import VoiceControl
 from .voice import Microphone
+from .ai_check import AICheck
 
 HELP = """Commands:
   home | go URL | back | forward | reload
@@ -15,7 +16,9 @@ HELP = """Commands:
   tabs | tab INDEX | help | quit
   mic on | mic off | mic status | mic reset
   mic list | mic use NUMBER | mic default
-Image and tab indices start at 0. Output files go to artifacts/."""
+  ai on | ai off | ai status | ai concurrency 1-3
+Image and tab indices start at 0. Output files go to artifacts/.
+AI image check marks likely AI images with a red banner; tune concurrency after testing."""
 
 
 async def main():
@@ -34,13 +37,16 @@ async def main():
     async with BrowserController() as b:
         voice = VoiceControl(b)
         voice.start()
+        ai = AICheck(b)
+        ai.start()
         try:
-            await command_loop(b, commands, read_commands, voice)
+            await command_loop(b, commands, read_commands, voice, ai)
         finally:
+            await ai.close()
             await voice.close()
 
 
-async def command_loop(b, commands, read_commands, voice):
+async def command_loop(b, commands, read_commands, voice, ai):
     print(HELP)
     # Daemon input thread allows closing the browser to exit immediately.
     threading.Thread(target=read_commands, daemon=True).start()
@@ -94,6 +100,24 @@ async def command_loop(b, commands, read_commands, voice):
                 elif arg == 'default': voice.select_device(None)
                 elif arg not in ("", "status"): print("Use mic on/off/status/reset/list, mic use NUMBER, or mic default.")
                 print(voice.status())
+            elif command == "ai":
+                if arg in ("", "status"):
+                    print(ai.status())
+                elif arg == "on":
+                    ai.resume()
+                    print(ai.status())
+                elif arg == "off":
+                    ai.pause()
+                    print(ai.status())
+                elif arg.startswith("concurrency"):
+                    parts = arg.split()
+                    if len(parts) != 2 or parts[1] not in ("1", "2", "3"):
+                        print("Use ai concurrency 1, 2 or 3.")
+                    else:
+                        ai.set_concurrency(int(parts[1]))
+                        print(ai.status())
+                else:
+                    print("Use ai on/off/status or ai concurrency 1-3.")
             elif command: print("Unknown command. Type help.")
         except (Error, ValueError, IndexError) as error:
             print(f"Could not complete command: {error}")
