@@ -1,0 +1,4 @@
+/* Applies to ordinary pages and frames. Keep global changes minimal.
+   Add site-specific rules using a class set by inject.js for matching hosts. */
+:focus-visible { outline: 3px solid #315bdb !important; outline-offset: 4px !important; }
+::selection { background: #cbd9ff; color: #142348; }

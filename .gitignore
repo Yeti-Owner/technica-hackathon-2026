@@ -1,0 +1,59 @@
+# Python environments and bytecode
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+
+# Packaging and build output
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Test, type-check and lint caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pytype/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# Browser downloads, temporary profiles and generated captures
+.browsers/
+ms-playwright/
+browser-profile/
+playwright/.auth/
+artifacts/
+test-results/
+playwright-report/
+blob-report/
+*.har
+trace.zip
+
+# Local secrets (keep shareable examples)
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# Local logs and editor / OS files
+*.log
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+Desktop.ini

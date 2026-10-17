@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Home · Browser studio</title><link rel="stylesheet" href="theme.css"><script src="bookmarks.js" defer></script><script src="home.js" defer></script></head>
+<body>
+<header><a href="home.html" class="brand">Browser studio</a><button id="theme" type="button" aria-pressed="false">Dark theme</button></header>
+<main>
+  <h1>Where to next?</h1>
+  <form action="https://www.google.com/search" method="get" class="search">
+    <label for="query">Search the web</label>
+    <div><input id="query" name="q" type="search" placeholder="Something you’re curious about…" required><button type="submit">Search</button></div>
+  </form>
+  <section aria-labelledby="bookmarks-title"><h2 id="bookmarks-title">Your places</h2><nav id="bookmarks" aria-label="Bookmarks"></nav></section>
+  <p class="hint">Use Tab to move, Shift + Tab to go back, and Enter to open.</p>
+</main>
+</body></html>
