@@ -33,7 +33,8 @@ class BrowserController:
             css = (ROOT / "ui/inject.css").read_text(encoding="utf-8")
             css += "\n" + (ROOT / "ui/ai_mark.css").read_text(encoding="utf-8")
             script = (ROOT / "ui/inject.js").read_text(encoding="utf-8")
-            script += "\n" + (ROOT / "ui/voice.js").read_text(encoding="utf-8")
+            # To be changed from scrolling to another function
+            # script += "\n" + (ROOT / "ui/voice.js").read_text(encoding="utf-8")
             script += "\n" + (ROOT / "ui/ai_scan.js").read_text(encoding="utf-8")
             await self.context.add_init_script(script="window.__starterCSS = " + json.dumps(css) + ";\n" + script)
             self.context.on("page", self._select_page)

@@ -27,6 +27,8 @@ class VoiceControl:
         self.sessions = {}
 
     def start(self):
+        # To be changed from scrolling to another function
+        return
         try:
             self.pause()
             self.device_label = ''
