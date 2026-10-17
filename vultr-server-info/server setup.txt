@@ -4,18 +4,74 @@ SERVER
 - Vultr Cloud Compute, Seattle, Debian 13 x64, 0.5GB RAM / 10GB SSD, IPv4 only
 - Hostname: ai-check
 - Label: ai-image-check
-- Logged in as root
+- Public IP: (not committed — check the Vultr dashboard or your local notes)
 
-COMMANDS RUN
+APP (on server, /root/ai-check/)
+- app.py        Flask server, listens on port 80
+- config.json   api_key (OUR key, sent as X-API-Key header) + SightEngine api_user/api_secret  <-- NEVER COMMIT THIS FILE'S CONTENTS
+- cache.db      SQLite cache: sha256 -> score, source, timestamp
+- venv/         Python venv (flask, pillow, requests)
+- Service: systemd unit "ai-check.service" — enabled, auto-starts on boot, restarts on crash
+- Firewall: ufw ACTIVE — allows only 22/tcp (SSH) and 80/tcp (HTTP)
+
+API
+- GET  http://SERVER_IP/health   ->  {"ok": true}
+- POST http://SERVER_IP/check    (requires header: X-API-Key: <api_key from config.json>)
+  - by URL:   -d "url=https://example.com/image.jpg"
+  - by file:  -F "file=@C:\path\to\image.jpg"
+  - response: {"id": "<sha256 of image bytes>", "score": 0-100, "source": "...", "cached": true/false}
+  - source values: local | sightengine | cache | inconclusive
+  - score 50 + source "inconclusive" = no information; valid requests NEVER error
+- Windows note: in PowerShell use curl.exe (plain `curl` is Invoke-WebRequest and breaks on -H)
+
+PIPELINE (what /check does, in order)
+1. Check X-API-Key
+2. Get image bytes (download the URL itself, or read the uploaded file; 15MB cap)
+3. sha256 the bytes -> cache lookup (hit = instant response, cached: true)
+4. Local metadata tests (no ML, never decodes pixels):
+   - PNG text chunks (parameters / prompt / Software: Stable Diffusion / NovelAI / ComfyUI tags) -> 95
+   - JPEG EXIF Software or ImageDescription containing AI tool names -> 95
+   - EXIF camera Make + Model present (real photo) -> 10
+5. Inconclusive -> SightEngine models=genai, probability x 100
+6. SightEngine down/out of quota -> score 50, source "inconclusive"
+
+SIGHTENGINE FACTS
+- Free tier: 2,000 operations/month. genai model costs 5 ops per call -> ~400 images/month
+- Credentials live only in /root/ai-check/config.json on the server
+
+USEFUL SERVER COMMANDS
+- Is it running:   systemctl status ai-check
+- Restart:         systemctl restart ai-check
+- Live logs:       journalctl -u ai-check -f
+- Edit config:     nano /root/ai-check/config.json   (then restart the service)
+
+FOR FUTURE ADDITIONS (browser integration etc.)
+- Ready-made Python client function: see RUNBOOK.md Step 12 (check_image())
+- Suggested thresholds: score >= 70 = AI, score <= 30 = human, anything else leave alone
+- If the server can't download an image URL (hotlink-protected), send the bytes
+  you already have from Playwright interception as a file upload instead
+- Full rebuild-from-scratch steps: vultr-server-info/RUNBOOK.md (gitignored — keep a local copy)
+- Known limits: plain HTTP (no TLS), no SightEngine quota guard, metadata-only local stage
+
+COMMANDS RUN (historical)
 fallocate -l 1G /swapfile && chmod 600 /swapfile
 mkswap /swapfile && swapon /swapfile
 echo '/swapfile none swap sw 0 0' >> /etc/fstab
 apt update && apt upgrade -y
 apt install -y python3-venv python3-pip ufw openssl
 free -h
+apt update
+mkdir -p /root/ai-check && cd /root/ai-check
+python3 -m venv venv
+venv/bin/pip install --upgrade pip
+venv/bin/pip install flask pillow requests
+openssl rand -hex 24   (generated our api_key, stored in config.json)
+nano /root/ai-check/config.json   (added SightEngine credentials)
+nano /root/ai-check/app.py        (server code; heredoc paste had failed, nano worked)
+systemctl daemon-reload && systemctl enable --now ai-check
+ufw allow 22/tcp && ufw allow 80/tcp && ufw enable   (ufw was ACTIVE earlier than the setup notes claimed — this fixed "unable to connect" from laptop)
 
 CURRENT STATE
-- 1GB swapfile at /swapfile, active, persists on reboot (listed in /etc/fstab)
-- System packages updated
-- Installed: python3-venv, python3-pip, ufw, openssl
-- ufw installed but not enabled
+- Server fully working: health check + image scoring verified from laptop via curl.exe
+- Cache verified (repeat request returns cached: true)
+- C2PA check NOT installed (optional stretch, see RUNBOOK.md)

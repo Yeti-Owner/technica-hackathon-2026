@@ -58,3 +58,6 @@ trace.zip
 .DS_Store
 Thumbs.db
 Desktop.ini
+
+# Vultr server runbook (local-only build instructions)
+vultr-server-info/RUNBOOK.md
