@@ -230,16 +230,13 @@ body {
   will-change: transform;
 }
 
-.sky-cloud-1 { top: 6vh;   left: -4vw;  width: clamp(260px, 24vw, 380px); animation: floatDrift1 32s ease-in-out infinite alternate; }
-.sky-cloud-2 { top: 18vh;  right: -3vw; width: clamp(280px, 28vw, 440px); animation: floatDrift2 38s ease-in-out infinite alternate; }
-.sky-cloud-3 { top: 52vh;  left: 4vw;   width: clamp(200px, 18vw, 300px); animation: floatDrift1 42s ease-in-out infinite alternate; opacity: 0.8; }
-.sky-cloud-4 { top: 70vh;  right: 6vw;  width: clamp(240px, 22vw, 360px); animation: floatDrift2 35s ease-in-out infinite alternate; opacity: 0.85; }
-.sky-cloud-5 { top: 88vh;  left: 2vw;   width: clamp(230px, 22vw, 350px); animation: floatDrift1 36s ease-in-out infinite alternate; opacity: 0.82; }
-.sky-cloud-6 { top: 110vh; right: 4vw;  width: clamp(250px, 24vw, 390px); animation: floatDrift2 40s ease-in-out infinite alternate; opacity: 0.85; }
-.sky-cloud-7 { top: 135vh; left: 8vw;   width: clamp(220px, 20vw, 340px); animation: floatDrift1 34s ease-in-out infinite alternate; opacity: 0.8; }
+.sky-cloud-5 { top: 120vh; left: 3vw;  width: clamp(230px, 22vw, 350px); animation: floatDrift1 36s ease-in-out infinite alternate; opacity: 0.82; }
+.sky-cloud-6 { top: 155vh; right: 4vw; width: clamp(250px, 24vw, 390px); animation: floatDrift2 40s ease-in-out infinite alternate; opacity: 0.85; }
+.sky-cloud-7 { top: 190vh; left: 6vw;  width: clamp(220px, 20vw, 340px); animation: floatDrift1 34s ease-in-out infinite alternate; opacity: 0.8; }
 
 
-.cloud-img {
+.cloud-img,
+.cloud-img-new {
   width: 100%;
   height: auto;
   display: block;
@@ -248,7 +245,12 @@ body {
   user-select: none;
 }
 
-:root[data-theme="dark"] .cloud-img {
+.cloud-img-new {
+  filter: drop-shadow(0 14px 28px var(--sky-cloud-shadow));
+}
+
+:root[data-theme="dark"] .cloud-img,
+:root[data-theme="dark"] .cloud-img-new {
   filter: brightness(0.68) contrast(1.15) drop-shadow(0 10px 24px rgba(0, 0, 0, 0.5));
   opacity: 0.82;
 }
@@ -414,7 +416,7 @@ main {
   align-items: center;
   justify-content: center; /* Vertically centers the entire hero cluster */
   padding: clamp(24px, 4vh, 48px) 24px;
-  overflow: hidden;
+  overflow: visible; /* Prevents hard cutoff of bottom transition cloud into mission section */
 }
 
 .hero-cloud-stage {
@@ -424,6 +426,7 @@ main {
   width: 100%;
   height: 100%;
   pointer-events: none;
+  z-index: 1;
 }
 
 .hero-cloud {
@@ -433,73 +436,106 @@ main {
   will-change: transform;
 }
 
-/* Back clouds: deep behind the black headline */
+/* Back clouds: deep behind headline and search bar */
 .hero-cloud-back {
   z-index: 1;
+}
+
+/* Foreground clouds: crisper depth, still strictly behind hero content */
+.hero-cloud-front {
+  z-index: 2;
+}
+
+/* ── LEFT SIDE CLOUDS (2 clouds total: deliberate variety & breathing room) ── */
+/* Large watercolor cloud, partially cropped at top-left screen edge */
+.hero-cloud-lt {
+  top: 7%;
+  left: -4vw;
+  width: clamp(270px, 26vw, 400px);
+  animation: heroFloat1 20s ease-in-out infinite alternate;
   opacity: 0.95;
 }
 
-.hero-cloud-b1 {
-  top: 12%;
-  left: 2%;
-  width: clamp(280px, 32vw, 440px);
-  animation: heroFloat1 18s ease-in-out infinite alternate;
+/* Medium cloud (new cloud style), stepped inward to avoid vertical column */
+.hero-cloud-lm {
+  top: 40%;
+  left: 8vw;
+  width: clamp(180px, 18vw, 270px);
+  animation: heroFloat2 24s ease-in-out infinite alternate;
+  animation-delay: -4s;
+  opacity: 0.90;
 }
 
-.hero-cloud-b2 {
-  top: 15%;
-  right: 2%;
-  width: clamp(300px, 36vw, 500px);
-  animation: heroFloat2 22s ease-in-out infinite alternate;
+/* ── RIGHT SIDE CLOUDS (2 clouds total: balanced visual weight, asymmetric arrangement) ── */
+/* Large watercolor cloud, top-right */
+.hero-cloud-rt {
+  top: 11%;
+  right: 3vw;
+  width: clamp(270px, 27vw, 410px);
+  animation: heroFloat3 22s ease-in-out infinite alternate;
+  animation-delay: -2s;
+  opacity: 0.95;
 }
 
-.hero-cloud-b3 {
-  top: 66%;
-  left: 4%;
-  width: clamp(240px, 25vw, 360px);
+/* Medium-small watercolor cloud, partially cropped at mid-right screen edge */
+.hero-cloud-rm {
+  top: 43%;
+  right: -4vw;
+  width: clamp(190px, 19vw, 280px);
+  animation: heroFloat4 19s ease-in-out infinite alternate;
+  animation-delay: -6s;
+  opacity: 0.88;
+}
+
+/* ── BELOW SEARCH BAR CLOUDS (3 clouds filling empty sky, clear center column) ── */
+/* Below-left cloud (new style): tucked below and left of search bar */
+.hero-cloud-bl {
+  top: 76%;
+  left: 10vw;
+  width: clamp(210px, 20vw, 310px);
   animation: heroFloat1 25s ease-in-out infinite alternate;
-  opacity: 0.8;
+  animation-delay: -7s;
+  opacity: 0.88;
 }
 
-/* Foreground clouds: behind content */
-.hero-cloud-front {
-  z-index: 2;
-  opacity: 0.92;
-  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.06));
+/* Below-right cloud (new style): larger, crisper, tucked below and right of search bar */
+.hero-cloud-br {
+  top: 76%;
+  right: 4vw;
+  width: clamp(260px, 26vw, 390px);
+  animation: heroFloat2 21s ease-in-out infinite alternate;
+  animation-delay: -3s;
+  opacity: 0.95;
 }
 
-.hero-cloud-f1 {
-  top: 32%;
-  left: 5%;
-  width: clamp(180px, 20vw, 280px);
-  animation: heroFloatFront1 15s ease-in-out infinite alternate;
-}
-
-.hero-cloud-f2 {
-  top: 28%;
-  right: 5%;
-  width: clamp(190px, 22vw, 300px);
-  animation: heroFloatFront2 17s ease-in-out infinite alternate;
+/* Below-center soft transition cloud: peeks gently toward mission card, strictly BEHIND card */
+.hero-cloud-bc {
+  top: 92%;
+  left: 40vw;
+  width: clamp(220px, 22vw, 320px);
+  animation: heroFloat3 27s ease-in-out infinite alternate;
+  animation-delay: -5s;
+  opacity: 0.70;
 }
 
 @keyframes heroFloat1 {
   0%   { transform: translate(0, 0) scale(1); }
-  100% { transform: translate(25px, -15px) scale(1.03); }
+  100% { transform: translate(22px, -14px) scale(1.02); }
 }
 
 @keyframes heroFloat2 {
   0%   { transform: translate(0, 0) scale(1); }
-  100% { transform: translate(-22px, 18px) scale(1.02); }
+  100% { transform: translate(-20px, 16px) scale(1.025); }
 }
 
-@keyframes heroFloatFront1 {
-  0%   { transform: translate(0, 0); }
-  100% { transform: translate(16px, -10px); }
+@keyframes heroFloat3 {
+  0%   { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(18px, -12px) scale(1.015); }
 }
 
-@keyframes heroFloatFront2 {
-  0%   { transform: translate(0, 0); }
-  100% { transform: translate(-18px, 12px); }
+@keyframes heroFloat4 {
+  0%   { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(-16px, 14px) scale(1.02); }
 }
 
 .hero-content {
@@ -1685,8 +1721,38 @@ main {
     padding: 40px 16px 36px;
   }
 
+  /* On tablet and mobile, display fewer and smaller clouds (1 left, 1 right, 1 below search) */
   .hero-cloud-stage {
-    display: none; /* Ambient background clouds remain; removes text clutter on mobile */
+    display: block;
+    overflow: hidden;
+  }
+
+  .hero-cloud-lm,
+  .hero-cloud-rm,
+  .hero-cloud-bl,
+  .hero-cloud-bc {
+    display: none !important;
+  }
+
+  .hero-cloud-lt {
+    top: 6%;
+    left: -12vw;
+    width: clamp(170px, 36vw, 240px);
+    opacity: 0.7;
+  }
+
+  .hero-cloud-rt {
+    top: 10%;
+    right: -10vw;
+    width: clamp(180px, 38vw, 250px);
+    opacity: 0.7;
+  }
+
+  .hero-cloud-br {
+    top: 80%;
+    right: -4vw;
+    width: clamp(190px, 44vw, 260px);
+    opacity: 0.8;
   }
 
   .sky-cloud {

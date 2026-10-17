@@ -136,7 +136,7 @@ function initAnimations() {
 
 
   // ── B. Desktop Mouse-Move Parallax for Hero Clouds ───────────────
-  if (window.innerWidth > 800) {
+  if (window.innerWidth > 800 && !prefersReducedMotion) {
     const heroSection = document.querySelector('.hero-section');
     const backClouds = document.querySelectorAll('.hero-cloud-back');
     const frontClouds = document.querySelectorAll('.hero-cloud-front');
@@ -169,6 +169,35 @@ function initAnimations() {
         y: 0,
         duration: 1.5,
         ease: 'power2.out'
+      });
+    });
+  }
+
+  // ── B2. Subtle Scroll Parallax on Hero Clouds (Layered Depth) ──────
+  if (!prefersReducedMotion) {
+    document.querySelectorAll('.hero-cloud-back').forEach((cloud) => {
+      gsap.to(cloud, {
+        y: () => window.innerHeight * 0.18,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '.hero-section',
+          start: 'top top',
+          end: 'bottom top',
+          scrub: true
+        }
+      });
+    });
+
+    document.querySelectorAll('.hero-cloud-front').forEach((cloud) => {
+      gsap.to(cloud, {
+        y: () => window.innerHeight * 0.32,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '.hero-section',
+          start: 'top top',
+          end: 'bottom top',
+          scrub: true
+        }
       });
     });
   }
