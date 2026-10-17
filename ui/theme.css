@@ -57,6 +57,26 @@
 
   /* Brand Logo Filter */
   --brand-logo-filter: none;
+
+  /* Search Bar Tokens */
+  --search-box-bg:           rgba(255, 255, 255, 0.75);
+  --search-box-border:       rgba(255, 255, 255, 0.85);
+  --search-box-border-focus: var(--text-main);
+  --search-icon-color:       var(--text-subtle);
+  --search-input-text:       var(--text-main);
+  --search-placeholder:      var(--text-subtle);
+  --search-btn-bg:           #0a0a0a;
+  --search-btn-text:         #ffffff;
+  --search-btn-hover-bg:     #242424;
+  --search-btn-shadow:       0 4px 14px rgba(0, 0, 0, 0.18);
+  --search-btn-hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+
+  /* Badge Tokens */
+  --badge-bg:                rgba(255, 255, 255, 0.65);
+  --badge-border:            rgba(255, 255, 255, 0.8);
+  --badge-text:              #0e384c;
+  --badge-dot:               #0284c7;
+  --badge-glow:              0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
 /* ── Dark Theme Variant (Preserves Theme Button Compatibility) ───── */
@@ -90,6 +110,26 @@
 
   /* Brand Logo subtle glow in dark theme for high contrast */
   --brand-logo-filter: drop-shadow(0 0 1px #ffffff) drop-shadow(0 0 8px rgba(255, 255, 255, 0.75)) drop-shadow(0 0 16px rgba(98, 233, 255, 0.5));
+
+  /* Search Bar Tokens (Dark Theme - High Contrast Aqua Button) */
+  --search-box-bg:           rgba(15, 38, 52, 0.75);
+  --search-box-border:       rgba(98, 233, 255, 0.3);
+  --search-box-border-focus: #62e9ff;
+  --search-icon-color:       #9ec8db;
+  --search-input-text:       #ffffff;
+  --search-placeholder:      #8ab2c6;
+  --search-btn-bg:           #4dd9f5;
+  --search-btn-text:         #041018; /* Contrast 11.8:1 - WCAG AAA */
+  --search-btn-hover-bg:     #78e4f8;
+  --search-btn-shadow:       0 4px 18px rgba(77, 217, 245, 0.42);
+  --search-btn-hover-shadow: 0 8px 26px rgba(77, 217, 245, 0.65);
+
+  /* Badge Tokens (Dark Theme - Vibrant Cyan & Deep Translucent Navy) */
+  --badge-bg:                rgba(8, 28, 42, 0.75);
+  --badge-border:            rgba(98, 233, 255, 0.4);
+  --badge-text:              #7ee8fa;
+  --badge-dot:               #4dd9f5;
+  --badge-glow:              0 0 18px rgba(77, 217, 245, 0.28);
 }
 
 /* ── Reset & Base Styles ─────────────────────────────────────────── */
@@ -102,6 +142,8 @@
 html {
   font-size: 16px;
   text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  scroll-padding-top: 100px;
 }
 
 html.lenis, html.lenis body {
@@ -231,7 +273,7 @@ body {
 .header-inner {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 16px 28px;
+  padding: 12px 28px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -246,9 +288,9 @@ body {
 }
 
 .brand-logo {
-  height: 44px;
+  height: 52px;
   width: auto;
-  max-height: 48px;
+  max-height: 58px;
   object-fit: contain;
   display: block;
   filter: var(--brand-logo-filter);
@@ -273,12 +315,49 @@ body {
   color: var(--text-main);
   opacity: 0.85;
   position: relative;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  padding: 4px 0;
+  transition: opacity 0.2s ease, transform 0.2s ease, color 0.25s ease;
+}
+
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0%;
+  height: 2.5px;
+  background: var(--text-main);
+  border-radius: 2px;
+  transition: width 0.25s cubic-bezier(0.2, 0, 0, 1), background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .nav-link:hover {
   opacity: 1;
   transform: translateY(-1px);
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+  width: 100%;
+}
+
+.nav-link.active {
+  opacity: 1;
+  color: var(--text-main);
+  font-weight: 700;
+}
+
+:root[data-theme="dark"] .nav-link {
+  color: var(--text-main);
+}
+
+:root[data-theme="dark"] .nav-link::after {
+  background: #62e9ff;
+  box-shadow: 0 0 10px rgba(98, 233, 255, 0.65);
+}
+
+:root[data-theme="dark"] .nav-link.active {
+  color: #ffffff;
 }
 
 .theme-toggle-btn {
@@ -375,15 +454,15 @@ main {
 }
 
 .hero-cloud-f1 {
-  top: 38%;
-  left: 18%;
+  top: 26%;
+  left: 12%;
   width: clamp(180px, 20vw, 280px);
   animation: heroFloatFront1 15s ease-in-out infinite alternate;
 }
 
 .hero-cloud-f2 {
-  top: 42%;
-  right: 18%;
+  top: 22%;
+  right: 10%;
   width: clamp(190px, 22vw, 300px);
   animation: heroFloatFront2 17s ease-in-out infinite alternate;
 }
@@ -417,19 +496,35 @@ main {
 }
 
 .hero-badge {
-  display: inline-block;
-  padding: 6px 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 20px;
   font-family: var(--font-body);
   font-size: 0.82rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--text-muted);
-  background: rgba(255, 255, 255, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  color: var(--badge-text);
+  background: var(--badge-bg);
+  border: 1.5px solid var(--badge-border);
   border-radius: var(--radius-full);
   margin-bottom: 24px;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: var(--badge-glow);
+  transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hero-badge::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--badge-dot);
+  box-shadow: 0 0 8px var(--badge-dot);
+  flex-shrink: 0;
 }
 
 /* ── HERO HEADLINE: BLACK, EXTRA-BOLD, TIGHT LETTER-SPACING ──────── */
@@ -465,6 +560,8 @@ main {
 
 /* ── Accessible Search Form ──────────────────────────────────────── */
 .hero-search {
+  position: relative;
+  z-index: 10;
   max-width: 640px;
   margin: 0 auto 48px;
 }
@@ -484,10 +581,10 @@ main {
   display: flex;
   align-items: center;
   position: relative;
-  background: var(--card-bg);
+  background: var(--search-box-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1.5px solid var(--card-border);
+  border: 1.5px solid var(--search-box-border);
   border-radius: var(--radius-lg);
   padding: 8px 10px 8px 20px;
   box-shadow: var(--card-shadow);
@@ -495,17 +592,18 @@ main {
 }
 
 .search-box-wrapper:focus-within {
-  border-color: var(--text-main);
+  border-color: var(--search-box-border-focus);
   background: var(--card-hover-bg);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.16);
 }
 
 .search-icon {
   width: 22px;
   height: 22px;
-  color: var(--text-subtle);
+  color: var(--search-icon-color);
   margin-right: 12px;
   flex-shrink: 0;
+  transition: color 0.25s ease;
 }
 
 .search-box-wrapper input {
@@ -514,43 +612,46 @@ main {
   border: none;
   font-family: var(--font-body);
   font-size: 1.1rem;
-  color: var(--text-main);
+  color: var(--search-input-text);
   outline: none;
   min-width: 0;
 }
 
 .search-box-wrapper input::placeholder {
-  color: var(--text-subtle);
-  opacity: 0.8;
+  color: var(--search-placeholder);
+  opacity: 0.9;
 }
 
 .search-btn {
   font-family: var(--font-display);
   font-size: 0.98rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   padding: 12px 28px;
   border: none;
   border-radius: var(--radius-md);
-  background: var(--hero-title-color);
-  color: #fff;
-  transition: transform 0.15s ease, opacity 0.2s ease, box-shadow 0.2s ease;
+  background: var(--search-btn-bg);
+  color: var(--search-btn-text);
+  box-shadow: var(--search-btn-shadow);
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), opacity 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
   flex-shrink: 0;
 }
 
-:root[data-theme="dark"] .search-btn {
-  background: var(--sky-top);
-  color: #041018;
+.search-btn:hover {
+  background: var(--search-btn-hover-bg);
+  transform: translateY(-2px);
+  box-shadow: var(--search-btn-hover-shadow);
+  opacity: 1;
 }
 
-.search-btn:hover {
-  transform: translateY(-1px);
-  opacity: 0.94;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+.search-btn:active {
+  transform: translateY(0);
 }
 
 /* ── Bookmarks ("Your places") ───────────────────────────────────── */
 .bookmarks-section {
+  position: relative;
+  z-index: 10;
   max-width: 780px;
   margin: 0 auto 30px;
   text-align: left;
@@ -1415,7 +1516,8 @@ main {
 /* ── Founders Section ────────────────────────────────────────────── */
 .founders-section {
   text-align: center;
-  margin-bottom: 60px;
+  margin-bottom: 40px;
+  padding-bottom: clamp(120px, 18vh, 200px);
 }
 
 .founders-header {
@@ -1618,9 +1720,24 @@ main {
   }
 }
 
+/* ── Section Scroll Offsets & Keyboard Focus Anchoring ─────────── */
+#features,
+#mission,
+#contact,
+#team {
+  scroll-margin-top: 100px;
+}
+
+#features:focus,
+#mission:focus,
+#contact:focus,
+#team:focus {
+  outline: none;
+}
+
 @media (max-width: 640px) {
   .brand-logo {
-    height: 36px;
+    height: 42px;
   }
 
   .hero-section {

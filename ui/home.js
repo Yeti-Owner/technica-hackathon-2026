@@ -100,6 +100,7 @@ function initAnimations() {
     });
 
     lenis.on('scroll', ScrollTrigger.update);
+    window.lenis = lenis;
 
     gsap.ticker.add((time) => {
       lenis.raf(time * 1000);
@@ -397,10 +398,131 @@ function initAnimations() {
   }
 }
 
+/* ── 5. Navigation Smooth Scrolling & Active Section Highlighting ── */
+function initNavScroll() {
+  const navLinks = document.querySelectorAll('.header-nav a[href^="#"]');
+  if (!navLinks.length) return;
+
+  const getTargetElements = () => {
+    return Array.from(navLinks).map(link => {
+      const hash = link.getAttribute('href');
+      const target = hash ? document.querySelector(hash) : null;
+      return { link, hash, target };
+    }).filter(item => item.target !== null);
+  };
+
+  const navItems = getTargetElements();
+
+  navLinks.forEach((link) => {
+    link.addEventListener('click', (event) => {
+      const targetId = link.getAttribute('href');
+      if (!targetId || targetId === '#') return;
+
+      const targetEl = document.querySelector(targetId);
+      if (!targetEl) return;
+
+      event.preventDefault();
+
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const navHeader = document.querySelector('.site-header');
+      const navHeight = navHeader ? navHeader.offsetHeight : 72;
+      const breathingRoom = 24;
+      const offset = navHeight + breathingRoom;
+
+      // If ScrollTrigger is active, ensure layout coordinates are fresh
+      if (window.ScrollTrigger) {
+        ScrollTrigger.refresh();
+      }
+
+      // Calculate exact target scroll position in document coordinates
+      const currentScroll = window.scrollY || window.pageYOffset || (window.lenis ? window.lenis.scroll : 0);
+      const targetTop = Math.max(0, targetEl.getBoundingClientRect().top + currentScroll - offset);
+
+      // Smooth scroll via Lenis if available
+      if (window.lenis) {
+        if (prefersReduced) {
+          window.lenis.scrollTo(targetTop, { immediate: true });
+        } else {
+          window.lenis.scrollTo(targetTop, { duration: 1.15 });
+        }
+      } else {
+        // Native fallback smooth scroll
+        window.scrollTo({
+          top: targetTop,
+          behavior: prefersReduced ? 'instant' : 'smooth'
+        });
+      }
+
+      // Update URL hash cleanly without instant browser jump
+      try {
+        history.pushState(null, '', targetId);
+      } catch (err) {
+        window.location.hash = targetId;
+      }
+
+      // Shift keyboard focus to target section for accessibility (WCAG AA)
+      if (!targetEl.hasAttribute('tabindex')) {
+        targetEl.setAttribute('tabindex', '-1');
+      }
+      targetEl.focus({ preventScroll: true });
+
+      // Immediate visual feedback on clicked nav link
+      setActiveLink(targetId);
+    });
+  });
+
+  function setActiveLink(activeHash) {
+    navLinks.forEach(link => {
+      const href = link.getAttribute('href');
+      const isActive = href === activeHash;
+      link.classList.toggle('active', isActive);
+      if (isActive) {
+        link.setAttribute('aria-current', 'page');
+      } else {
+        link.removeAttribute('aria-current');
+      }
+    });
+  }
+
+  // Active link detection using IntersectionObserver
+  if ('IntersectionObserver' in window && navItems.length > 0) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id;
+          if (id) {
+            setActiveLink(`#${id}`);
+          }
+        }
+      });
+    }, {
+      rootMargin: '-25% 0px -50% 0px',
+      threshold: [0, 0.1, 0.25]
+    });
+
+    navItems.forEach(({ target }) => observer.observe(target));
+  }
+
+  // Scroll event fallback for continuous active link tracking
+  window.addEventListener('scroll', () => {
+    const scrollPosition = (window.scrollY || window.pageYOffset) + 160;
+    
+    for (let i = navItems.length - 1; i >= 0; i--) {
+      const { hash, target } = navItems[i];
+      const elTop = target.getBoundingClientRect().top + window.pageYOffset;
+      if (scrollPosition >= elTop - 60) {
+        setActiveLink(hash);
+        break;
+      }
+    }
+  }, { passive: true });
+}
+
 /* ── DOM Ready Initialization ────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
   initBookmarks();
   initThemeToggle();
   initNightStars();
   initAnimations();
+  initNavScroll();
 });
