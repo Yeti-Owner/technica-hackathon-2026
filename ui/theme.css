@@ -22,13 +22,14 @@
   --hero-logo-filter: drop-shadow(0 14px 28px rgba(8, 42, 56, 0.10));
   
   /* Hero Sizing & Spacing Tokens (Easily Tweakable) */
-  --hero-logo-height:        clamp(220px, 34vw, 530px);
+  --navbar-height:           90px;
+  --hero-min-height:         calc(100vh - var(--navbar-height));
+  --hero-nudge-y:            0px;        /* Optional nudge: e.g. -10px or +10px */
+  --hero-logo-height:        clamp(280px, 40vw, 560px);
   --hero-logo-max-width:     min(94vw, 720px);
-  --hero-padding-top:        clamp(28px, 4.5vh, 52px);
-  --hero-padding-bottom:     clamp(50px, 7vh, 80px);
-  --hero-gap-logo-title:     clamp(12px, 1.5vw, 18px);
-  --hero-gap-title-search:   clamp(18px, 2.2vw, 26px);
-  --hero-title-size:         clamp(1.8rem, 3.8vw, 2.85rem);
+  --hero-logo-gap:           clamp(16px, 1.8vw, 24px);
+  --hero-search-gap:         clamp(20px, 2.4vw, 30px);
+  --hero-title-size:         clamp(1.85rem, 3.8vw, 2.85rem);
 
   --text-main:        #081c26;           /* Crisp dark body text for WCAG AA */
   --text-muted:       #14384a;           /* Secondary text */
@@ -406,12 +407,13 @@ main {
 /* ── HERO SECTION & NESTLED CLOUDS ───────────────────────────────── */
 .hero-section {
   position: relative;
-  min-height: calc(100vh - 76px);
+  min-height: var(--hero-min-height);
+  min-height: calc(100svh - var(--navbar-height));
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  padding: var(--hero-padding-top) 24px var(--hero-padding-bottom);
+  justify-content: center; /* Vertically centers the entire hero cluster */
+  padding: clamp(24px, 4vh, 48px) 24px;
   overflow: hidden;
 }
 
@@ -438,21 +440,21 @@ main {
 }
 
 .hero-cloud-b1 {
-  top: 6%;
+  top: 12%;
   left: 2%;
   width: clamp(280px, 32vw, 440px);
   animation: heroFloat1 18s ease-in-out infinite alternate;
 }
 
 .hero-cloud-b2 {
-  top: 8%;
+  top: 15%;
   right: 2%;
   width: clamp(300px, 36vw, 500px);
   animation: heroFloat2 22s ease-in-out infinite alternate;
 }
 
 .hero-cloud-b3 {
-  top: 68%;
+  top: 66%;
   left: 4%;
   width: clamp(240px, 25vw, 360px);
   animation: heroFloat1 25s ease-in-out infinite alternate;
@@ -467,14 +469,14 @@ main {
 }
 
 .hero-cloud-f1 {
-  top: 24%;
+  top: 32%;
   left: 5%;
   width: clamp(180px, 20vw, 280px);
   animation: heroFloatFront1 15s ease-in-out infinite alternate;
 }
 
 .hero-cloud-f2 {
-  top: 20%;
+  top: 28%;
   right: 5%;
   width: clamp(190px, 22vw, 300px);
   animation: heroFloatFront2 17s ease-in-out infinite alternate;
@@ -510,6 +512,7 @@ main {
   display: flex;
   flex-direction: column;
   align-items: center;
+  transform: translateY(var(--hero-nudge-y, 0px));
 }
 
 /* ── HERO LOGO (CENTRAL VISUAL HERO) ─────────────────────────────── */
@@ -517,7 +520,9 @@ main {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: var(--hero-gap-logo-title);
+  /* Compensate for top 25.35% and bottom 39.2% transparent padding built into the 2000x2000 PNG */
+  margin-top: calc(-0.2535 * var(--hero-logo-height));
+  margin-bottom: calc(-0.392 * var(--hero-logo-height) + var(--hero-logo-gap));
   will-change: transform, opacity;
 }
 
@@ -552,7 +557,7 @@ main {
   line-height: 1.15;
   letter-spacing: -0.03em;
   color: var(--hero-title-color);
-  margin-bottom: var(--hero-gap-title-search);
+  margin-bottom: var(--hero-search-gap);
   text-shadow: 0 2px 20px rgba(255, 255, 255, 0.5);
   position: relative;
   will-change: transform, opacity;
