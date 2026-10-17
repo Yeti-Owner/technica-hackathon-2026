@@ -4,241 +4,399 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Nod — Hands-free browsing for everyone</title>
-  <meta name="description" content="Nod removes the need to type or struggle with a standard mouse. Browse the internet comfortably, entirely hands-free.">
+  <meta name="description" content="Nod replaces typing and clicking with simple head movements and voice, making hands-free internet browsing effortless, intuitive, and accessible.">
+  
+  <!-- Google Fonts: Space Grotesk (display) + IBM Plex Sans (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  
   <link rel="stylesheet" href="theme.css">
+
+  <!-- Smooth Scroll (Lenis) & Motion (GSAP + ScrollTrigger) -->
+  <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+
   <script src="bookmarks.js" defer></script>
   <script src="home.js" defer></script>
 </head>
 <body>
 
-<a href="#main-content" class="skip-link">Skip to content</a>
+<a href="#main-content" class="skip-link">Skip to main content</a>
 
-<!-- ═══ ILLUSTRATED CLOUDS — float across the sky ═══ -->
-<div class="clouds-layer" aria-hidden="true">
-
-  <!-- Cloud A — top-left, large -->
-  <div class="cloud-group cloud-a" style="left: -3%">
-    <div class="cloud c1"></div>
-    <div class="cloud c2"></div>
-    <div class="cloud c3"></div>
-    <div class="cloud c4"></div>
+<!-- ═══ AMBIENT SKY CLOUDS (PARALLAX + DRIFT) ═══ -->
+<div class="sky-clouds-layer" aria-hidden="true">
+  <!-- Top floating cloud clusters with organic SVG shapes -->
+  <div class="sky-cloud sky-cloud-1" data-speed="0.25">
+    <svg viewBox="0 0 280 120" class="svg-cloud" fill="currentColor">
+      <path d="M45,100 C20,100 0,82 0,60 C0,40 18,22 40,22 C48,10 65,0 88,0 C116,0 138,16 145,36 C155,26 170,20 188,20 C218,20 242,42 245,70 C265,72 280,85 280,100 C280,115 262,120 240,120 L45,120 Z"/>
+    </svg>
   </div>
 
-  <!-- Cloud B — top-right, medium -->
-  <div class="cloud-group cloud-b">
-    <div class="cloud c1"></div>
-    <div class="cloud c2"></div>
-    <div class="cloud c3"></div>
+  <div class="sky-cloud sky-cloud-2" data-speed="0.45">
+    <svg viewBox="0 0 320 130" class="svg-cloud" fill="currentColor">
+      <path d="M50,110 C22,110 0,90 0,65 C0,42 20,24 45,24 C55,10 75,0 102,0 C135,0 162,18 170,40 C182,30 200,24 220,24 C255,24 282,48 285,80 C305,82 320,95 320,110 C320,125 300,130 275,130 L50,130 Z"/>
+    </svg>
   </div>
 
-  <!-- Cloud C — left side, small -->
-  <div class="cloud-group cloud-c">
-    <div class="cloud c1"></div>
-    <div class="cloud c2"></div>
-    <div class="cloud c3"></div>
+  <div class="sky-cloud sky-cloud-3" data-speed="0.18">
+    <svg viewBox="0 0 240 100" class="svg-cloud" fill="currentColor">
+      <path d="M35,90 C15,90 0,75 0,55 C0,38 15,22 35,22 C42,10 58,0 78,0 C102,0 122,14 128,32 C138,24 150,18 165,18 C192,18 214,38 216,64 C230,66 240,78 240,90 C240,100 225,100 205,100 L35,100 Z"/>
+    </svg>
   </div>
 
-  <!-- Cloud D — right side, mid -->
-  <div class="cloud-group cloud-d">
-    <div class="cloud c1"></div>
-    <div class="cloud c2"></div>
-    <div class="cloud c3"></div>
+  <div class="sky-cloud sky-cloud-4" data-speed="0.35">
+    <svg viewBox="0 0 300 120" class="svg-cloud" fill="currentColor">
+      <path d="M45,105 C20,105 0,85 0,62 C0,40 18,24 42,24 C52,10 72,0 98,0 C130,0 156,18 164,38 C176,28 194,22 214,22 C248,22 274,45 278,76 C292,78 300,90 300,105 C300,120 280,120 255,120 L45,120 Z"/>
+    </svg>
   </div>
-
-  <!-- Cloud E — center, tiny -->
-  <div class="cloud-group cloud-e">
-    <div class="cloud c1"></div>
-    <div class="cloud c2"></div>
-    <div class="cloud c3"></div>
-  </div>
-
-  <!-- Cloud F — left mid, large -->
-  <div class="cloud-group cloud-f">
-    <div class="cloud c1"></div>
-    <div class="cloud c2"></div>
-    <div class="cloud c3"></div>
-    <div class="cloud c4"></div>
-  </div>
-
-  <!-- Cloud G — right scattered -->
-  <div class="cloud-group cloud-g">
-    <div class="cloud c1"></div>
-    <div class="cloud c2"></div>
-    <div class="cloud c3"></div>
-  </div>
-
 </div>
 
+<!-- ── Navigation Bar ──────────────────────────────────────── -->
+<header class="site-header">
+  <div class="header-inner">
+    <a href="home.html" class="brand" aria-label="Nod home">
+      <img src="../Images for ui/Nod Logo.png" alt="Nod logo" class="brand-logo" width="40" height="40">
+      <span class="brand-text">Nod</span>
+    </a>
+    
+    <nav class="header-nav" aria-label="Primary navigation">
+      <a href="#about" class="nav-link">Features</a>
+      <a href="#mission" class="nav-link">Mission</a>
+      <a href="#team" class="nav-link">Team</a>
+      <a href="#thoughts" class="nav-link">Contact</a>
+    </nav>
 
-<!-- ── Header ──────────────────────────────────────── -->
-<header>
-  <a href="home.html" class="brand" aria-label="Nod home">
-    <img src="../Images for ui/Nod Logo.png" alt="Nod logo" class="brand-logo" width="40" height="40">
-    Nod
-  </a>
-  <nav class="header-nav" aria-label="Primary navigation">
-    <a href="#about">About</a>
-    <a href="#mission">Mission</a>
-    <a href="#team">Team</a>
-  </nav>
-  <button id="theme" type="button" aria-pressed="false">Dark theme</button>
+    <div class="header-actions">
+      <button id="theme" type="button" class="theme-toggle-btn" aria-pressed="false">Dark theme</button>
+    </div>
+  </div>
 </header>
 
-<!-- ── Main content (sky section) ──────────────────── -->
+<!-- ── Main Content (Day Sky Section) ─────────────────────── -->
 <main id="main-content">
 
-  <!-- Hero -->
-  <div class="hero">
-    <h1>Where to next?</h1>
-    <p class="tagline">Browse the internet hands-free. Nod replaces typing and clicking with simple head movements and voice, so everyone can get online.</p>
-  </div>
+  <!-- ── Hero Section with Clouds Nestling the Black Headline ── -->
+  <section class="hero-section" aria-labelledby="hero-title">
+    <div class="hero-cloud-stage" aria-hidden="true">
+      <!-- Back Clouds: layered behind the headline -->
+      <div class="hero-cloud hero-cloud-back hero-cloud-b1">
+        <svg viewBox="0 0 340 140" fill="currentColor">
+          <path d="M55,120 C25,120 0,98 0,70 C0,45 22,25 50,25 C62,10 84,0 114,0 C150,0 180,20 190,44 C202,32 222,26 244,26 C282,26 312,52 316,88 C332,90 340,104 340,120 Z"/>
+        </svg>
+      </div>
+      <div class="hero-cloud hero-cloud-back hero-cloud-b2">
+        <svg viewBox="0 0 380 150" fill="currentColor">
+          <path d="M60,130 C28,130 0,105 0,75 C0,48 24,28 54,28 C66,12 90,0 122,0 C160,0 192,22 204,48 C218,34 238,28 262,28 C302,28 335,56 340,94 C360,96 380,112 380,130 Z"/>
+        </svg>
+      </div>
+      <div class="hero-cloud hero-cloud-back hero-cloud-b3">
+        <svg viewBox="0 0 290 120" fill="currentColor">
+          <path d="M45,100 C20,100 0,80 0,58 C0,36 18,20 40,20 C50,8 70,0 95,0 C125,0 150,16 158,36 C170,26 186,20 205,20 C238,20 262,42 265,72 C280,74 290,86 290,100 Z"/>
+        </svg>
+      </div>
 
-  <!-- Search bar -->
-  <form action="https://www.google.com/search" method="get" class="search" id="search-form">
-    <label for="query">Search the web</label>
-    <div>
-      <input id="query" name="q" type="search" placeholder="Something you're curious about…" required>
-      <button type="submit">Search</button>
+      <!-- Foreground Clouds: overlapping edges of the letters for deep nestling -->
+      <div class="hero-cloud hero-cloud-front hero-cloud-f1">
+        <svg viewBox="0 0 260 110" fill="currentColor">
+          <path d="M40,95 C18,95 0,76 0,55 C0,34 16,18 36,18 C46,8 64,0 86,0 C114,0 136,14 144,32 C154,24 168,18 185,18 C214,18 236,38 240,66 C252,68 260,80 260,95 Z"/>
+        </svg>
+      </div>
+      <div class="hero-cloud hero-cloud-front hero-cloud-f2">
+        <svg viewBox="0 0 280 115" fill="currentColor">
+          <path d="M45,100 C20,100 0,80 0,58 C0,36 18,20 42,20 C52,8 72,0 96,0 C126,0 150,16 158,36 C170,26 186,20 205,20 C238,20 262,42 265,72 C275,74 280,86 280,100 Z"/>
+        </svg>
+      </div>
     </div>
-  </form>
 
-  <!-- Bookmarks -->
-  <section aria-labelledby="bookmarks-title">
-    <h2 id="bookmarks-title">Your places</h2>
-    <nav id="bookmarks" aria-label="Bookmarks"></nav>
+    <div class="hero-content">
+      <div class="hero-badge">Technica Hackathon 2026 · Accessibility</div>
+      <h1 id="hero-title" class="hero-title">
+        <span class="word">Where</span> <span class="word">to</span> <span class="word">next?</span>
+      </h1>
+      <p class="hero-tagline">
+        Browse the internet hands-free. Nod replaces typing and clicking with simple head movements and voice, so everyone can get online comfortably without frustration.
+      </p>
+
+      <!-- Search Bar -->
+      <form action="https://www.google.com/search" method="get" class="hero-search" id="search-form" role="search">
+        <label for="query" class="search-label">Search the web hands-free</label>
+        <div class="search-box-wrapper">
+          <svg class="search-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input id="query" name="q" type="search" placeholder="Something you're curious about…" required autocomplete="off">
+          <button type="submit" class="search-btn">Search</button>
+        </div>
+      </form>
+
+      <!-- Bookmarks Section -->
+      <section class="bookmarks-section" aria-labelledby="bookmarks-title">
+        <div class="bookmarks-header">
+          <h2 id="bookmarks-title" class="bookmarks-label">Your places</h2>
+          <span class="bookmarks-sub">Hands-free shortcuts</span>
+        </div>
+        <nav id="bookmarks" class="bookmarks-grid" aria-label="Bookmarks"></nav>
+      </section>
+
+      <div class="keyboard-hint" aria-hidden="true">
+        <span>💡 Tip: Navigate with <kbd>Tab</kbd>, reverse with <kbd>Shift</kbd> + <kbd>Tab</kbd>, select with <kbd>Enter</kbd></span>
+      </div>
+    </div>
   </section>
 
-  <hr class="section-divider">
+  <!-- ── Big Cloud Transition (Center of Page Statement) ─────── -->
+  <section class="cloud-transition-section" id="mission" aria-label="Our Mission Statement">
+    <div class="transition-cloud-curtain curtain-left" aria-hidden="true">
+      <svg viewBox="0 0 600 600" preserveAspectRatio="none" fill="currentColor">
+        <path d="M0,0 L600,0 C540,120 480,180 520,300 C560,420 500,500 600,600 L0,600 Z"/>
+      </svg>
+    </div>
+    
+    <div class="transition-cloud-curtain curtain-right" aria-hidden="true">
+      <svg viewBox="0 0 600 600" preserveAspectRatio="none" fill="currentColor">
+        <path d="M600,0 L0,0 C60,120 120,180 80,300 C40,420 100,500 0,600 L600,600 Z"/>
+      </svg>
+    </div>
 
-  <!-- ── What it does ──────────────────────────────── -->
-  <div class="about-section reveal" id="about">
-    <p class="section-label">What Nod does</p>
-    <h2>A computer you control without your hands</h2>
-    <div class="about-grid">
-      <div class="about-card">
-        <h3>No typing required</h3>
-        <p>Nod completely removes the need to type or struggle with a standard mouse. Click on exactly what you want, select buttons, and scroll up and down web pages — entirely hands-free.</p>
-      </div>
-      <div class="about-card">
-        <h3>Built for independence</h3>
-        <p>For people who have trouble using their hands due to conditions like arthritis, cerebral palsy, ALS, or spinal cord injuries, just using a computer can be exhausting. Nod gives people their independence back.</p>
-      </div>
-      <div class="about-card">
-        <h3>Simple head movements</h3>
-        <p>By trading the fine hand movements of a normal mouse for simple head movements and voice commands, Nod takes away the physical strain of getting online.</p>
-      </div>
-      <div class="about-card">
-        <h3>Affordable access</h3>
-        <p>Special accessibility hardware can cost thousands of dollars. Nod is software that runs on the basic computer parts you already own — no expensive equipment needed.</p>
+    <div class="cloud-statement-inner">
+      <p class="statement-eyebrow">Our Mission</p>
+      <h2 class="statement-heading">Being able to use the internet shouldn't be a luxury.</h2>
+      <p class="statement-body">
+        We want to make sure everyone has an equal chance to explore the digital world. A physical disability or motor limitation should never keep anyone from reading the news, paying bills, shopping, or chatting with friends — comfortably, independently, and without fatigue.
+      </p>
+    </div>
+  </section>
+
+  <!-- ── Horizontal Scroll Section (Pinned with GSAP) ────────── -->
+  <section class="horizontal-pin-section" id="about" aria-label="How Nod Works">
+    <div class="pin-header-wrapper">
+      <div class="pin-eyebrow">Why Nod Matters</div>
+      <h2 class="pin-title">A computer you control without your hands</h2>
+      <div class="pin-progress-track" aria-hidden="true">
+        <div class="pin-progress-bar" id="horizontal-progress"></div>
       </div>
     </div>
-  </div>
 
-  <hr class="section-divider">
+    <div class="horizontal-container">
+      <div class="horizontal-track" id="features-track">
+        
+        <!-- Panel 1 -->
+        <article class="feature-card" tabindex="0">
+          <div class="card-num">01</div>
+          <div class="card-icon-bubble" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+              <line x1="12" y1="19" x2="12" y2="22"></line>
+            </svg>
+          </div>
+          <h3>No typing required</h3>
+          <p>Nod completely removes the need to type or struggle with a standard mouse. Click on exactly what you want, select buttons, and scroll up and down web pages — entirely hands-free.</p>
+          <div class="card-footer">Effortless interactions</div>
+        </article>
 
-  <!-- ── Mission ───────────────────────────────────── -->
-  <div class="statement reveal" id="mission">
-    <p class="section-label">Our mission</p>
-    <h2>Being able to use the internet shouldn't be a luxury.</h2>
-    <p>We want to help people with accessibility issues and make sure everyone has an equal chance to use the internet. A physical disability shouldn't keep anyone from being part of the digital world. Read the news, pay bills, shop, chat with friends — all on your own, comfortably, without frustration.</p>
-  </div>
+        <!-- Panel 2 -->
+        <article class="feature-card" tabindex="0">
+          <div class="card-num">02</div>
+          <div class="card-icon-bubble" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="m10 15 5-3-5-3v6Z"></path>
+            </svg>
+          </div>
+          <h3>Simple head movements</h3>
+          <p>By trading the fine hand movements of a normal mouse for simple head movements and voice commands, Nod takes away the physical strain of getting online.</p>
+          <div class="card-footer">Zero wrist or hand fatigue</div>
+        </article>
 
-  <p class="hint">Use Tab to move, Shift + Tab to go back, and Enter to open.</p>
+        <!-- Panel 3 -->
+        <article class="feature-card" tabindex="0">
+          <div class="card-num">03</div>
+          <div class="card-icon-bubble" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+          </div>
+          <h3>Built for independence</h3>
+          <p>For people with arthritis, cerebral palsy, ALS, or spinal cord injuries, just using a computer can be exhausting. Nod restores independence so anyone can explore online freely.</p>
+          <div class="card-footer">Empowering autonomy</div>
+        </article>
+
+        <!-- Panel 4 -->
+        <article class="feature-card" tabindex="0">
+          <div class="card-num">04</div>
+          <div class="card-icon-bubble" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+          </div>
+          <h3>Affordable access</h3>
+          <p>Special accessibility hardware can cost thousands of dollars. Nod is lightweight software that runs on standard computers with standard webcams — no expensive gear required.</p>
+          <div class="card-footer">Available to anyone</div>
+        </article>
+
+      </div>
+    </div>
+  </section>
 
 </main>
 
 
-<!-- ═══ NIGHT SKY TRANSITION ═══════════════════════ -->
-<div class="night-transition">
+<!-- ═══ NIGHT SKY TRANSITION (SCALLOPED EDGE + MOON + TEAM) ═══ -->
+<div class="night-transition-wrapper">
 
-  <!-- Wavy scalloped edge SVG -->
-  <div class="wave-divider">
+  <!-- Fluffy Cloud Scalloped Wave SVG Transition -->
+  <div class="wave-cloud-divider" aria-hidden="true">
     <svg viewBox="0 0 1440 180" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M0,180 L0,80
-        C60,110 120,130 180,120
-        C240,110 280,70 360,60
-        C440,50 500,80 560,90
-        C620,100 680,90 720,80
-        C760,70 820,50 900,55
-        C980,60 1020,90 1080,100
-        C1140,110 1200,95 1260,80
-        C1320,65 1380,70 1440,80
+      <path d="M0,180 L0,70
+        C60,95 120,115 180,105
+        C240,95 280,60 360,50
+        C440,40 500,70 560,80
+        C620,90 680,80 720,70
+        C760,60 820,40 900,45
+        C980,50 1020,80 1080,90
+        C1140,100 1200,85 1260,70
+        C1320,55 1380,60 1440,70
         L1440,180 Z"
-        fill="#082a38"/>
+        fill="currentColor"/>
     </svg>
   </div>
 
-  <!-- Night sky panel -->
-  <div class="night-sky" id="team">
+  <!-- Deep Navy Night Sky Section -->
+  <section class="night-sky-section" id="team" aria-labelledby="night-closing-title">
 
-    <!-- Stars -->
-    <div class="night-stars" id="night-stars-container"></div>
+    <!-- Twinkling Stars & Sparkles Layer -->
+    <div class="night-stars-layer" id="night-stars-container" aria-hidden="true"></div>
 
-    <!-- Crescent moon -->
-    <div class="crescent-moon" aria-hidden="true">
-      <div class="moon-body">
-        <div class="moon-shadow"></div>
+    <!-- Glowing Crescent Moon with Radial Halo -->
+    <div class="crescent-moon-wrapper" id="night-moon" aria-hidden="true">
+      <div class="moon-halo"></div>
+      <div class="crescent-moon">
+        <div class="moon-disk"></div>
+        <div class="moon-cutout"></div>
       </div>
+      <!-- Soft accent sparkles near moon -->
+      <div class="sparkle sparkle-1">✦</div>
+      <div class="sparkle sparkle-2">★</div>
+      <div class="sparkle sparkle-3">✦</div>
     </div>
 
-    <!-- Founders section -->
-    <div class="night-content">
-      <div class="founders-section reveal">
-        <p class="section-label">The team behind Nod</p>
-        <h2>Built by three students who care.</h2>
+    <div class="night-content-container">
+
+      <!-- Closing Accent Headline (Reference Style: "Any thoughts?") -->
+      <div class="closing-callout" id="thoughts">
+        <p class="closing-eyebrow">Get in touch</p>
+        <h2 id="night-closing-title" class="closing-headline">Any thoughts?</h2>
+        <p class="closing-sub">
+          We're constantly improving Nod for the Technica Hackathon and beyond. Test the browser, try our practice tools, or share how we can make hands-free browsing even better.
+        </p>
+        <div class="closing-actions">
+          <a href="./practice.html" class="closing-btn primary-btn">Try Practice Tools</a>
+          <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="closing-btn secondary-btn">Project Repository</a>
+        </div>
+      </div>
+
+      <hr class="night-divider" aria-hidden="true">
+
+      <!-- Founders Section -->
+      <div class="founders-section">
+        <div class="founders-header">
+          <p class="section-label">The Team Behind Nod</p>
+          <h3 class="founders-title">Built by three students who care.</h3>
+          <p class="founders-lead">Computer science and cybersecurity students dedicated to open, hands-free accessibility for everyone.</p>
+        </div>
+
         <div class="founders-grid">
 
-          <div class="founder-card">
-            <img
-              src="../Images for ui/tomas pfp.jpg"
-              alt="Tomas Karounas"
-              class="founder-photo"
-              width="120" height="120"
-              loading="lazy"
-            >
-            <p class="founder-name">Tomas Karounas</p>
-            <p class="founder-school">University of North Georgia</p>
-            <p class="founder-major">Computer Science</p>
-            <p class="founder-hobbies">Reading · Chess · Judo</p>
-          </div>
+          <!-- Tomas Karounas -->
+          <article class="founder-card" tabindex="0">
+            <div class="founder-photo-frame">
+              <img
+                src="../Images for ui/tomas pfp.jpg"
+                alt="Portrait of Tomas Karounas"
+                class="founder-photo"
+                width="140" height="140"
+                loading="lazy"
+              >
+            </div>
+            <div class="founder-info">
+              <h4 class="founder-name">Tomas Karounas</h4>
+              <p class="founder-school">University of North Georgia</p>
+              <p class="founder-major">Computer Science</p>
+              <div class="founder-pill-box">
+                <span class="founder-pill">Reading</span>
+                <span class="founder-pill">Chess</span>
+                <span class="founder-pill">Judo</span>
+              </div>
+            </div>
+          </article>
 
-          <div class="founder-card">
-            <img
-              src="../Images for ui/callum pfp.jpg"
-              alt="Callum Maclean"
-              class="founder-photo"
-              width="120" height="120"
-              loading="lazy"
-            >
-            <p class="founder-name">Callum Maclean</p>
-            <p class="founder-school">University of North Georgia</p>
-            <p class="founder-major">Computer Science</p>
-            <p class="founder-hobbies">Hiking · Dogs · Game Development</p>
-          </div>
+          <!-- Callum Maclean -->
+          <article class="founder-card" tabindex="0">
+            <div class="founder-photo-frame">
+              <img
+                src="../Images for ui/callum pfp.jpg"
+                alt="Portrait of Callum Maclean"
+                class="founder-photo"
+                width="140" height="140"
+                loading="lazy"
+              >
+            </div>
+            <div class="founder-info">
+              <h4 class="founder-name">Callum Maclean</h4>
+              <p class="founder-school">University of North Georgia</p>
+              <p class="founder-major">Computer Science</p>
+              <div class="founder-pill-box">
+                <span class="founder-pill">Hiking</span>
+                <span class="founder-pill">Dogs</span>
+                <span class="founder-pill">Game Dev</span>
+              </div>
+            </div>
+          </article>
 
-          <div class="founder-card">
-            <img
-              src="../Images for ui/nick pfp.jpg"
-              alt="Nick McDowell"
-              class="founder-photo"
-              width="120" height="120"
-              loading="lazy"
-            >
-            <p class="founder-name">Nick McDowell</p>
-            <p class="founder-school">Georgia Tech</p>
-            <p class="founder-major">Cybersecurity</p>
-            <p class="founder-hobbies">Homelabbing · Videogames · Walking my dogs</p>
-          </div>
+          <!-- Nick McDowell -->
+          <article class="founder-card" tabindex="0">
+            <div class="founder-photo-frame">
+              <img
+                src="../Images for ui/nick pfp.jpg"
+                alt="Portrait of Nick McDowell"
+                class="founder-photo"
+                width="140" height="140"
+                loading="lazy"
+              >
+            </div>
+            <div class="founder-info">
+              <h4 class="founder-name">Nick McDowell</h4>
+              <p class="founder-school">Georgia Tech</p>
+              <p class="founder-major">Cybersecurity</p>
+              <div class="founder-pill-box">
+                <span class="founder-pill">Homelabbing</span>
+                <span class="founder-pill">Videogames</span>
+                <span class="founder-pill">Walking Dogs</span>
+              </div>
+            </div>
+          </article>
 
         </div>
       </div>
-    </div>
-  </div>
-</div>
 
-<footer>
-  <p>Nod — Technica Hackathon 2026</p>
-</footer>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <p class="footer-copy">Nod · Technica Hackathon 2026</p>
+        <p class="footer-motto">Built with care for hands-free digital accessibility.</p>
+      </div>
+    </footer>
+
+  </section>
+</div>
 
 </body>
 </html>
