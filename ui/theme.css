@@ -1512,9 +1512,14 @@ main {
 
 /* ── Footer ──────────────────────────────────────────────────────── */
 .site-footer {
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 36px 24px 20px;
-  margin-top: 40px;
+  position: relative;
+  z-index: 10;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 30px 24px 36px;
+  margin-top: 60px;
+  background: rgba(7, 24, 43, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .footer-inner {
@@ -1532,11 +1537,13 @@ main {
   font-size: 0.95rem;
   font-weight: 600;
   color: #ffffff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
 }
 
 .footer-motto {
   font-size: 0.88rem;
-  color: var(--night-muted);
+  color: rgba(230, 243, 255, 0.9);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
 }
 
 /* ── Responsive Adaptations ──────────────────────────────────────── */
