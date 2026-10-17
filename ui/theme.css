@@ -54,6 +54,9 @@
   /* Focus Ring (High Contrast Accessibility) */
   --focus-ring: 3px solid #ffbe3b;
   --focus-offset: 3px;
+
+  /* Brand Logo Filter */
+  --brand-logo-filter: none;
 }
 
 /* ── Dark Theme Variant (Preserves Theme Button Compatibility) ───── */
@@ -84,6 +87,9 @@
   --night-text:       #e2f2fa;
   --night-muted:      #78a3b8;
   --night-accent:     #52d8ee;
+
+  /* Brand Logo subtle glow in dark theme for high contrast */
+  --brand-logo-filter: drop-shadow(0 0 1px #ffffff) drop-shadow(0 0 8px rgba(255, 255, 255, 0.75)) drop-shadow(0 0 16px rgba(98, 233, 255, 0.5));
 }
 
 /* ── Reset & Base Styles ─────────────────────────────────────────── */
@@ -152,11 +158,11 @@ body {
 
 /* ── Ambient Sky Clouds Background ───────────────────────────────── */
 .sky-clouds-layer {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  height: 2400px;
   pointer-events: none;
   z-index: 1;
   overflow: hidden;
@@ -169,13 +175,13 @@ body {
   will-change: transform;
 }
 
-.sky-cloud-1 { top: 6vh;  left: -4vw;  width: clamp(260px, 24vw, 380px); animation: floatDrift1 32s ease-in-out infinite alternate; }
-.sky-cloud-2 { top: 18vh; right: -3vw; width: clamp(280px, 28vw, 440px); animation: floatDrift2 38s ease-in-out infinite alternate; }
-.sky-cloud-3 { top: 58vh; left: 4vw;   width: clamp(200px, 18vw, 300px); animation: floatDrift1 42s ease-in-out infinite alternate; opacity: 0.8; }
-.sky-cloud-4 { top: 75vh; right: 8vw;  width: clamp(240px, 22vw, 360px); animation: floatDrift2 35s ease-in-out infinite alternate; opacity: 0.85; }
-.sky-cloud-5 { top: 92vh; right: 4vw;  width: clamp(230px, 22vw, 350px); animation: floatDrift1 36s ease-in-out infinite alternate; opacity: 0.82; }
-.sky-cloud-6 { top: 125vh; left: -2vw; width: clamp(260px, 25vw, 400px); animation: floatDrift2 40s ease-in-out infinite alternate; opacity: 0.85; }
-.sky-cloud-7 { top: 165vh; right: 2vw; width: clamp(220px, 20vw, 340px); animation: floatDrift1 34s ease-in-out infinite alternate; opacity: 0.8; }
+.sky-cloud-1 { top: 6vh;   left: -4vw;  width: clamp(260px, 24vw, 380px); animation: floatDrift1 32s ease-in-out infinite alternate; }
+.sky-cloud-2 { top: 18vh;  right: -3vw; width: clamp(280px, 28vw, 440px); animation: floatDrift2 38s ease-in-out infinite alternate; }
+.sky-cloud-3 { top: 52vh;  left: 4vw;   width: clamp(200px, 18vw, 300px); animation: floatDrift1 42s ease-in-out infinite alternate; opacity: 0.8; }
+.sky-cloud-4 { top: 70vh;  right: 6vw;  width: clamp(240px, 22vw, 360px); animation: floatDrift2 35s ease-in-out infinite alternate; opacity: 0.85; }
+.sky-cloud-5 { top: 88vh;  left: 2vw;   width: clamp(230px, 22vw, 350px); animation: floatDrift1 36s ease-in-out infinite alternate; opacity: 0.82; }
+.sky-cloud-6 { top: 110vh; right: 4vw;  width: clamp(250px, 24vw, 390px); animation: floatDrift2 40s ease-in-out infinite alternate; opacity: 0.85; }
+.sky-cloud-7 { top: 135vh; left: 8vw;   width: clamp(220px, 20vw, 340px); animation: floatDrift1 34s ease-in-out infinite alternate; opacity: 0.8; }
 
 
 .cloud-img {
@@ -233,26 +239,24 @@ body {
 }
 
 .brand {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
   text-decoration: none;
-  color: var(--hero-title-color);
-  font-family: var(--font-display);
-  font-size: 1.45rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
+  line-height: 1;
 }
 
 .brand-logo {
-  width: 38px;
-  height: 38px;
+  height: 44px;
+  width: auto;
+  max-height: 48px;
   object-fit: contain;
-  transition: transform 0.25s ease;
+  display: block;
+  filter: var(--brand-logo-filter);
+  transition: transform 0.25s ease, filter 0.3s ease;
 }
 
 .brand:hover .brand-logo {
-  transform: scale(1.08) rotate(4deg);
+  transform: scale(1.05);
 }
 
 .header-nav {
@@ -822,7 +826,7 @@ main {
   -webkit-backdrop-filter: blur(16px);
   border: 1.5px solid var(--card-border);
   border-radius: 28px;
-  padding: 36px 32px;
+  padding: 38px 32px 34px;
   box-shadow: var(--card-shadow);
   display: flex;
   flex-direction: column;
@@ -846,36 +850,14 @@ main {
   line-height: 1;
   color: rgba(8, 28, 40, 0.15);
   position: absolute;
-  top: 28px;
+  top: 32px;
   right: 32px;
   letter-spacing: -0.04em;
+  pointer-events: none;
 }
 
 :root[data-theme="dark"] .card-num {
   color: rgba(255, 255, 255, 0.12);
-}
-
-.card-icon-bubble {
-  width: 54px;
-  height: 54px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.85);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--hero-title-color);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-  margin-bottom: 24px;
-}
-
-:root[data-theme="dark"] .card-icon-bubble {
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
-}
-
-.card-icon-bubble svg {
-  width: 26px;
-  height: 26px;
 }
 
 .feature-card h3 {
@@ -884,7 +866,9 @@ main {
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--hero-title-color);
-  margin-bottom: 16px;
+  margin: 0 0 16px;
+  padding-right: 56px;
+  line-height: 1.25;
 }
 
 .feature-card p {
@@ -892,6 +876,7 @@ main {
   line-height: 1.65;
   color: var(--text-main);
   flex-grow: 1;
+  margin: 0;
 }
 
 .card-footer {
@@ -915,7 +900,7 @@ main {
   z-index: 10;
   width: 100%;
   margin-top: 40px;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 .wave-cloud-divider {
@@ -925,61 +910,97 @@ main {
   color: var(--night-base);
   margin-bottom: -2px;
   overflow: visible;
+  height: clamp(100px, 14vw, 190px);
 }
 
 .wave-cloud-divider svg {
-  width: 100%;
-  height: clamp(80px, 12vw, 180px);
-  display: block;
-}
-
-/* ── Soft Fluffy Transition Seam Clouds (Day to Night boundary) ──── */
-.transition-seam-clouds {
   position: absolute;
-  top: -55px;
+  bottom: 0;
   left: 0;
   width: 100%;
-  height: 130px;
-  pointer-events: none;
+  height: 100%;
+  display: block;
   z-index: 2;
-  overflow: hidden;
+  pointer-events: none;
+}
+
+/* ── Multi-layer Wave Seam Clouds (Natural Overlapping, No Straight Cut) ── */
+.seam-clouds-behind {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.seam-clouds-front {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  pointer-events: none;
+  overflow: visible;
 }
 
 .seam-cloud {
   position: absolute;
   pointer-events: none;
   user-select: none;
-  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.14));
   opacity: 0.95;
   will-change: transform;
 }
 
-.seam-cloud-1 {
-  left: -2%;
-  top: -15px;
-  width: clamp(240px, 24vw, 360px);
-  animation: seamFloat1 18s ease-in-out infinite alternate;
-}
-
-.seam-cloud-2 {
-  left: 28%;
-  top: 10px;
-  width: clamp(260px, 26vw, 390px);
-  animation: seamFloat2 22s ease-in-out infinite alternate;
-}
-
-.seam-cloud-3 {
-  left: 60%;
-  top: -25px;
-  width: clamp(220px, 22vw, 340px);
+/* Clouds tucked naturally behind the scalloped wave curve */
+.seam-behind-1 {
+  left: 2%;
+  bottom: 35px;
+  width: clamp(280px, 26vw, 420px);
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.12));
   animation: seamFloat1 20s ease-in-out infinite alternate;
 }
 
-.seam-cloud-4 {
-  right: -3%;
-  top: 5px;
-  width: clamp(250px, 25vw, 380px);
+.seam-behind-2 {
+  left: 42%;
+  bottom: 25px;
+  width: clamp(300px, 28vw, 440px);
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.12));
   animation: seamFloat2 24s ease-in-out infinite alternate;
+}
+
+.seam-behind-3 {
+  right: 2%;
+  bottom: 40px;
+  width: clamp(270px, 25vw, 400px);
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.12));
+  animation: seamFloat1 22s ease-in-out infinite alternate;
+}
+
+/* Clouds sitting in front of the wave crest (spilling full rounded shapes onto night navy) */
+.seam-front-1 {
+  left: 18%;
+  bottom: -40px;
+  width: clamp(290px, 27vw, 430px);
+  filter: drop-shadow(0 14px 28px rgba(4, 18, 30, 0.45));
+  animation: seamFloat2 18s ease-in-out infinite alternate;
+}
+
+.seam-front-2 {
+  left: 65%;
+  bottom: -45px;
+  width: clamp(310px, 28vw, 440px);
+  filter: drop-shadow(0 14px 28px rgba(4, 18, 30, 0.45));
+  animation: seamFloat1 21s ease-in-out infinite alternate;
+}
+
+.seam-front-3 {
+  left: -3%;
+  bottom: -30px;
+  width: clamp(260px, 24vw, 370px);
+  filter: drop-shadow(0 12px 24px rgba(4, 18, 30, 0.4));
+  animation: seamFloat2 25s ease-in-out infinite alternate;
 }
 
 @keyframes seamFloat1 {
@@ -1588,12 +1609,20 @@ main {
     display: none;
   }
 
-  .transition-seam-clouds {
-    height: 90px;
+  .seam-behind-2, .seam-front-3 {
+    display: none;
+  }
+
+  .wave-cloud-divider {
+    height: clamp(80px, 14vw, 140px);
   }
 }
 
 @media (max-width: 640px) {
+  .brand-logo {
+    height: 36px;
+  }
+
   .hero-section {
     padding: 50px 16px 40px;
   }

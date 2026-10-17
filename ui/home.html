@@ -61,8 +61,7 @@
 <header class="site-header">
   <div class="header-inner">
     <a href="home.html" class="brand" aria-label="Nod home">
-      <img src="../Images for ui/Nod Logo.png" alt="Nod logo" class="brand-logo" width="40" height="40">
-      <span class="brand-text">Nod</span>
+      <img src="assets/nod-logo.png" alt="Nod home" class="brand-logo" height="44" width="auto">
     </a>
     
     <nav class="header-nav" aria-label="Primary navigation">
@@ -178,13 +177,6 @@
         <!-- Panel 1 -->
         <article class="feature-card" tabindex="0">
           <div class="card-num">01</div>
-          <div class="card-icon-bubble" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
-              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-              <line x1="12" y1="19" x2="12" y2="22"></line>
-            </svg>
-          </div>
           <h3>No typing required</h3>
           <p>Nod completely removes the need to type or struggle with a standard mouse. Click on exactly what you want, select buttons, and scroll up and down web pages — entirely hands-free.</p>
           <div class="card-footer">Effortless interactions</div>
@@ -193,12 +185,6 @@
         <!-- Panel 2 -->
         <article class="feature-card" tabindex="0">
           <div class="card-num">02</div>
-          <div class="card-icon-bubble" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"></circle>
-              <path d="m10 15 5-3-5-3v6Z"></path>
-            </svg>
-          </div>
           <h3>Simple head movements</h3>
           <p>By trading the fine hand movements of a normal mouse for simple head movements and voice commands, Nod takes away the physical strain of getting online.</p>
           <div class="card-footer">Zero wrist or hand fatigue</div>
@@ -207,11 +193,6 @@
         <!-- Panel 3 -->
         <article class="feature-card" tabindex="0">
           <div class="card-num">03</div>
-          <div class="card-icon-bubble" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-            </svg>
-          </div>
           <h3>Built for independence</h3>
           <p>For people with arthritis, cerebral palsy, ALS, or spinal cord injuries, just using a computer can be exhausting. Nod restores independence so anyone can explore online freely.</p>
           <div class="card-footer">Empowering autonomy</div>
@@ -220,13 +201,6 @@
         <!-- Panel 4 -->
         <article class="feature-card" tabindex="0">
           <div class="card-num">04</div>
-          <div class="card-icon-bubble" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-              <line x1="8" y1="21" x2="16" y2="21"></line>
-              <line x1="12" y1="17" x2="12" y2="21"></line>
-            </svg>
-          </div>
           <h3>Affordable access</h3>
           <p>Special accessibility hardware can cost thousands of dollars. Nod is lightweight software that runs on standard computers with standard webcams — no expensive gear required.</p>
           <div class="card-footer">Available to anyone</div>
@@ -242,14 +216,16 @@
 <!-- ═══ NIGHT SKY TRANSITION (SCALLOPED EDGE + MOON + TEAM) ═══ -->
 <div class="night-transition-wrapper">
 
-  <!-- Fluffy Cloud Scalloped Wave SVG Transition + Seam Clouds -->
+  <!-- Fluffy Cloud Scalloped Wave SVG Transition + Seam Clouds (Natural Multi-layer Overlap) -->
   <div class="wave-cloud-divider" aria-hidden="true">
-    <div class="transition-seam-clouds">
-      <img src="../Images for ui/Cloud 1.png" alt="" class="seam-cloud seam-cloud-1" width="340" height="250" loading="lazy">
-      <img src="../Images for ui/Cloud 2.png" alt="" class="seam-cloud seam-cloud-2" width="380" height="270" loading="lazy">
-      <img src="../Images for ui/Cloud 1.png" alt="" class="seam-cloud seam-cloud-3" width="320" height="240" loading="lazy">
-      <img src="../Images for ui/Cloud 2.png" alt="" class="seam-cloud seam-cloud-4" width="360" height="260" loading="lazy">
+    <!-- Back seam clouds: puff up into day sky, naturally tucked behind the scalloped wave curve -->
+    <div class="seam-clouds-behind">
+      <img src="../Images for ui/Cloud 1.png" alt="" class="seam-cloud seam-behind-1" width="380" height="280" loading="lazy">
+      <img src="../Images for ui/Cloud 2.png" alt="" class="seam-cloud seam-behind-2" width="400" height="290" loading="lazy">
+      <img src="../Images for ui/Cloud 1.png" alt="" class="seam-cloud seam-behind-3" width="360" height="270" loading="lazy">
     </div>
+
+    <!-- The Scalloped Night Wave SVG Divider -->
     <svg viewBox="0 0 1440 180" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M0,180 L0,70
         C60,95 120,115 180,105
@@ -263,6 +239,13 @@
         L1440,180 Z"
         fill="currentColor"/>
     </svg>
+
+    <!-- Front seam clouds: sit in front of the wave crest, softly overlapping with full rounded cloud shapes -->
+    <div class="seam-clouds-front">
+      <img src="../Images for ui/Cloud 2.png" alt="" class="seam-cloud seam-front-1" width="370" height="270" loading="lazy">
+      <img src="../Images for ui/Cloud 1.png" alt="" class="seam-cloud seam-front-2" width="380" height="280" loading="lazy">
+      <img src="../Images for ui/Cloud 2.png" alt="" class="seam-cloud seam-front-3" width="340" height="250" loading="lazy">
+    </div>
   </div>
 
   <!-- Deep Navy Night Sky Section -->
