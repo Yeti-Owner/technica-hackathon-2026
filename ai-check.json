@@ -3,6 +3,8 @@
   "minSize": 80,
   "prefetchScreens": 1.5,
   "concurrency": 2,
+  "retries": 1,
+  "maxAttemptsPerImage": 2,
   "failStreakLimit": 5,
   "rateCeilingPerMinute": 30,
   "requestTimeoutSeconds": 35,

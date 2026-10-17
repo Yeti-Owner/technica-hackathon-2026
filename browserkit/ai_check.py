@@ -18,6 +18,8 @@ DEFAULTS = {
     "minSize": 80,
     "prefetchScreens": 1.5,
     "concurrency": 2,
+    "retries": 1,
+    "maxAttemptsPerImage": 2,
     "failStreakLimit": 5,
     "rateCeilingPerMinute": 30,
     "requestTimeoutSeconds": 35,
@@ -28,6 +30,13 @@ DEFAULTS = {
 SNIFF_BYTES = 32 * 1024 * 1024
 SNIFF_ENTRIES = 64
 URL_ENTRIES = 4096
+
+
+class RateLimited(RuntimeError):
+    """Server-side budget rejection (HTTP 429), not a generic send failure."""
+    def __init__(self, reason):
+        super().__init__(f"server rate limited: {reason}")
+        self.reason = reason
 
 
 def read_env(path):
@@ -98,6 +107,8 @@ def validate_config(raw):
     config["minSize"] = _int(raw.get("minSize"), DEFAULTS["minSize"], 0)
     config["prefetchScreens"] = _float(raw.get("prefetchScreens"), DEFAULTS["prefetchScreens"], 0)
     config["concurrency"] = _int(raw.get("concurrency"), DEFAULTS["concurrency"], 1, 3)
+    config["retries"] = _int(raw.get("retries"), DEFAULTS["retries"], 0, 3)
+    config["maxAttemptsPerImage"] = _int(raw.get("maxAttemptsPerImage"), DEFAULTS["maxAttemptsPerImage"], 1, 5)
     config["failStreakLimit"] = _int(raw.get("failStreakLimit"), DEFAULTS["failStreakLimit"], 1)
     config["rateCeilingPerMinute"] = _int(raw.get("rateCeilingPerMinute"), DEFAULTS["rateCeilingPerMinute"], 1)
     config["requestTimeoutSeconds"] = _float(raw.get("requestTimeoutSeconds"), DEFAULTS["requestTimeoutSeconds"], 1)
@@ -158,6 +169,18 @@ def too_large(size, max_bytes):
     return size > max_bytes
 
 
+def post_mode(data, url):
+    """Pure decision: send bytes when we have them, else fall back to URL mode.
+
+    Returns "file", "url", or "skip". Side-effect free so it is unit-testable.
+    """
+    if data is not None:
+        return "file"
+    if url:
+        return "url"
+    return "skip"
+
+
 class RunawayBreaker:
     """Consecutive failures or a burst of starts pause the feature."""
 
@@ -205,11 +228,14 @@ class AICheck:
         self.closed = False
         self.message = "not started"
         self.last_error = None
-        self.counters = {"scanned": 0, "marked": 0, "failed": 0, "inflight": 0}
+        self.counters = {"scanned": 0, "marked": 0, "failed": 0, "inflight": 0, "budget": 0}
         self.lock = asyncio.Lock()
         self.pending = []
         self.pending_map = {}
         self.pending_shas = set()
+        self.priority = {}
+        self.retry_counts = {}
+        self.attempt_counts = {}
         self.seq = 0
         self.inflight = set()
         self.sniffed = OrderedDict()
@@ -257,6 +283,8 @@ class AICheck:
             text = (f"AI check on · scanned {counters['scanned']} · marked {counters['marked']}"
                     f" · queued {len(self.pending_map)} · inflight {counters['inflight']}"
                     f" · past errors {counters['failed']}")
+            if counters.get("budget", 0) > 0:
+                text += f" · budget skipped {counters['budget']}"
         if self.last_error:
             text += f" · last error: {self.last_error}"
         return text
@@ -329,6 +357,8 @@ class AICheck:
         self.pending.clear()
         self.pending_map.clear()
         self.pending_shas.clear()
+        self.priority.clear()
+        self.retry_counts.clear()
 
     def _on_page(self, page):
         if self.closed:
@@ -451,8 +481,14 @@ class AICheck:
                     if not passes_min_size(width, height, self.config["minSize"]):
                         continue
                     sha = self.url_to_sha.get(url)
-                    if not sha or sha not in self.sniffed:
+                    if not sha:
                         continue
+                    if self.attempt_counts.get(sha, 0) >= self.config["maxAttemptsPerImage"]:
+                        # This image's attempt budget is spent for the session.
+                        continue
+                    # Bytes may have been evicted from the sniff LRU since the
+                    # response was seen; still queue the candidate so _process
+                    # can fall back to URL mode instead of dropping it silently.
                     if sha in self.inflight:
                         continue
                     area = width * height
@@ -465,6 +501,7 @@ class AICheck:
                         self.seq += 1
                         heapq.heappush(self.pending, (-area, order, seq, page, url, sha))
                         self.pending_map[key] = (-area, order, seq)
+                        self.priority[sha] = (-area, order)
                         continue
                     if sha in self.pending_shas:
                         continue
@@ -473,6 +510,7 @@ class AICheck:
                     heapq.heappush(self.pending, (-area, order, seq, page, url, sha))
                     self.pending_map[key] = (-area, order, seq)
                     self.pending_shas.add(sha)
+                    self.priority[sha] = (-area, order)
             self.wake.set()
         except Exception as error:
             self.last_error = str(error)
@@ -491,9 +529,34 @@ class AICheck:
                 return page, url, sha
         return None
 
+    def _requeue(self, page, url, sha):
+        """Put a candidate back for another pass, keeping its priority tuple."""
+        neg_area, order = self.priority.get(sha, (0, 0))
+        seq = self.seq
+        self.seq += 1
+        heapq.heappush(self.pending, (neg_area, order, seq, page, url, sha))
+        self.pending_map[(id(page), url)] = (neg_area, order, seq)
+        self.pending_shas.add(sha)
+
+    def _forget_candidate(self, page, url, sha):
+        """Drop all bookkeeping for a candidate that is finally done."""
+        self.pending_map.pop((id(page), url), None)
+        self.pending_shas.discard(sha)
+        self.priority.pop(sha, None)
+        self.retry_counts.pop(sha, None)
+
+    def _budget_pause(self):
+        if self.paused or self.closed:
+            return
+        self.paused = True
+        self.message = "server daily AI budget exhausted; will recover tomorrow; type 'ai on' to force retry"
+        self._clear_pending()
+        self.wake.set()
+        print("ai: paused — server daily AI budget exhausted; type 'ai on' to force retry")
+
     async def _worker(self):
-        try:
-            while self.enabled and not self.paused and not self.closed:
+        while self.enabled and not self.paused and not self.closed:
+            try:
                 candidate = await self._next()
                 if candidate is None:
                     self.wake.clear()
@@ -503,64 +566,157 @@ class AICheck:
                         pass
                     continue
                 await self._process(*candidate)
-        except asyncio.CancelledError:
-            pass
-        except Exception as error:
-            self.last_error = str(error)
+            except asyncio.CancelledError:
+                raise
+            except Exception as error:
+                # Never let one bad request permanently kill a worker.
+                self.last_error = str(error)
+                await asyncio.sleep(0)
 
     async def _process(self, page, url, sha):
         async with self.lock:
             if sha in self.inflight:
                 return
+            if self.attempt_counts.get(sha, 0) >= self.config["maxAttemptsPerImage"]:
+                # Session attempt budget for this image is already spent.
+                self._forget_candidate(page, url, sha)
+                return
             self.inflight.add(sha)
             self.counters["inflight"] += 1
-            now = time.monotonic()
-            if self.paused or self.closed:
-                self.inflight.discard(sha)
-                self.counters["inflight"] -= 1
-                return
-            if self.breaker.rate_exceeded(now):
-                self.inflight.discard(sha)
-                self.counters["inflight"] -= 1
-                trip = True
-            else:
-                self.breaker.record_start(now)
-                trip = False
-                data = self.sniffed.get(sha)
-        if trip:
-            self._trip()
-            return
         try:
-            if data is None:
+            data = None
+            async with self.lock:
+                now = time.monotonic()
+                if self.paused or self.closed:
+                    return
+                if self.breaker.rate_exceeded(now):
+                    trip = True
+                else:
+                    self.breaker.record_start(now)
+                    trip = False
+                    data = self.sniffed.get(sha)
+            if trip:
+                async with self.lock:
+                    self._requeue(page, url, sha)
+                self._trip()
                 return
+            mode = post_mode(data, url)
+            if mode == "skip":
+                async with self.lock:
+                    self._forget_candidate(page, url, sha)
+                return
+            async with self.lock:
+                # Counted on every send, whatever the outcome, so a globally
+                # failing backend cannot loop forever on the same image.
+                self.attempt_counts[sha] = self.attempt_counts.get(sha, 0) + 1
             try:
-                result = await asyncio.to_thread(self._post, data)
+                if mode == "url":
+                    result = await asyncio.to_thread(self._post_url, url, url)
+                else:
+                    result = await asyncio.to_thread(self._post, data, url)
+            except RateLimited as error:
+                # Server-side budget rejection: never a generic retry.
+                async with self.lock:
+                    self.counters["budget"] += 1
+                    self._forget_candidate(page, url, sha)
+                    if error.reason == "daily_verdict_budget":
+                        self.counters["failed"] += 1
+                        daily = True
+                    else:
+                        # Terminal for this image for the session; not global.
+                        self.attempt_counts[sha] = self.config["maxAttemptsPerImage"]
+                        daily = False
+                if daily:
+                    self._budget_pause()
+                return
             except Exception as error:
                 async with self.lock:
-                    self.counters["failed"] += 1
                     self.last_error = str(error)
-                    tripped = self.breaker.failure()
+                    attempt = self.retry_counts.get(sha, 0) + 1
+                    self.retry_counts[sha] = attempt
+                    exhausted = self.attempt_counts.get(sha, 0) >= self.config["maxAttemptsPerImage"]
+                    if attempt <= self.config.get("retries", DEFAULTS["retries"]) and not exhausted:
+                        # Not a final failure yet: put it back with its priority.
+                        retry = True
+                        self._requeue(page, url, sha)
+                    else:
+                        retry = False
+                        self.counters["failed"] += 1
+                        self._forget_candidate(page, url, sha)
+                        tripped = self.breaker.failure()
+                if retry:
+                    self.wake.set()
+                    return
                 if tripped:
                     self._trip()
                 return
             async with self.lock:
                 self.counters["scanned"] += 1
                 self.breaker.success()
+                self._forget_candidate(page, url, sha)
+                # A successful verdict ends tracking for this image.
+                self.attempt_counts.pop(sha, None)
             if should_mark(result.get("score"), result.get("source"), self.config["threshold"]):
                 await self._apply(page, url, result.get("score"))
                 async with self.lock:
                     self.counters["marked"] += 1
+        except Exception as error:
+            # A single request must never escape and kill the worker loop.
+            async with self.lock:
+                self.counters["failed"] += 1
+                self.last_error = str(error)
         finally:
-            self.inflight.discard(sha)
-            self.counters["inflight"] = max(0, self.counters["inflight"] - 1)
+            async with self.lock:
+                self.inflight.discard(sha)
+                self.counters["inflight"] = max(0, self.counters["inflight"] - 1)
 
-    def _post(self, data):
+    def _post(self, data, src=None):
+        kwargs = {}
+        if isinstance(src, str) and src:
+            kwargs["data"] = {"src": src}
         response = requests.post(
             f"{self.server}/check",
             headers={"X-API-Key": self.key},
             files={"file": ("image", data)},
             timeout=self.config["requestTimeoutSeconds"],
+            **kwargs,
         )
+        if response.status_code == 429:
+            reason = "unknown"
+            try:
+                body = response.json()
+                if isinstance(body, dict):
+                    reason = body.get("reason") or "unknown"
+            except Exception:
+                reason = "unknown"
+            raise RateLimited(reason)
+        if response.status_code != 200:
+            raise RuntimeError(f"HTTP {response.status_code}")
+        result = response.json()
+        if not isinstance(result, dict):
+            raise ValueError("response is not an object")
+        return result
+
+    def _post_url(self, url, src=None):
+        """Fallback when the sniffed bytes are gone: let the server fetch the URL."""
+        payload = {"url": url}
+        if isinstance(src, str) and src:
+            payload["src"] = src
+        response = requests.post(
+            f"{self.server}/check",
+            headers={"X-API-Key": self.key},
+            data=payload,
+            timeout=self.config["requestTimeoutSeconds"],
+        )
+        if response.status_code == 429:
+            reason = "unknown"
+            try:
+                body = response.json()
+                if isinstance(body, dict):
+                    reason = body.get("reason") or "unknown"
+            except Exception:
+                reason = "unknown"
+            raise RateLimited(reason)
         if response.status_code != 200:
             raise RuntimeError(f"HTTP {response.status_code}")
         result = response.json()
@@ -588,6 +744,5 @@ class AICheck:
             return
         self.paused = True
         self.message = "suspected runaway loop, type 'ai on' to resume"
-        self._clear_pending()
         self.wake.set()
         print("ai: paused — suspected runaway loop, type 'ai on' to resume")

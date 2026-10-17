@@ -4,6 +4,7 @@
   let active = false;
   let configured = false;
   let attempts = 0;
+  let flushAttempts = 0;
   let cfg = {minSize: 80, prefetchScreens: 1.5};
   let order = 0;
   const records = new WeakMap();
@@ -94,16 +95,15 @@
     flushTimer = 0;
     if (!active || !pending.length) return;
     const report = window.pyAIReport;
-    if (typeof report !== 'function') {
-      if (!retryTimer) retryTimer = setTimeout(() => { retryTimer = 0; flush(); }, 250);
-      return;
-    }
+    if (typeof report !== 'function') { if (!retryTimer) retryTimer = setTimeout(() => { retryTimer = 0; flush(); }, 250); return; }
     try {
-      const items = pending;
+      report(JSON.stringify({type: 'candidates', frameId, frameUrl: location.href, items: JSON.parse(JSON.stringify(pending))}));
       pending = [];
-      report(JSON.stringify({type: 'candidates', frameId, frameUrl: location.href, items}));
+      attempts = 0;
+      flushAttempts = 0;
     } catch (error) {
-      if (!retryTimer) retryTimer = setTimeout(() => { retryTimer = 0; flush(); }, 250);
+      flushAttempts += 1;
+      if (!retryTimer) retryTimer = setTimeout(() => { retryTimer = 0; flush(); }, flushAttempts > 40 ? 2000 : 250);
     }
   }
 
