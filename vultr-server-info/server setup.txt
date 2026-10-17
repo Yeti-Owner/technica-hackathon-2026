@@ -1,0 +1,21 @@
+VULTR SERVER SETUP: AI IMAGE CHECK
+
+SERVER
+- Vultr Cloud Compute, Seattle, Debian 13 x64, 0.5GB RAM / 10GB SSD, IPv4 only
+- Hostname: ai-check
+- Label: ai-image-check
+- Logged in as root
+
+COMMANDS RUN
+fallocate -l 1G /swapfile && chmod 600 /swapfile
+mkswap /swapfile && swapon /swapfile
+echo '/swapfile none swap sw 0 0' >> /etc/fstab
+apt update && apt upgrade -y
+apt install -y python3-venv python3-pip ufw openssl
+free -h
+
+CURRENT STATE
+- 1GB swapfile at /swapfile, active, persists on reboot (listed in /etc/fstab)
+- System packages updated
+- Installed: python3-venv, python3-pip, ufw, openssl
+- ufw installed but not enabled

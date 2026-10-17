@@ -17,6 +17,7 @@ class BrowserController:
             # One script establishes order; runs again on navigation and in new tabs.
             css = (ROOT / "ui/inject.css").read_text(encoding="utf-8")
             script = (ROOT / "ui/inject.js").read_text(encoding="utf-8")
+            script += "\n" + (ROOT / "ui/voice.js").read_text(encoding="utf-8")
             await self.context.add_init_script(script="window.__starterCSS = " + json.dumps(css) + ";\n" + script)
             self.context.on("page", self._select_page)
             self.page = await self.context.new_page()
