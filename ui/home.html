@@ -13,16 +13,62 @@
 
 <a href="#main-content" class="skip-link">Skip to content</a>
 
-<!-- Ambient cloud shapes -->
-<div class="cloud-container" aria-hidden="true">
-  <div class="cloud cloud-1"></div>
-  <div class="cloud cloud-2"></div>
-  <div class="cloud cloud-3"></div>
-  <div class="cloud cloud-4"></div>
+<!-- ═══ ILLUSTRATED CLOUDS — float across the sky ═══ -->
+<div class="clouds-layer" aria-hidden="true">
+
+  <!-- Cloud A — top-left, large -->
+  <div class="cloud-group cloud-a" style="left: -3%">
+    <div class="cloud c1"></div>
+    <div class="cloud c2"></div>
+    <div class="cloud c3"></div>
+    <div class="cloud c4"></div>
+  </div>
+
+  <!-- Cloud B — top-right, medium -->
+  <div class="cloud-group cloud-b">
+    <div class="cloud c1"></div>
+    <div class="cloud c2"></div>
+    <div class="cloud c3"></div>
+  </div>
+
+  <!-- Cloud C — left side, small -->
+  <div class="cloud-group cloud-c">
+    <div class="cloud c1"></div>
+    <div class="cloud c2"></div>
+    <div class="cloud c3"></div>
+  </div>
+
+  <!-- Cloud D — right side, mid -->
+  <div class="cloud-group cloud-d">
+    <div class="cloud c1"></div>
+    <div class="cloud c2"></div>
+    <div class="cloud c3"></div>
+  </div>
+
+  <!-- Cloud E — center, tiny -->
+  <div class="cloud-group cloud-e">
+    <div class="cloud c1"></div>
+    <div class="cloud c2"></div>
+    <div class="cloud c3"></div>
+  </div>
+
+  <!-- Cloud F — left mid, large -->
+  <div class="cloud-group cloud-f">
+    <div class="cloud c1"></div>
+    <div class="cloud c2"></div>
+    <div class="cloud c3"></div>
+    <div class="cloud c4"></div>
+  </div>
+
+  <!-- Cloud G — right scattered -->
+  <div class="cloud-group cloud-g">
+    <div class="cloud c1"></div>
+    <div class="cloud c2"></div>
+    <div class="cloud c3"></div>
+  </div>
+
 </div>
 
-<!-- Stars for bottom (dark) area -->
-<div class="stars" aria-hidden="true" id="stars-container"></div>
 
 <!-- ── Header ──────────────────────────────────────── -->
 <header>
@@ -38,7 +84,7 @@
   <button id="theme" type="button" aria-pressed="false">Dark theme</button>
 </header>
 
-<!-- ── Main content ────────────────────────────────── -->
+<!-- ── Main content (sky section) ──────────────────── -->
 <main id="main-content">
 
   <!-- Hero -->
@@ -97,63 +143,98 @@
     <p>We want to help people with accessibility issues and make sure everyone has an equal chance to use the internet. A physical disability shouldn't keep anyone from being part of the digital world. Read the news, pay bills, shop, chat with friends — all on your own, comfortably, without frustration.</p>
   </div>
 
-  <hr class="section-divider">
-
-  <!-- ── Team ──────────────────────────────────────── -->
-  <div class="founders-section moon-section reveal" id="team">
-    <div class="moon" aria-hidden="true"></div>
-    <p class="section-label">The team behind Nod</p>
-    <h2>Built by three students who care.</h2>
-    <div class="founders-grid">
-
-      <div class="founder-card">
-        <img
-          src="../Images for ui/tomas pfp.jpg"
-          alt="Tomas Karounas"
-          class="founder-photo"
-          width="120" height="120"
-          loading="lazy"
-        >
-        <p class="founder-name">Tomas Karounas</p>
-        <p class="founder-school">University of North Georgia</p>
-        <p class="founder-major">Computer Science</p>
-        <p class="founder-hobbies">Reading · Chess · Judo</p>
-      </div>
-
-      <div class="founder-card">
-        <img
-          src="../Images for ui/callum pfp.jpg"
-          alt="Callum Maclean"
-          class="founder-photo"
-          width="120" height="120"
-          loading="lazy"
-        >
-        <p class="founder-name">Callum Maclean</p>
-        <p class="founder-school">University of North Georgia</p>
-        <p class="founder-major">Computer Science</p>
-        <p class="founder-hobbies">Hiking · Dogs · Game Development</p>
-      </div>
-
-      <div class="founder-card">
-        <img
-          src="../Images for ui/nick pfp.jpg"
-          alt="Nick McDowell"
-          class="founder-photo"
-          width="120" height="120"
-          loading="lazy"
-        >
-        <p class="founder-name">Nick McDowell</p>
-        <p class="founder-school">Georgia Tech</p>
-        <p class="founder-major">Cybersecurity</p>
-        <p class="founder-hobbies">Homelabbing · Videogames · Walking my dogs</p>
-      </div>
-
-    </div>
-  </div>
-
   <p class="hint">Use Tab to move, Shift + Tab to go back, and Enter to open.</p>
 
 </main>
+
+
+<!-- ═══ NIGHT SKY TRANSITION ═══════════════════════ -->
+<div class="night-transition">
+
+  <!-- Wavy scalloped edge SVG -->
+  <div class="wave-divider">
+    <svg viewBox="0 0 1440 180" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,180 L0,80
+        C60,110 120,130 180,120
+        C240,110 280,70 360,60
+        C440,50 500,80 560,90
+        C620,100 680,90 720,80
+        C760,70 820,50 900,55
+        C980,60 1020,90 1080,100
+        C1140,110 1200,95 1260,80
+        C1320,65 1380,70 1440,80
+        L1440,180 Z"
+        fill="#082a38"/>
+    </svg>
+  </div>
+
+  <!-- Night sky panel -->
+  <div class="night-sky" id="team">
+
+    <!-- Stars -->
+    <div class="night-stars" id="night-stars-container"></div>
+
+    <!-- Crescent moon -->
+    <div class="crescent-moon" aria-hidden="true">
+      <div class="moon-body">
+        <div class="moon-shadow"></div>
+      </div>
+    </div>
+
+    <!-- Founders section -->
+    <div class="night-content">
+      <div class="founders-section reveal">
+        <p class="section-label">The team behind Nod</p>
+        <h2>Built by three students who care.</h2>
+        <div class="founders-grid">
+
+          <div class="founder-card">
+            <img
+              src="../Images for ui/tomas pfp.jpg"
+              alt="Tomas Karounas"
+              class="founder-photo"
+              width="120" height="120"
+              loading="lazy"
+            >
+            <p class="founder-name">Tomas Karounas</p>
+            <p class="founder-school">University of North Georgia</p>
+            <p class="founder-major">Computer Science</p>
+            <p class="founder-hobbies">Reading · Chess · Judo</p>
+          </div>
+
+          <div class="founder-card">
+            <img
+              src="../Images for ui/callum pfp.jpg"
+              alt="Callum Maclean"
+              class="founder-photo"
+              width="120" height="120"
+              loading="lazy"
+            >
+            <p class="founder-name">Callum Maclean</p>
+            <p class="founder-school">University of North Georgia</p>
+            <p class="founder-major">Computer Science</p>
+            <p class="founder-hobbies">Hiking · Dogs · Game Development</p>
+          </div>
+
+          <div class="founder-card">
+            <img
+              src="../Images for ui/nick pfp.jpg"
+              alt="Nick McDowell"
+              class="founder-photo"
+              width="120" height="120"
+              loading="lazy"
+            >
+            <p class="founder-name">Nick McDowell</p>
+            <p class="founder-school">Georgia Tech</p>
+            <p class="founder-major">Cybersecurity</p>
+            <p class="founder-hobbies">Homelabbing · Videogames · Walking my dogs</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <footer>
   <p>Nod — Technica Hackathon 2026</p>

@@ -56,11 +56,17 @@ body {
   font-size: 16px;
   line-height: 1.6;
   color: var(--ink);
-  background: linear-gradient(180deg, var(--sky) 0%, var(--sky-mid) 55%, var(--deep) 88%);
-  background-attachment: fixed;
+  background: var(--sky);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* ── Sky background sections ──────────────────────────── */
+.sky-section {
+  background: var(--sky);
+  position: relative;
 }
 
 /* ── Skip link (accessibility) ────────────────────────── */
@@ -90,10 +96,7 @@ header {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: linear-gradient(180deg, var(--sky) 60%, transparent 100%);
-}
-:root[data-theme=dark] header {
-  background: linear-gradient(180deg, var(--sky) 60%, transparent 100%);
+  background: var(--sky);
 }
 
 .brand {
@@ -144,8 +147,6 @@ a { color: var(--ink); }
   color: var(--ink);
   background: var(--surface);
   transition: background 0.2s ease, border-color 0.2s ease;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
 }
 #theme:hover {
   background: rgba(255, 255, 255, 0.22);
@@ -156,7 +157,9 @@ a { color: var(--ink); }
 main {
   max-width: 960px;
   margin: 0 auto;
-  padding: 0 28px 80px;
+  padding: 0 28px 0;
+  position: relative;
+  z-index: 2;
 }
 
 /* ── Hero section ─────────────────────────────────────── */
@@ -213,8 +216,6 @@ input {
   background: var(--surface);
   color: var(--ink);
   font-size: 16px;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   transition: border-color 0.2s ease, background 0.2s ease;
 }
 input::placeholder {
@@ -257,7 +258,7 @@ input:focus {
 .about-section {
   padding: 40px 0 60px;
 }
-.about-section .section-label {
+.section-label {
   font-family: var(--font-display);
   font-size: 13px;
   font-weight: 600;
@@ -287,8 +288,6 @@ input:focus {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 16px;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   transition: border-color 0.25s ease, transform 0.2s ease;
 }
 .about-card:hover {
@@ -369,8 +368,6 @@ h2#bookmarks-title {
   border-radius: 12px;
   background: var(--surface);
   text-decoration: none;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   transition: border-color 0.2s ease, transform 0.2s ease;
 }
 #bookmarks a:hover {
@@ -398,36 +395,224 @@ h2#bookmarks-title {
   opacity: 0.7;
 }
 
-/* ── Cloud illustrations ──────────────────────────────── */
-.cloud-container {
+/* ═══════════════════════════════════════════════════════
+   ILLUSTRATED CLOUDS — flat cartoon clouds like reference
+   ═══════════════════════════════════════════════════════ */
+
+.clouds-layer {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 0;
+  z-index: 1;
   overflow: hidden;
 }
+
+/* Cloud shape built from CSS circles */
 .cloud {
   position: absolute;
-  background: rgba(255, 255, 255, 0.35);
+  background: #fff;
   border-radius: 50%;
-  filter: blur(40px);
+  opacity: 0.9;
 }
-.cloud-1 { width: 300px; height: 120px; top: 8%; left: -5%; animation: drift 45s linear infinite; }
-.cloud-2 { width: 220px; height: 90px; top: 18%; right: -8%; animation: drift 55s linear infinite reverse; }
-.cloud-3 { width: 280px; height: 100px; top: 35%; left: 15%; animation: drift 60s linear infinite; opacity: 0.5; }
-.cloud-4 { width: 200px; height: 80px; top: 50%; right: 10%; animation: drift 50s linear infinite reverse; opacity: 0.4; }
 
-@keyframes drift {
-  from { transform: translateX(-80px); }
-  to   { transform: translateX(80px); }
+/* Each cloud group is an assembly of circles */
+.cloud-group {
+  position: absolute;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.06));
+}
+
+/* ── Cloud A — large, top-left ────────────────────────── */
+.cloud-a {
+  top: 4%;
+  animation: drift-right 50s ease-in-out infinite alternate;
+}
+.cloud-a .c1 { width: 120px; height: 80px; border-radius: 60px; top: 20px; left: 0; }
+.cloud-a .c2 { width: 80px; height: 80px; top: 0; left: 40px; }
+.cloud-a .c3 { width: 100px; height: 70px; border-radius: 50px; top: 15px; left: 80px; }
+.cloud-a .c4 { width: 60px; height: 60px; top: 5px; left: 110px; }
+
+/* ── Cloud B — medium, top-right ──────────────────────── */
+.cloud-b {
+  top: 8%;
+  right: 8%;
+  animation: drift-left 45s ease-in-out infinite alternate;
+}
+.cloud-b .c1 { width: 90px; height: 60px; border-radius: 45px; top: 15px; left: 0; }
+.cloud-b .c2 { width: 60px; height: 60px; top: 0; left: 30px; }
+.cloud-b .c3 { width: 80px; height: 55px; border-radius: 40px; top: 12px; left: 55px; }
+
+/* ── Cloud C — small, left side ───────────────────────── */
+.cloud-c {
+  top: 22%;
+  left: 5%;
+  transform: scale(0.7);
+  animation: drift-right 55s ease-in-out infinite alternate;
+  animation-delay: -8s;
+}
+.cloud-c .c1 { width: 80px; height: 50px; border-radius: 40px; top: 12px; left: 0; }
+.cloud-c .c2 { width: 50px; height: 50px; top: 0; left: 25px; }
+.cloud-c .c3 { width: 70px; height: 45px; border-radius: 35px; top: 10px; left: 45px; }
+
+/* ── Cloud D — right side, mid page ───────────────────── */
+.cloud-d {
+  top: 30%;
+  right: 3%;
+  transform: scale(0.6);
+  animation: drift-left 60s ease-in-out infinite alternate;
+  animation-delay: -15s;
+}
+.cloud-d .c1 { width: 100px; height: 65px; border-radius: 50px; top: 16px; left: 0; }
+.cloud-d .c2 { width: 65px; height: 65px; top: 0; left: 35px; }
+.cloud-d .c3 { width: 85px; height: 58px; border-radius: 42px; top: 13px; left: 60px; }
+
+/* ── Cloud E — small, top center ──────────────────────── */
+.cloud-e {
+  top: 14%;
+  left: 35%;
+  transform: scale(0.5);
+  animation: drift-right 40s ease-in-out infinite alternate;
+  animation-delay: -20s;
+}
+.cloud-e .c1 { width: 70px; height: 45px; border-radius: 35px; top: 10px; left: 0; }
+.cloud-e .c2 { width: 45px; height: 45px; top: 0; left: 20px; }
+.cloud-e .c3 { width: 60px; height: 40px; border-radius: 30px; top: 8px; left: 40px; }
+
+/* ── Cloud F — large, left mid ────────────────────────── */
+.cloud-f {
+  top: 42%;
+  left: -2%;
+  transform: scale(0.75);
+  animation: drift-right 48s ease-in-out infinite alternate;
+  animation-delay: -5s;
+}
+.cloud-f .c1 { width: 110px; height: 70px; border-radius: 55px; top: 18px; left: 0; }
+.cloud-f .c2 { width: 70px; height: 70px; top: 0; left: 35px; }
+.cloud-f .c3 { width: 90px; height: 60px; border-radius: 45px; top: 14px; left: 70px; }
+.cloud-f .c4 { width: 55px; height: 55px; top: 5px; left: 100px; }
+
+/* ── Cloud G — right, scattered ───────────────────────── */
+.cloud-g {
+  top: 55%;
+  right: 10%;
+  transform: scale(0.55);
+  animation: drift-left 52s ease-in-out infinite alternate;
+  animation-delay: -12s;
+}
+.cloud-g .c1 { width: 80px; height: 50px; border-radius: 40px; top: 12px; left: 0; }
+.cloud-g .c2 { width: 50px; height: 50px; top: 0; left: 25px; }
+.cloud-g .c3 { width: 65px; height: 42px; border-radius: 32px; top: 10px; left: 42px; }
+
+/* Drift animations */
+@keyframes drift-right {
+  0%   { transform: translateX(-60px) scale(var(--cloud-scale, 1)); }
+  100% { transform: translateX(60px) scale(var(--cloud-scale, 1)); }
+}
+@keyframes drift-left {
+  0%   { transform: translateX(60px) scale(var(--cloud-scale, 1)); }
+  100% { transform: translateX(-60px) scale(var(--cloud-scale, 1)); }
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   NIGHT SKY TRANSITION — wavy horizon + moon + stars
+   ═══════════════════════════════════════════════════════ */
+
+.night-transition {
+  position: relative;
+  z-index: 2;
+  margin-top: 0;
+}
+
+/* Wavy/scalloped SVG edge — sky to night */
+.wave-divider {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-bottom: -2px; /* seal the gap */
+}
+.wave-divider svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Night sky panel */
+.night-sky {
+  background: var(--deep);
+  position: relative;
+  overflow: hidden;
+  padding: 60px 28px 60px;
+  min-height: 460px;
+}
+
+/* Crescent moon */
+.crescent-moon {
+  position: absolute;
+  top: 40px;
+  right: 14%;
+  width: 120px;
+  height: 120px;
+}
+.moon-body {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%,
+    #f7f0d8 0%, #ede4c0 50%, #d8cfa3 100%);
+  box-shadow:
+    0 0 40px 10px rgba(247, 240, 216, 0.2),
+    0 0 80px 30px rgba(247, 240, 216, 0.08);
+  position: relative;
+}
+/* Shadow that creates the crescent effect */
+.moon-shadow {
+  position: absolute;
+  top: -10px;
+  left: 25px;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: var(--deep);
+  box-shadow: 0 0 20px 5px var(--deep);
+}
+
+/* Stars container */
+.night-stars {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.star {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: #fff;
+  border-radius: 50%;
+  opacity: 0;
+  animation: twinkle 3s ease-in-out infinite;
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0.1; }
+  50%      { opacity: 0.85; }
+}
+
+/* Night content (founders go here) */
+.night-content {
+  position: relative;
+  z-index: 2;
+  max-width: 960px;
+  margin: 0 auto;
 }
 
 /* ── Founders section ─────────────────────────────────── */
 .founders-section {
-  padding: 60px 0 40px;
+  padding: 20px 0 40px;
 }
 .founders-section .section-label {
   font-family: var(--font-display);
@@ -462,7 +647,7 @@ h2#bookmarks-title {
   height: 120px;
   border-radius: 14px;
   object-fit: cover;
-  border: 2px solid var(--line);
+  border: 2px solid rgba(255, 255, 255, 0.2);
   margin-bottom: 20px;
   transition: transform 0.2s ease, border-color 0.2s ease;
 }
@@ -501,12 +686,15 @@ h2#bookmarks-title {
 
 /* ── Footer ───────────────────────────────────────────── */
 footer {
+  background: var(--deep);
   text-align: center;
-  padding: 40px 28px 32px;
+  padding: 20px 28px 32px;
   font-size: 13px;
   color: var(--muted);
   opacity: 0.6;
   font-family: var(--font-body);
+  position: relative;
+  z-index: 2;
 }
 footer a {
   color: var(--muted);
@@ -542,10 +730,10 @@ footer a {
   transform: translateY(0);
 }
 
-/* ── Content sits above clouds ────────────────────────── */
-header, main, footer {
+/* ── Content above clouds ─────────────────────────────── */
+header, main, footer, .night-transition {
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
 /* ── Practice page ────────────────────────────────────── */
@@ -557,59 +745,6 @@ header, main, footer {
 .practice-spacer {
   min-height: 100vh;
   padding-top: 30px;
-}
-
-/* ── Moon decoration (bottom section) ─────────────────── */
-.moon-section {
-  position: relative;
-  padding: 80px 0 20px;
-  overflow: hidden;
-}
-.moon {
-  position: absolute;
-  width: 180px;
-  height: 180px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%,
-    #f5ecd5 0%, #e8dbbf 40%, #d4c9a0 100%);
-  box-shadow: 0 0 60px 20px rgba(245, 236, 213, 0.15);
-  top: -20px;
-  right: 5%;
-  opacity: 0.9;
-}
-.moon::after {
-  content: '';
-  position: absolute;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.04);
-  top: 30%;
-  left: 25%;
-}
-
-/* ── Stars ─────────────────────────────────────────────── */
-.stars {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 40%;
-  pointer-events: none;
-  z-index: 0;
-}
-.star {
-  position: absolute;
-  width: 3px;
-  height: 3px;
-  background: #fff;
-  border-radius: 50%;
-  opacity: 0;
-  animation: twinkle 3s ease-in-out infinite;
-}
-@keyframes twinkle {
-  0%, 100% { opacity: 0; }
-  50%      { opacity: 0.7; }
 }
 
 /* ── Responsive ───────────────────────────────────────── */
@@ -637,8 +772,27 @@ header, main, footer {
   }
 
   main {
-    padding: 0 20px 60px;
+    padding: 0 20px 0;
   }
+
+  .crescent-moon {
+    width: 80px;
+    height: 80px;
+    top: 20px;
+    right: 8%;
+  }
+  .moon-body {
+    width: 80px;
+    height: 80px;
+  }
+  .moon-shadow {
+    width: 75px;
+    height: 75px;
+    left: 18px;
+    top: -8px;
+  }
+
+  .cloud-group { transform: scale(0.5) !important; }
 }
 
 @media (max-width: 480px) {
@@ -663,5 +817,9 @@ header, main, footer {
 
   .about-card {
     padding: 24px;
+  }
+
+  .night-sky {
+    padding: 40px 20px 40px;
   }
 }

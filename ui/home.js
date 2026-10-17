@@ -41,26 +41,29 @@ document.querySelector('#theme').addEventListener('click', event => {
   revealEls.forEach(el => observer.observe(el));
 })();
 
-/* ── Generate stars for bottom section ─────────────── */
+/* ── Generate stars for the night sky ──────────────── */
 (function initStars() {
-  const container = document.getElementById('stars-container');
+  const container = document.getElementById('night-stars-container');
   if (!container) return;
 
   const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const count = 40;
+  const count = 60;
 
   for (let i = 0; i < count; i++) {
     const star = document.createElement('div');
     star.className = 'star';
     star.style.left = Math.random() * 100 + '%';
     star.style.top = Math.random() * 100 + '%';
-    star.style.width = (Math.random() * 2 + 1.5) + 'px';
-    star.style.height = star.style.width;
+
+    const size = (Math.random() * 2.5 + 1) + 'px';
+    star.style.width = size;
+    star.style.height = size;
+
     if (!prefersReduced) {
-      star.style.animationDelay = (Math.random() * 5) + 's';
-      star.style.animationDuration = (Math.random() * 3 + 2) + 's';
+      star.style.animationDelay = (Math.random() * 6) + 's';
+      star.style.animationDuration = (Math.random() * 4 + 2) + 's';
     } else {
-      star.style.opacity = (Math.random() * 0.4 + 0.1).toString();
+      star.style.opacity = (Math.random() * 0.5 + 0.15).toString();
     }
     container.appendChild(star);
   }
