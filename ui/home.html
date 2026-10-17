@@ -1,15 +1,163 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Home · Browser studio</title><link rel="stylesheet" href="theme.css"><script src="bookmarks.js" defer></script><script src="home.js" defer></script></head>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nod — Hands-free browsing for everyone</title>
+  <meta name="description" content="Nod removes the need to type or struggle with a standard mouse. Browse the internet comfortably, entirely hands-free.">
+  <link rel="stylesheet" href="theme.css">
+  <script src="bookmarks.js" defer></script>
+  <script src="home.js" defer></script>
+</head>
 <body>
-<header><a href="home.html" class="brand">Browser studio</a><button id="theme" type="button" aria-pressed="false">Dark theme</button></header>
-<main>
-  <h1>Where to next?</h1>
-  <form action="https://www.google.com/search" method="get" class="search">
+
+<a href="#main-content" class="skip-link">Skip to content</a>
+
+<!-- Ambient cloud shapes -->
+<div class="cloud-container" aria-hidden="true">
+  <div class="cloud cloud-1"></div>
+  <div class="cloud cloud-2"></div>
+  <div class="cloud cloud-3"></div>
+  <div class="cloud cloud-4"></div>
+</div>
+
+<!-- Stars for bottom (dark) area -->
+<div class="stars" aria-hidden="true" id="stars-container"></div>
+
+<!-- ── Header ──────────────────────────────────────── -->
+<header>
+  <a href="home.html" class="brand" aria-label="Nod home">
+    <img src="../Images for ui/Nod Logo.png" alt="Nod logo" class="brand-logo" width="40" height="40">
+    Nod
+  </a>
+  <nav class="header-nav" aria-label="Primary navigation">
+    <a href="#about">About</a>
+    <a href="#mission">Mission</a>
+    <a href="#team">Team</a>
+  </nav>
+  <button id="theme" type="button" aria-pressed="false">Dark theme</button>
+</header>
+
+<!-- ── Main content ────────────────────────────────── -->
+<main id="main-content">
+
+  <!-- Hero -->
+  <div class="hero">
+    <h1>Where to next?</h1>
+    <p class="tagline">Browse the internet hands-free. Nod replaces typing and clicking with simple head movements and voice, so everyone can get online.</p>
+  </div>
+
+  <!-- Search bar -->
+  <form action="https://www.google.com/search" method="get" class="search" id="search-form">
     <label for="query">Search the web</label>
-    <div><input id="query" name="q" type="search" placeholder="Something you’re curious about…" required><button type="submit">Search</button></div>
+    <div>
+      <input id="query" name="q" type="search" placeholder="Something you're curious about…" required>
+      <button type="submit">Search</button>
+    </div>
   </form>
-  <section aria-labelledby="bookmarks-title"><h2 id="bookmarks-title">Your places</h2><nav id="bookmarks" aria-label="Bookmarks"></nav></section>
+
+  <!-- Bookmarks -->
+  <section aria-labelledby="bookmarks-title">
+    <h2 id="bookmarks-title">Your places</h2>
+    <nav id="bookmarks" aria-label="Bookmarks"></nav>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- ── What it does ──────────────────────────────── -->
+  <div class="about-section reveal" id="about">
+    <p class="section-label">What Nod does</p>
+    <h2>A computer you control without your hands</h2>
+    <div class="about-grid">
+      <div class="about-card">
+        <h3>No typing required</h3>
+        <p>Nod completely removes the need to type or struggle with a standard mouse. Click on exactly what you want, select buttons, and scroll up and down web pages — entirely hands-free.</p>
+      </div>
+      <div class="about-card">
+        <h3>Built for independence</h3>
+        <p>For people who have trouble using their hands due to conditions like arthritis, cerebral palsy, ALS, or spinal cord injuries, just using a computer can be exhausting. Nod gives people their independence back.</p>
+      </div>
+      <div class="about-card">
+        <h3>Simple head movements</h3>
+        <p>By trading the fine hand movements of a normal mouse for simple head movements and voice commands, Nod takes away the physical strain of getting online.</p>
+      </div>
+      <div class="about-card">
+        <h3>Affordable access</h3>
+        <p>Special accessibility hardware can cost thousands of dollars. Nod is software that runs on the basic computer parts you already own — no expensive equipment needed.</p>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- ── Mission ───────────────────────────────────── -->
+  <div class="statement reveal" id="mission">
+    <p class="section-label">Our mission</p>
+    <h2>Being able to use the internet shouldn't be a luxury.</h2>
+    <p>We want to help people with accessibility issues and make sure everyone has an equal chance to use the internet. A physical disability shouldn't keep anyone from being part of the digital world. Read the news, pay bills, shop, chat with friends — all on your own, comfortably, without frustration.</p>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- ── Team ──────────────────────────────────────── -->
+  <div class="founders-section moon-section reveal" id="team">
+    <div class="moon" aria-hidden="true"></div>
+    <p class="section-label">The team behind Nod</p>
+    <h2>Built by three students who care.</h2>
+    <div class="founders-grid">
+
+      <div class="founder-card">
+        <img
+          src="../Images for ui/tomas pfp.jpg"
+          alt="Tomas Karounas"
+          class="founder-photo"
+          width="120" height="120"
+          loading="lazy"
+        >
+        <p class="founder-name">Tomas Karounas</p>
+        <p class="founder-school">University of North Georgia</p>
+        <p class="founder-major">Computer Science</p>
+        <p class="founder-hobbies">Reading · Chess · Judo</p>
+      </div>
+
+      <div class="founder-card">
+        <img
+          src="../Images for ui/callum pfp.jpg"
+          alt="Callum Maclean"
+          class="founder-photo"
+          width="120" height="120"
+          loading="lazy"
+        >
+        <p class="founder-name">Callum Maclean</p>
+        <p class="founder-school">University of North Georgia</p>
+        <p class="founder-major">Computer Science</p>
+        <p class="founder-hobbies">Hiking · Dogs · Game Development</p>
+      </div>
+
+      <div class="founder-card">
+        <img
+          src="../Images for ui/nick pfp.jpg"
+          alt="Nick McDowell"
+          class="founder-photo"
+          width="120" height="120"
+          loading="lazy"
+        >
+        <p class="founder-name">Nick McDowell</p>
+        <p class="founder-school">Georgia Tech</p>
+        <p class="founder-major">Cybersecurity</p>
+        <p class="founder-hobbies">Homelabbing · Videogames · Walking my dogs</p>
+      </div>
+
+    </div>
+  </div>
+
   <p class="hint">Use Tab to move, Shift + Tab to go back, and Enter to open.</p>
+
 </main>
-</body></html>
+
+<footer>
+  <p>Nod — Technica Hackathon 2026</p>
+</footer>
+
+</body>
+</html>
