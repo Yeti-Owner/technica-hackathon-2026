@@ -70,18 +70,22 @@
   /* Brand Logo Filter */
   --brand-logo-filter: none;
 
-  /* Search Bar Tokens */
-  --search-box-bg:           rgba(255, 255, 255, 0.75);
-  --search-box-border:       rgba(255, 255, 255, 0.85);
-  --search-box-border-focus: var(--text-main);
-  --search-icon-color:       var(--text-subtle);
-  --search-input-text:       var(--text-main);
-  --search-placeholder:      var(--text-subtle);
-  --search-btn-bg:           #0a0a0a;
-  --search-btn-text:         #ffffff;
-  --search-btn-hover-bg:     #242424;
-  --search-btn-shadow:       0 4px 14px rgba(0, 0, 0, 0.18);
-  --search-btn-hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  /* Search Cloud Bar Tokens (Light Theme) */
+  --search-cloud-fill-top:       #ffffff;
+  --search-cloud-fill-mid:       #f3f9fd;
+  --search-cloud-fill-bottom:    #dbebf8;
+  --search-cloud-stroke:         rgba(255, 255, 255, 0.95);
+  --search-cloud-shadow:         drop-shadow(0 18px 36px rgba(8, 48, 72, 0.16)) drop-shadow(0 4px 12px rgba(8, 48, 72, 0.08));
+  --search-cloud-focus-stroke:   #0284c7;
+  --search-cloud-focus-shadow:   drop-shadow(0 0 16px rgba(2, 132, 199, 0.55)) drop-shadow(0 18px 36px rgba(8, 48, 72, 0.24));
+  --search-icon-color:           #436f88;
+  --search-input-text:           #082032; /* WCAG AAA high contrast dark navy */
+  --search-placeholder:          #4c7087; /* 5.8:1 contrast against cloud fill - WCAG AA */
+  --search-btn-bg:               #09131a;
+  --search-btn-text:             #ffffff;
+  --search-btn-hover-bg:         #1d2d38;
+  --search-btn-shadow:           0 4px 14px rgba(0, 0, 0, 0.22);
+  --search-btn-hover-shadow:     0 8px 22px rgba(0, 0, 0, 0.32);
 
   /* Badge Tokens */
   --badge-bg:                rgba(255, 255, 255, 0.65);
@@ -124,18 +128,22 @@
   --brand-logo-filter: drop-shadow(0 0 1px #ffffff) drop-shadow(0 0 8px rgba(255, 255, 255, 0.75)) drop-shadow(0 0 16px rgba(98, 233, 255, 0.5));
   --hero-logo-filter: drop-shadow(0 0 24px rgba(255, 255, 255, 0.35)) drop-shadow(0 0 45px rgba(98, 233, 255, 0.22)) drop-shadow(0 14px 30px rgba(0, 0, 0, 0.6));
 
-  /* Search Bar Tokens (Dark Theme - High Contrast Aqua Button) */
-  --search-box-bg:           rgba(15, 38, 52, 0.75);
-  --search-box-border:       rgba(98, 233, 255, 0.3);
-  --search-box-border-focus: #62e9ff;
-  --search-icon-color:       #9ec8db;
-  --search-input-text:       #ffffff;
-  --search-placeholder:      #8ab2c6;
-  --search-btn-bg:           #4dd9f5;
-  --search-btn-text:         #041018; /* Contrast 11.8:1 - WCAG AAA */
-  --search-btn-hover-bg:     #78e4f8;
-  --search-btn-shadow:       0 4px 18px rgba(77, 217, 245, 0.42);
-  --search-btn-hover-shadow: 0 8px 26px rgba(77, 217, 245, 0.65);
+  /* Search Cloud Bar Tokens (Dark Theme - Translucent Watercolor Glow) */
+  --search-cloud-fill-top:       rgba(240, 248, 255, 0.96);
+  --search-cloud-fill-mid:       rgba(215, 235, 250, 0.90);
+  --search-cloud-fill-bottom:    rgba(180, 215, 240, 0.85);
+  --search-cloud-stroke:         rgba(255, 255, 255, 0.65);
+  --search-cloud-shadow:         drop-shadow(0 16px 40px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 24px rgba(98, 233, 255, 0.22));
+  --search-cloud-focus-stroke:   #52d8ee;
+  --search-cloud-focus-shadow:   drop-shadow(0 0 20px rgba(82, 216, 238, 0.85)) drop-shadow(0 16px 40px rgba(0, 0, 0, 0.7));
+  --search-icon-color:           #244b60;
+  --search-input-text:           #061824; /* Strong contrast on luminous cloud body */
+  --search-placeholder:          #395c70;
+  --search-btn-bg:               #091620;
+  --search-btn-text:             #62e9ff; /* Vibrant high contrast cyan */
+  --search-btn-hover-bg:         #0d2232;
+  --search-btn-shadow:           0 4px 16px rgba(0, 0, 0, 0.4);
+  --search-btn-hover-shadow:     0 8px 24px rgba(98, 233, 255, 0.35);
 
   /* Badge Tokens (Dark Theme - Vibrant Cyan & Deep Translucent Navy) */
   --badge-bg:                rgba(8, 28, 42, 0.75);
@@ -614,11 +622,12 @@ main {
 }
 
 /* ── Accessible Search Form ──────────────────────────────────────── */
+/* ── Accessible Search Form as a Long Fluffy Cloud ────────────────── */
 .hero-search {
   position: relative;
   z-index: 10;
   width: 100%;
-  max-width: 640px;
+  max-width: clamp(640px, 52vw, 760px);
   margin: 0 auto 0;
   will-change: transform, opacity;
 }
@@ -630,35 +639,85 @@ main {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-muted);
-  margin-bottom: 8px;
+  margin-bottom: 12px; /* Breathing room above the cloud's top bumps */
   text-align: left;
 }
 
-.search-box-wrapper {
+.search-cloud-container {
+  position: relative;
+  width: 100%;
+  min-height: 88px;
   display: flex;
   align-items: center;
-  position: relative;
-  background: var(--search-box-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1.5px solid var(--search-box-border);
-  border-radius: var(--radius-lg);
-  padding: 8px 10px 8px 20px;
-  box-shadow: var(--card-shadow);
-  transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+  transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1);
 }
 
-.search-box-wrapper:focus-within {
-  border-color: var(--search-box-border-focus);
-  background: var(--card-hover-bg);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.16);
+.search-cloud-container:hover {
+  transform: scale(1.015);
+}
+
+/* Background cloud floats gently; form controls stay physically stable */
+.search-cloud-bg {
+  position: absolute;
+  top: -16px;
+  left: -8px;
+  right: -8px;
+  bottom: -10px;
+  pointer-events: none;
+  filter: var(--search-cloud-shadow);
+  animation: searchCloudFloat 18s ease-in-out infinite alternate;
+  transition: filter 0.25s ease;
+}
+
+@keyframes searchCloudFloat {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(-3.5px); }
+}
+
+.search-cloud-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+.search-cloud-path {
+  fill: url(#cloudSearchGrad);
+  stroke: var(--search-cloud-stroke);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+  transition: stroke 0.25s ease, stroke-width 0.25s ease;
+}
+
+/* High contrast accessible focus outline following the cloud silhouette */
+.search-cloud-container:focus-within .search-cloud-bg {
+  filter: var(--search-cloud-focus-shadow);
+}
+
+.search-cloud-container:focus-within .search-cloud-path {
+  stroke: var(--search-cloud-focus-stroke) !important;
+  stroke-width: 3.5px !important;
+}
+
+/* Content layout inside the cloud: solid middle band safe area */
+.search-box-wrapper {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 18px 30px 14px 32px;
+  box-sizing: border-box;
 }
 
 .search-icon {
   width: 22px;
   height: 22px;
   color: var(--search-icon-color);
-  margin-right: 12px;
+  margin-right: 14px;
   flex-shrink: 0;
   transition: color 0.25s ease;
 }
@@ -668,15 +727,20 @@ main {
   background: transparent;
   border: none;
   font-family: var(--font-body);
-  font-size: 1.1rem;
+  font-size: 1.14rem;
+  font-weight: 500;
   color: var(--search-input-text);
   outline: none;
   min-width: 0;
 }
 
+.search-box-wrapper input:focus-visible {
+  outline: none !important; /* Cloud silhouette outline acts as high-contrast accessible focus indicator */
+}
+
 .search-box-wrapper input::placeholder {
   color: var(--search-placeholder);
-  opacity: 0.9;
+  opacity: 0.95;
 }
 
 .search-btn {
@@ -684,9 +748,10 @@ main {
   font-size: 0.98rem;
   font-weight: 700;
   cursor: pointer;
-  padding: 12px 28px;
+  padding: 13px 30px;
+  min-height: 46px;
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   background: var(--search-btn-bg);
   color: var(--search-btn-text);
   box-shadow: var(--search-btn-shadow);
@@ -699,6 +764,10 @@ main {
   transform: translateY(-2px);
   box-shadow: var(--search-btn-hover-shadow);
   opacity: 1;
+}
+
+.search-btn:active {
+  transform: translateY(0);
 }
 
 
@@ -1759,18 +1828,49 @@ main {
     opacity: 0.4;
   }
 
+  .hero-search {
+    width: 100%;
+    max-width: 95vw;
+  }
+
+  .search-cloud-container {
+    min-height: 74px;
+  }
+
+  .search-cloud-bg {
+    top: -12px;
+    bottom: -6px;
+    left: -4px;
+    right: -4px;
+  }
+
   .search-box-wrapper {
-    flex-direction: column;
-    gap: 12px;
-    padding: 14px;
+    flex-direction: row; /* Keep horizontal cloud bar format */
+    gap: 8px;
+    padding: 12px 14px 10px 18px;
+  }
+
+  .search-icon {
+    width: 18px;
+    height: 18px;
+    margin-right: 6px;
   }
 
   .search-box-wrapper input {
-    width: 100%;
+    font-size: 0.96rem;
+    min-width: 0;
+    width: auto;
+    flex: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
   }
 
   .search-btn {
-    width: 100%;
+    width: auto;
+    padding: 10px 18px;
+    font-size: 0.9rem;
+    min-height: 44px;
   }
 
   .footer-inner {
@@ -1789,6 +1889,8 @@ main {
 
   .sky-cloud,
   .hero-cloud,
+  .search-cloud-container,
+  .search-cloud-bg,
   .curtain-left,
   .curtain-right,
   .horizontal-track,
