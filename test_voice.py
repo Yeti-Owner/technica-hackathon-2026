@@ -133,8 +133,71 @@ class VoiceTests(unittest.TestCase):
         frames = [(feature, .9, 140), (None, .4, None),
                   (feature, .9, 280), (feature, .9, 140), (feature, .9, 140)]
         with patch.object(detector, 'features', side_effect=frames):
-            outputs = [detector.update(np.ones(2880)*.02, 48000, i*.03) for i in range(5)]
+            outputs = [detector.update(vowel([350, 850, 2500]), 48000, i*.03) for i in range(5)]
         self.assertEqual(outputs[-1], 1)
+
+    def test_learning_never_removes_or_reverses_default_matches(self):
+        detector = VowelDetector()
+        features = [np.log([f1, f2]) for f1 in np.linspace(200, 1200, 25)
+                    for f2 in np.linspace(500, 2200, 25)]
+        baseline = [detector.classify(f, detector.DEFAULTS)[0] for f in features]
+        for shift in [-.14, .14]:
+            detector.centers[1] = detector.DEFAULTS[1]+shift
+            detector.centers[-1] = detector.DEFAULTS[-1]-shift
+            for f, expected in zip(features, baseline):
+                if expected:
+                    self.assertEqual(detector.classify(f)[0], expected)
+
+    def test_breathy_aaa_tail_stays_active_but_silence_still_stops(self):
+        detector = VowelDetector()
+        block = vowel([800, 1300, 2600])
+        for i in range(12):
+            detector.update(block, 48000, i*.03)
+        with patch.object(detector, 'features', return_value=(None, .43, 140)):
+            for i in range(12, 120):
+                self.assertEqual(detector.update(block*.08, 48000, i*.03), -1)
+        detector.update(np.zeros_like(block), 48000, 4.2)
+        self.assertEqual(detector.direction, 0)
+
+    def test_old_noise_expires_and_quiet_sound_recovers_after_long_session(self):
+        detector = VowelDetector()
+        rng = np.random.default_rng(20)
+        noise = rng.normal(0, .01, 2880)
+        with patch.object(detector, 'features', return_value=(None, .1, None)):
+            for i in range(200):
+                detector.update(noise, 48000, i*.03)
+            self.assertGreater(detector.noise, .008)
+            for i in range(20):
+                detector.update(noise*.01, 48000, 1800+i*.03)
+        self.assertLess(detector.threshold, .0004)
+        for i in range(10):
+            detector.update(vowel([800, 1300, 2600])*.025, 48000, 1801+i*.03)
+        self.assertEqual(detector.direction, -1)
+
+    def test_repeated_session_holds_remain_recognizable(self):
+        detector = VowelDetector()
+        blocks = {1: vowel([380, 900, 2500]), -1: vowel([760, 1300, 2600])}
+        now = 0.
+        for cycle in range(80):
+            direction = 1 if cycle % 2 == 0 else -1
+            for frame in range(40):
+                now += .03
+                detector.update(blocks[direction], 48000, now)
+            self.assertEqual(detector.direction, direction, cycle)
+            now += .6
+            detector.update(np.zeros(2880), 48000, now)
+            self.assertEqual(detector.direction, 0)
+
+    def test_microphone_environment_reset_keeps_vowel_learning(self):
+        detector = VowelDetector()
+        detector.noise = .1
+        detector.ambient.append((10., .1))
+        detector.centers[1] += .05
+        learned = detector.centers[1].copy()
+        detector.reset_environment()
+        self.assertEqual(len(detector.ambient), 0)
+        self.assertLess(detector.noise, .001)
+        np.testing.assert_allclose(detector.centers[1], learned)
 
     def test_ambient_tracks_noise_without_absorbing_held_vowel(self):
         detector = VowelDetector()

@@ -32,6 +32,7 @@ class VoiceControl:
             self.device_label = ''
             self.mic = Microphone()
             self.mic.start(self.device)
+            self.detector.reset_environment()
             self.device_label = f'{self.mic.name} (input {self.mic.device})'
             self.enabled = True
             self.message = "Listening · ooo ↓ / aaa ↑"

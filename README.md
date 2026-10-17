@@ -27,6 +27,7 @@ Hold **ooo** to scroll down or **aaa** to scroll up; these are vowels, not low/h
 
 - One microphone serves all tabs; audio stays in Python. Do not expose microphone access or Python command bindings to websites.
 - Preserve hold continuity: spectral matching, 300 ms coast + 250 ms fade, and no reactivation after short gaps. Direction stays locked during a hold.
+- Learning must preserve confident default matches. Hold references refresh only from confirmed vowels; room-noise samples expire and reset when the microphone starts.
 - Preserve focus checks and the page's 250 ms watchdog. Playwright focus emulation is disabled so background tabs do not scroll.
 - Commit source and `requirements.txt`; keep environments, captures, secrets, and `artifacts/voice-profile.json` local.
 - Recognition is experimental. Test real voices after detector changes; synthetic tests cannot establish accuracy. Browser-internal pages, PDFs, and cross-origin panels have scrolling limitations.
