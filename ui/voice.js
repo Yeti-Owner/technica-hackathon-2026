@@ -45,7 +45,7 @@
   };
   function scroll(pixels) {
     let element = hovered?.isConnected ? hovered : document.activeElement;
-    while (element && element !== document.documentElement) {
+    while (element && element !== document.documentElement && element !== document.body) {
       const style = getComputedStyle(element);
       const canScroll = /(auto|scroll)/.test(style.overflowY) && element.scrollHeight > element.clientHeight;
       const hasRoom = pixels > 0 ? element.scrollTop + element.clientHeight < element.scrollHeight - 1 : element.scrollTop > 0;
@@ -55,6 +55,6 @@
       }
       element = element.parentElement;
     }
-    window.scrollBy({top: pixels, behavior: 'instant'});
+    (document.scrollingElement || window).scrollBy({top: pixels, behavior: 'instant'});
   }
 })();

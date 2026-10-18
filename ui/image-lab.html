@@ -66,19 +66,29 @@
       --wave-glow-opacity: 0.35;
     }
 
-    /* ── Base Document Background (Sky Cyan in Light, Navy in Dark) ── */
-    html, body {
+    /* ── Single Document Scroller (html & body default visible) ──── */
+    html {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      overflow-x: visible;
+      overflow-y: visible;
+      scrollbar-gutter: stable;
+    }
+
+    body {
       margin: 0;
       padding: 0;
       min-height: 100vh;
+      min-height: 100dvh;
       background: var(--sky-top, #24cae8);
       color: var(--text-main);
       font-family: var(--font-body);
-      overflow-x: hidden;
+      overflow-x: clip;
+      overflow-y: visible;
       transition: color 0.4s ease;
     }
 
-    [data-theme="dark"] html,
     [data-theme="dark"] body {
       background: var(--night-deep, #041018);
     }
@@ -154,7 +164,8 @@
     .lab-page-wrapper {
       position: relative;
       width: 100%;
-      overflow: visible;
+      overflow-x: clip;
+      overflow-y: visible;
     }
 
     .lab-grid-master {
