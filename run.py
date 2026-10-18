@@ -26,7 +26,8 @@ def main():
         STAMP.write_text(fingerprint)
 
     if "--setup" not in sys.argv:
-        return subprocess.call([str(PYTHON), "-m", "browserkit.head"], cwd=ROOT)
+        module = "browserkit.head" if "--head" in sys.argv else "browserkit"
+        return subprocess.call([str(PYTHON), "-m", module], cwd=ROOT)
     return 0
 
 

@@ -212,6 +212,7 @@ class VowelDetector:
             self.evidence = max(0., self.evidence-dt*.25)
             if now-self.last_candidate > .10:
                 self.candidate, self.pitch, self.evidence = 0, None, 0.
+        self.observation = (rms, vector, clarity, shape)
         return self.direction
 
     def save(self):
@@ -221,6 +222,119 @@ class VowelDetector:
             temporary.write_text(json.dumps({"version": 1, "centers": {
                 str(k): v.tolist() for k, v in self.centers.items()}}))
             temporary.replace(self.profile)
+
+
+class ClickDetector:
+    """Conservative one-shot gestures. No scrolling hold/fade can authorize a click."""
+    HOLD = .45
+    QUIET = .24
+    MAX_GAP = .24
+
+    def __init__(self, detector=None):
+        self.detector = detector or VowelDetector()
+        self.reset()
+
+    def reset(self):
+        self.armed = False
+        self.candidate = 0
+        self.quiet_since = None
+        self.started = self.last_good = self.good_time = 0.
+        self.last_update = None
+        self.reference = self.shape = None
+        self.onset = None
+        self.opposite_time = 0.
+        self.reason = 'Pause briefly to arm'
+
+    def cancel(self):
+        self.reset()
+        self.detector.reset()
+
+    @staticmethod
+    def has_harmonics(samples, rate):
+        x = np.asarray(samples, dtype=float)
+        power = np.abs(np.fft.rfft((x-x.mean())*np.hanning(len(x))))**2
+        frequencies = np.fft.rfftfreq(len(x), 1/rate)
+        power[(frequencies < 80) | (frequencies > 4000)] = 0
+        if power.max() < 1e-12:
+            return False
+        peaks, _ = signal.find_peaks(power, height=power.max()*.001,
+                                     distance=max(1, round(60*len(x)/rate)))
+        # Rounded ooo can have just one strong harmonic and a faint second one.
+        # Still reject pure tones; requiring three strong peaks discarded vowels.
+        return len(peaks) >= 2
+
+    def update(self, samples, rate, now):
+        if self.last_update is not None and now-self.last_update > .12:
+            self.cancel()  # Missing audio is not proof of silence.
+        dt = .03 if self.last_update is None else max(0., min(.04, now-self.last_update))
+        self.last_update = now
+        self.detector.update(samples, rate, now)
+        rms, vector, clarity, shape = self.detector.observation
+        quiet = rms < .00018 or (rms < max(.00045, self.detector.noise*1.35) and clarity < .50)
+        if quiet:
+            if self.quiet_since is None:
+                self.quiet_since = now
+            if now-self.quiet_since >= self.QUIET:
+                self.armed = True
+                self.candidate = 0
+                self.reason = 'Ready: hold ooo or aaa'
+        else:
+            self.quiet_since = None
+
+        if not self.armed:
+            return 0
+        label, distances = self.detector.classify(vector) if vector is not None else (0, {})
+        clear = (label != 0 and clarity >= .60 and rms > max(.00022, self.detector.noise*1.4)
+                 and distances[label] < 2.0 and distances[-label]-distances[label] > .40
+                 and self.has_harmonics(samples, rate))
+        if not self.candidate:
+            if quiet:
+                self.onset = None
+                return 0
+            if not clear:
+                # A 60 ms analysis window straddles silence and vowel onset.
+                # Allow a short attack, but never skip a clearly different vowel.
+                if self.onset is None:
+                    self.onset = now
+                if now-self.onset <= .30:
+                    self.reason = 'Waiting for a clear vowel'
+                    return 0
+                self.reset()  # Do not start midway through a spoken phrase.
+                self.reason = 'Uncertain sound; pause and try again'
+                return 0
+            self.candidate = label
+            self.started = self.last_good = now
+            self.good_time = 0.
+            self.reference, self.shape = vector.copy(), shape.copy()
+        stable = (clear and label == self.candidate
+                  and np.max(np.abs(vector-self.reference)) < .50
+                  and float(np.dot(shape, self.shape)) > .75)
+        # A single LPC estimate can jump to the other vowel. Only a sustained
+        # change cancels immediately; ambiguous frames never count toward a click.
+        self.opposite_time = self.opposite_time + dt if clear and label == -self.candidate else 0.
+        if stable:
+            self.last_good = now
+            self.good_time += dt
+            self.reason = 'Confirming ooo' if label == 1 else 'Confirming aaa'
+        elif self.opposite_time >= .09 or now-self.last_good > self.MAX_GAP:
+            self.reset()
+            self.reason = 'Interrupted sound; pause and try again'
+            return 0
+        if (stable and now-self.started >= self.HOLD
+                and self.good_time >= max(self.HOLD*.75, (now-self.started)*.65)):
+            action = self.candidate
+            # Learn only after a completed gesture, within the existing bounds.
+            # The scrolling learner waited longer than a click takes to confirm.
+            baseline, _ = self.detector.classify(self.reference, self.detector.DEFAULTS)
+            if baseline == action:
+                center = .97*self.detector.centers[action] + .03*self.reference
+                self.detector.centers[action] = np.clip(
+                    center, self.detector.DEFAULTS[action]-.14,
+                    self.detector.DEFAULTS[action]+.14)
+            self.reset()  # A held sound cannot repeat, even after navigation.
+            self.reason = 'Click sent; pause before the next sound'
+            return action
+        return 0
 
 
 class Microphone:

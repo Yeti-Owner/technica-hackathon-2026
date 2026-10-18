@@ -9,5 +9,6 @@
   "rateCeilingPerMinute": 30,
   "requestTimeoutSeconds": 35,
   "maxBodyBytes": 15728640,
-  "whitelist": []
+  "whitelist": [],
+  "imageWhitelist": []
 }
