@@ -26,7 +26,7 @@
 
   <style>
     /* ===================================================================
-       TWEAKABLE VARIABLES (COLORS, SPACING, SIZING, MOTION)
+       TWEAKABLE VARIABLES (COLORS, SPACING, SIZING, MOTION, WAVE)
        =================================================================== */
     :root {
       /* Card Sizing */
@@ -54,18 +54,33 @@
       --frame-bump-scale: 1;
       --frame-shadow: drop-shadow(0 16px 36px rgba(8, 48, 72, 0.18)) drop-shadow(0 4px 12px rgba(8, 48, 72, 0.08));
       --frame-glow: drop-shadow(0 0 25px rgba(220, 240, 255, 0.55)) drop-shadow(0 0 50px rgba(98, 233, 255, 0.32));
+
+      /* Wave Transition Tokens */
+      --wave-height: clamp(180px, 20vw, 280px);
+      --wave-glow-opacity: 0.85;
+      --wave-fill: var(--night-base, #081c28);
     }
 
-    /* ── Seamless Full-Page Document Background ────────────────────── */
+    [data-theme="dark"] {
+      --wave-fill: var(--night-base, #040d13);
+      --wave-glow-opacity: 0.35;
+    }
+
+    /* ── Base Document Background (Sky Cyan in Light, Navy in Dark) ── */
     html, body {
       margin: 0;
       padding: 0;
       min-height: 100vh;
-      background: var(--night-deep, #041018);
+      background: var(--sky-top, #24cae8);
       color: var(--text-main);
       font-family: var(--font-body);
       overflow-x: hidden;
       transition: color 0.4s ease;
+    }
+
+    [data-theme="dark"] html,
+    [data-theme="dark"] body {
+      background: var(--night-deep, #041018);
     }
 
     /* ── Slim Scroll Progress Indicator ───────────────────────────── */
@@ -150,29 +165,41 @@
       flex-direction: column;
     }
 
-    /* ── 1. DAY SKY ZONE (Bright Sky Blue Gradient) ──────────────── */
+    /* ── 1. DAY SKY ZONE (Extends seamlessly down behind wave) ────── */
     .lab-day-zone {
       position: relative;
       width: 100%;
-      background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-base) 45%, var(--sky-bottom) 85%, #8de5f8 100%);
+      background: linear-gradient(180deg, 
+        var(--sky-top) 0%, 
+        var(--sky-base) 40%, 
+        var(--sky-bottom) 70%, 
+        #65d5ed 84%,
+        #92e4f6 93%,
+        #bdf0fa 100%
+      );
       background-repeat: no-repeat;
       color: var(--text-main);
       transition: background 0.4s ease;
       overflow: visible;
       padding-top: 10px;
+      padding-bottom: clamp(140px, 16vw, 220px); /* Day sky extends down behind wave */
     }
 
     [data-theme="dark"] .lab-day-zone {
-      background: linear-gradient(180deg, var(--sky-night-top) 0%, var(--sky-night-mid) 50%, var(--night-base) 100%);
+      background: linear-gradient(180deg, 
+        var(--sky-night-top) 0%, 
+        var(--sky-night-mid) 55%, 
+        var(--night-base) 100%
+      );
     }
 
-    /* Decorative Day Margin Clouds Layer */
+    /* Decorative Day Margin Clouds Layer - OVERFLOW VISIBLE to prevent slicing clouds! */
     .lab-ambient-clouds-day {
       position: absolute;
       inset: 0;
       pointer-events: none;
       z-index: 1;
-      overflow: hidden;
+      overflow: visible;
     }
 
     .lab-intro-section {
@@ -395,44 +422,51 @@
       font-weight: 500;
     }
 
-    /* ── 2. CLOUD LINE AT HALFWAY POINT (Wavy Night Transition) ───── */
+    /* ── 2. FULL-WIDTH CLOUD LINE (The Single Wavy Boundary) ───────── */
     .lab-cloud-line-transition {
       position: relative;
-      width: 100%;
-      height: clamp(220px, 24vw, 360px);
-      margin-top: 40px;
-      margin-bottom: -2px;
+      width: 104%;
+      margin-left: -2%; /* 2% overscan on both sides so no edge seams exist */
+      height: var(--wave-height);
+      margin-top: calc(-1 * var(--wave-height) + 2px); /* Pulls wave up OVER the extended day sky */
+      margin-bottom: -3px; /* Overlaps 3px into night section to prevent sub-pixel hairline gaps */
       overflow: visible;
-      color: var(--night-base, #081c28);
       z-index: 6;
       line-height: 0;
-    }
-
-    .cloud-line-glow {
-      position: absolute;
-      top: 10%;
-      left: 0;
-      width: 100%;
-      height: 90%;
-      background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(254, 215, 170, 0.22) 0%, rgba(192, 132, 252, 0.16) 45%, transparent 75%);
       pointer-events: none;
-      z-index: 0;
     }
 
     .wave-cloud-svg-wrap {
       position: absolute;
-      bottom: 0;
-      left: 0;
+      inset: 0;
       width: 100%;
       height: 100%;
       z-index: 2;
       pointer-events: none;
+      overflow: visible;
     }
 
     .wave-cloud-svg-wrap svg {
       display: block;
       width: 100%;
       height: 100%;
+      overflow: visible;
+    }
+
+    .wave-night-body {
+      fill: var(--wave-fill);
+    }
+
+    .wave-glow-stroke-wide,
+    .wave-glow-stroke-tight {
+      transition: opacity 0.4s ease;
+    }
+
+    [data-theme="dark"] .wave-glow-stroke-wide {
+      opacity: 0.2 !important;
+    }
+    [data-theme="dark"] .wave-glow-stroke-tight {
+      opacity: 0.35 !important;
     }
 
     .seam-clouds-behind {
@@ -483,11 +517,15 @@
       100% { transform: translate(-12px, 9px); }
     }
 
-    /* ── 3. NIGHT SKY ZONE (Deep Navy Sky) ────────────────────────── */
+    /* ── 3. NIGHT SKY ZONE (Seamless continuation of wave base) ───── */
     .lab-night-zone {
       position: relative;
       width: 100%;
-      background: linear-gradient(180deg, var(--night-base, #081c28) 0%, #061520 25%, var(--night-deep, #041018) 100%);
+      background: linear-gradient(180deg, 
+        var(--wave-fill) 0%, 
+        #061520 22%, 
+        var(--night-deep, #041018) 100%
+      );
       color: var(--night-text, #f0f8fc);
       overflow: visible;
       
@@ -543,13 +581,13 @@
       50%      { opacity: 1;    transform: scale(1.3); }
     }
 
-    /* Decorative Night Margin Clouds Layer */
+    /* Decorative Night Margin Clouds Layer - OVERFLOW VISIBLE */
     .lab-ambient-clouds-night {
       position: absolute;
       inset: 0;
       pointer-events: none;
       z-index: 1;
-      overflow: hidden;
+      overflow: visible;
     }
 
     /* ── Ambient Decorative Clouds (Placement & Parallax Drift) ───── */
@@ -953,7 +991,8 @@
       .sparkle,
       .star,
       .pastel-star,
-      .seam-cloud {
+      .seam-cloud,
+      .wave-night-body {
         animation: none !important;
         transform: none !important;
       }
@@ -1055,7 +1094,7 @@
 
     <!-- ── 1. DAY SKY ZONE (First Half of Page) ── -->
     <div class="lab-day-zone" id="lab-day-zone">
-      <!-- Decorative Day Clouds Container -->
+      <!-- Decorative Day Clouds Container (overflow: visible prevents clipping) -->
       <div class="lab-ambient-clouds-day" id="lab-ambient-clouds-day" aria-hidden="true"></div>
 
       <!-- Intro Section -->
@@ -1068,13 +1107,12 @@
         </div>
       </header>
 
-      <!-- Day Sections Container -->
+      <!-- Day Sections Container (Sections 1..3) -->
       <div class="lab-day-sections" id="lab-day-sections"></div>
     </div>
 
-    <!-- ── 2. FULL-WIDTH CLOUD LINE (Halfway Point Wave Transition) ── -->
+    <!-- ── 2. FULL-WIDTH CLOUD LINE (The Single Wavy Boundary with Zero Straight Lines) ── -->
     <div class="lab-cloud-line-transition" id="lab-cloud-line" aria-hidden="true">
-      <div class="cloud-line-glow"></div>
 
       <!-- Back seam clouds: day clouds peeking over the wave crest into the day sky -->
       <div class="seam-clouds-behind">
@@ -1084,10 +1122,25 @@
         <img src="assets/clouds/cloud-day-1.png" alt="" class="seam-cloud seam-behind-4" width="390" height="280" loading="lazy">
       </div>
 
-      <!-- The Scalloped Wave SVG Edge -->
+      <!-- The Scalloped Wave SVG Edge with integrated twilight glow adhering to the curve -->
       <div class="wave-cloud-svg-wrap">
         <svg viewBox="0 0 1440 180" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M0,180 L0,70
+          <defs>
+            <!-- Twilight Wave Curve Glow Filter -->
+            <filter id="waveGlowFilter" x="-10%" y="-50%" width="120%" height="200%">
+              <feGaussianBlur stdDeviation="14" result="blur" />
+            </filter>
+            <linearGradient id="twilightGlowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="rgba(254, 215, 170, 0.55)" />
+              <stop offset="25%" stop-color="rgba(244, 114, 182, 0.45)" />
+              <stop offset="60%" stop-color="rgba(192, 132, 252, 0.5)" />
+              <stop offset="85%" stop-color="rgba(147, 197, 253, 0.4)" />
+              <stop offset="100%" stop-color="rgba(254, 215, 170, 0.5)" />
+            </linearGradient>
+          </defs>
+
+          <!-- 1. Soft blurred twilight glow stroke adhering precisely to the wave curve -->
+          <path class="wave-glow-stroke-wide" d="M-20,70
             C60,95 120,115 180,105
             C240,95 280,60 360,50
             C440,40 500,70 560,80
@@ -1095,9 +1148,40 @@
             C760,60 820,40 900,45
             C980,50 1020,80 1080,90
             C1140,100 1200,85 1260,70
-            C1320,55 1380,60 1440,70
-            L1440,180 Z"
-            fill="currentColor"/>
+            C1320,55 1380,60 1460,70"
+            fill="none"
+            stroke="url(#twilightGlowGrad)"
+            stroke-width="50"
+            filter="url(#waveGlowFilter)"
+            opacity="0.5" />
+
+          <path class="wave-glow-stroke-tight" d="M-20,70
+            C60,95 120,115 180,105
+            C240,95 280,60 360,50
+            C440,40 500,70 560,80
+            C620,90 680,80 720,70
+            C760,60 820,40 900,45
+            C980,50 1020,80 1080,90
+            C1140,100 1200,85 1260,70
+            C1320,55 1380,60 1460,70"
+            fill="none"
+            stroke="url(#twilightGlowGrad)"
+            stroke-width="24"
+            filter="url(#waveGlowFilter)"
+            opacity="0.8" />
+
+          <!-- 2. Solid Navy Wave Shape (The single true boundary between day and night) -->
+          <path class="wave-night-body" d="M-20,182 L-20,70
+            C60,95 120,115 180,105
+            C240,95 280,60 360,50
+            C440,40 500,70 560,80
+            C620,90 680,80 720,70
+            C760,60 820,40 900,45
+            C980,50 1020,80 1080,90
+            C1140,100 1200,85 1260,70
+            C1320,55 1380,60 1460,70
+            L1460,182 Z"
+            fill="var(--night-base, #081c28)" />
         </svg>
       </div>
 
@@ -1116,10 +1200,10 @@
       <!-- Twinkling stars in night sky -->
       <div class="lab-night-stars" id="lab-night-stars" aria-hidden="true"></div>
 
-      <!-- Decorative Night Margin Clouds Container -->
+      <!-- Decorative Night Margin Clouds Container (overflow: visible) -->
       <div class="lab-ambient-clouds-night" id="lab-ambient-clouds-night" aria-hidden="true"></div>
 
-      <!-- Night Sections Container -->
+      <!-- Night Sections Container (Sections 4..7) -->
       <div class="lab-night-sections" id="lab-night-sections"></div>
 
       <!-- ── 4. MOON & NIGHT CLOUDS FOOTER ── -->
@@ -1211,7 +1295,7 @@ document.addEventListener('DOMContentLoaded', function () {
     { file: 'assets/clouds/cloud-day-1.png', side: 'left',  topPct: 66, widthVw: 29, offsetPx: -90, layer: 3, opacity: 0.85, driftDur: 30, driftDelay: -4,  speed: 0.30 },
     { file: 'assets/clouds/cloud-day-2.png', side: 'right', topPct: 76, widthVw: 24, offsetPx: -50, layer: 2, opacity: 0.72, driftDur: 34, driftDelay: -18, speed: 0.22 },
     { file: 'assets/clouds/cloud-day-3.png', side: 'left',  topPct: 86, widthVw: 21, offsetPx: -35, layer: 1, opacity: 0.55, driftDur: 25, driftDelay: -7,  speed: 0.16 },
-    { file: 'assets/clouds/cloud-day-1.png', side: 'right', topPct: 92, widthVw: 26, offsetPx: -70, layer: 2, opacity: 0.75, driftDur: 29, driftDelay: -10, speed: 0.26 }
+    { file: 'assets/clouds/cloud-day-1.png', side: 'right', topPct: 91, widthVw: 26, offsetPx: -65, layer: 2, opacity: 0.75, driftDur: 29, driftDelay: -10, speed: 0.26 }
   ];
 
   const NIGHT_CLOUDS_CONFIG = [
@@ -1300,7 +1384,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // ===================================================================
-  // 4. SCROLL PROGRESS & TRANSITION CONTROLLER
+  // 4. SCROLL PROGRESS & TRANSITION CONTROLLER (LINKED TO WAVE MIDPOINT)
   // ===================================================================
   const progressFill = document.getElementById('scroll-progress-fill');
   const cloudLine = document.getElementById('lab-cloud-line');
@@ -1316,16 +1400,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (cloudLine && starsContainer) {
       const rect = cloudLine.getBoundingClientRect();
+      const waveMid = rect.top + rect.height * 0.5;
       const winH = window.innerHeight;
-      if (rect.top < winH) {
-        const progress = Math.min(1, Math.max(0, (winH - rect.top) / (winH * 0.8)));
+
+      // Stars fade in gracefully as the wave curves pass through the viewport
+      if (waveMid < winH) {
+        const progress = Math.min(1, Math.max(0, (winH - waveMid) / (winH * 0.6)));
         starsContainer.style.opacity = String(progress);
       } else {
         starsContainer.style.opacity = '0';
       }
 
+      // Sticky navbar switches to night aesthetic when the wave reaches top header area
       if (headerEl) {
-        if (rect.top <= 70) {
+        if (rect.top + rect.height * 0.3 <= 50) {
           headerEl.classList.add('is-night-nav');
         } else {
           headerEl.classList.remove('is-night-nav');
