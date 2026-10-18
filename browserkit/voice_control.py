@@ -1,4 +1,4 @@
-"""Bridge the single local microphone to the focused browser document."""
+"""Local one-shot vowel clicks on the element selected by keyboard/head focus."""
 import asyncio
 import queue
 import time
@@ -6,44 +6,41 @@ import time
 import numpy as np
 from playwright.async_api import Error
 
-from .voice import Microphone, VowelDetector
+from .voice import ClickDetector, Microphone, VowelDetector
 from .controller import ROOT
 
 
 class VoiceControl:
     def __init__(self, browser):
         self.browser = browser
-        self.detector = VowelDetector(ROOT / "artifacts/voice-profile.json")
+        self.detector = VowelDetector(ROOT / 'artifacts/voice-profile.json')
+        self.gesture = ClickDetector(self.detector)
         self.mic = None
         self.enabled = False
-        self.message = "Mic off"
-        self.task = None
-        self.audio_task = None
+        self.message = 'Mic off'
+        self.task = self.audio_task = None
         self.device = None
         self.device_label = ''
-        self.target = None
+        self.target = self.candidate_target = self.pending = None
         self.window = np.zeros(0, dtype=np.float32)
         self.last_audio = 0.
         self.sessions = {}
 
     def start(self):
-        # To be changed from scrolling to another function
-        return
+        self.pause()
+        self.device_label = ''
         try:
-            self.pause()
-            self.device_label = ''
             self.mic = Microphone()
             self.mic.start(self.device)
             self.detector.reset_environment()
             self.device_label = f'{self.mic.name} (input {self.mic.device})'
             self.enabled = True
-            self.message = "Listening · ooo ↓ / aaa ↑"
-            print(f"Microphone checked: {self.device_label}; audio arriving at {self.mic.rate} Hz.")
-            print("Microphone on: hold ooo to scroll down, aaa to scroll up. Pause between directions. 'mic off' pauses.")
+            self.message = 'Listening: ooo left-click / aaa right-click'
+            print(f'Microphone checked: {self.device_label}.')
+            print('Focus an item with your head or Tab. Pause, then hold ooo or aaa steadily for about 0.6 seconds. One click per sound; pause between clicks.')
         except Exception as error:
-            self.enabled = False
-            self.message = "Mic unavailable · see terminal"
-            print(f"Microphone unavailable: {error}. Check your default input and OS microphone access, then type 'mic on'.")
+            self.message = 'Mic unavailable'
+            print(f'Microphone unavailable: {error}. Check your input, then use mic on.')
         if self.task is None or self.task.done():
             self.task = asyncio.create_task(self.run())
         elif self.audio_task is not None and self.audio_task.done():
@@ -54,80 +51,79 @@ class VoiceControl:
         self.start()
 
     def status(self):
-        return f'{self.message} · {self.device_label or "No microphone open"} · {self.detector.reason}'
+        return f'{self.message} · {self.device_label or "No microphone open"} · {self.gesture.reason}'
+
+    def _cancel(self):
+        self.gesture.cancel()
+        self.candidate_target = self.pending = None
 
     def pause(self):
         self.enabled = False
         if self.mic:
             self.mic.close()
-        self.detector.reset()
+        self._cancel()
         self.window = np.zeros(0, dtype=np.float32)
-        self.message = "Mic off · type mic on to resume"
+        self.message = 'Mic off · type mic on to resume'
 
     def reset_learning(self):
         self.detector = VowelDetector()
-        self.detector.profile = ROOT / "artifacts/voice-profile.json"
+        self.detector.profile = ROOT / 'artifacts/voice-profile.json'
+        self.gesture = ClickDetector(self.detector)
+        self._cancel()
         self.detector.save()
-        print("Voice learning reset to defaults.")
+        print('Voice learning reset to defaults.')
 
-    async def _page_tick(self, page, speed, message):
-        try:
+    async def _focused_target(self):
+        pages = list(self.browser.context.pages)
+        for closed in list(self.sessions):
+            if closed not in pages:
+                del self.sessions[closed]
+        for page in pages:
             if page not in self.sessions:
                 session = await self.browser.context.new_cdp_session(page)
-                # Playwright otherwise makes every tab report focused/visible.
                 await session.send('Emulation.setFocusEmulationEnabled', {'enabled': False})
                 self.sessions[page] = session
-            return await asyncio.wait_for(page.evaluate("""args => {
-                if (!window.__voiceTick) return false;
-                return window.__voiceTick(args);
-            }""", {"speed": speed, "message": message}), timeout=.2)
-        except asyncio.TimeoutError:
-            return None  # Unknown focus is not evidence that the user switched tabs.
-        except Error:
-            return False if page.is_closed() else None
+            if not await page.evaluate('document.visibilityState === "visible" && document.hasFocus()'):
+                continue
+            self.browser.page = page  # Head navigation follows the actual active tab.
+            for frame in page.frames:
+                state = await frame.evaluate('''() => {
+                    const s = window.__voiceFocus?.();
+                    return s?.active && s.element ? {key: s.key} : null;
+                }''')
+                if state:
+                    return page, frame, state['key']
+        return None
 
     async def run(self):
         last_save = time.monotonic()
         self.audio_task = asyncio.create_task(self._audio_loop())
         try:
             while self.browser.browser.is_connected():
-                now = time.monotonic()
-                strength = self.detector.strength(now)
-                direction = self.detector.direction if self.enabled else 0
-                message = self.message
-                if direction:
-                    message = "Scrolling down · ooo ↓" if direction == 1 else "Scrolling up · aaa ↑"
-                if self.device_label:
-                    message += ' · ' + self.device_label
-                pages = list(self.browser.context.pages)
-                for closed in list(self.sessions):
-                    if closed not in pages:
-                        del self.sessions[closed]
-                # Each document checks focus again before scrolling. No page bindings
-                # can invoke Python or request access to the microphone.
-                results = await asyncio.gather(*(self._page_tick(
-                    page, direction*240*strength if page == self.target else 0, message)
-                    for page in pages))
-                focused = next((p for p, active in zip(pages, results) if active), None)
-                if (focused is None and self.target in pages
-                        and results[pages.index(self.target)] is None):
-                    # Preserve the gesture through a transient evaluation failure.
-                    # The document still rechecks real focus before every scroll.
-                    focused = self.target
-                if focused != self.target:
-                    self.detector.reset()
-                    self.target = focused
-                if focused is None:
-                    self.detector.reset()
-                else:
-                    self.browser.page = focused
-                if now-last_save > 30:
+                try:
+                    target = await asyncio.wait_for(self._focused_target(), timeout=.25)
+                except (Error, asyncio.TimeoutError):
+                    target = None
+                if target != self.target or target is None:
+                    self._cancel()
+                self.target = target
+                if self.pending:
+                    stamp, action, intended = self.pending
+                    self.pending = None  # Consume before dispatch: never retry a click.
+                    if self.enabled and target == intended and time.monotonic()-stamp < .2:
+                        try:
+                            clicked = await self.browser.click_focused(target, 'left' if action == 1 else 'right')
+                            if clicked:
+                                print('Voice left click' if action == 1 else 'Voice right click')
+                        except Error:
+                            pass  # Navigation, lost focus, disabled/covered target: cancel.
+                if time.monotonic()-last_save > 30:
                     self._save()
-                    last_save = now
-                await asyncio.sleep(.025)
+                    last_save = time.monotonic()
+                await asyncio.sleep(.04)
         except Exception as error:
             self.pause()
-            print(f"Voice scrolling stopped: {error}. Type 'mic on' to retry.")
+            print(f'Voice clicks stopped: {error}. Type mic on to retry.')
         finally:
             self.audio_task.cancel()
             try:
@@ -145,27 +141,37 @@ class VoiceControl:
                             stamp, block, overflow = self.mic.blocks.get_nowait()
                         except queue.Empty:
                             break
-                        if now-stamp > .15:
-                            self.window = np.zeros(0, dtype=np.float32)
-                            continue
-                        if overflow or stamp-self.last_audio > .09:
+                        if now-stamp > .15 or overflow or stamp-self.last_audio > .12:
+                            self._cancel()
                             self.window = np.zeros(0, dtype=np.float32)
                         self.last_audio = stamp
+                        if now-stamp > .15 or overflow:
+                            continue
                         self.window = np.concatenate((self.window, block))[-int(self.mic.rate*.06):]
-                        if len(self.window) >= int(self.mic.rate*.06):
-                            self.detector.update(self.window, self.mic.rate, stamp)
-                    if now-self.last_audio > .09:
-                        self.detector.expire(now)
+                        if len(self.window) < int(self.mic.rate*.06):
+                            continue
+                        was_candidate = self.gesture.candidate
+                        action = self.gesture.update(self.window, self.mic.rate, stamp)
+                        if action:
+                            print('Detected "ooo"' if action == 1 else 'Detected "aaa"', flush=True)
+                        if self.gesture.candidate and not was_candidate:
+                            self.candidate_target = self.target
+                        if action and self.target and self.candidate_target == self.target:
+                            self.pending = (stamp, action, self.candidate_target)
+                        if not self.target:
+                            self._cancel()
+                    if now-self.last_audio > .12:
+                        self._cancel()
                 await asyncio.sleep(.01)
         except Exception as error:
             self.pause()
-            print(f'Audio processing stopped: {error}. Restart the browser to retry.')
+            print(f'Audio processing stopped: {error}. Type mic on to retry.')
 
     def _save(self):
         try:
             self.detector.save()
         except OSError as error:
-            print(f"Could not save voice preferences: {error}")
+            print(f'Could not save voice preferences: {error}')
 
     async def close(self):
         self.pause()

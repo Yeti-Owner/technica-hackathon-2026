@@ -1,12 +1,12 @@
 # Browser studio
 
-Python + Playwright Chromium browser studio: terminal commands, camera head control (on by default), and in-browser AI image detection. The local voice/humming stack is present but currently disabled (reserved for future repurpose). Camera frames are processed locally; there are no cloud audio APIs.
+Python + Playwright Chromium browser studio: terminal commands, camera head control, local vowel clicks, and in-browser AI image detection. Camera and microphone processing stay local; there are no cloud audio APIs.
 
 ## Run
 
-Install Python 3.10+, then run `python run.py`. First launch bootstraps the local `.venv`, installs `requirements.txt` (including mediapipe and opencv-python), installs Playwright Chromium, and downloads a ~4 MB face model to `~/.cache/head-control`. Use `python run.py --setup` to re-run setup. Linux may also need Playwright system dependencies and `libportaudio2`.
+Install Python 3.10+, then run `python run.py`. First launch bootstraps the local `.venv`, installs `requirements.txt` and Playwright Chromium. Camera mode downloads a ~4 MB face model to `~/.cache/head-control` on first use. Use `python run.py --setup` to re-run setup. Linux may also need Playwright system dependencies and `libportaudio2`.
 
-`python run.py` launches head mode by default: the browser plus camera head control, and the AI image check when it is configured. To run without head control, use `python -m browserkit`.
+`python run.py` launches without camera/head control. Use `python run.py --head` to enable it. Both modes include voice clicks and the AI image check when configured; use Tab/Shift+Tab to select elements without head control.
 
 ## Setup (.env)
 
@@ -35,20 +35,23 @@ Camera frames are processed locally by MediaPipe; nothing is uploaded.
 
 Data flow: image bytes (or URLs) are POSTed to the configured server with the `X-API-Key` header.
 
-## Voice (currently disabled)
+## Voice clicks
 
-The local voice/humming stack is present but disabled by design: `VoiceControl.start()` is a no-op and `ui/voice.js` is not injected, so the `mic *` commands currently do nothing. It is reserved for future repurpose.
+Head left/right (or Tab/Shift+Tab) selects an element. After a brief quiet pause, hold **ooo** steadily for about **0.6 seconds** to left-click it, or **aaa** to right-click it. Each utterance produces at most one click; pause for at least 0.3 seconds before another. Detection gaps up to 0.18 seconds preserve progress but do not count toward confirmation. Focus changes, missing audio, and sustained changing sounds cancel confirmation. Right click opens the element's context menu; it does not choose a menu action.
+
+`mic on/off/status`, `mic list`, `mic use NUMBER`, `mic default`, and `mic reset` control input and preferences. Startup checks the default microphone. No voice overlay or voice scrolling is enabled. Detection rejects brief syllables and requires stable, clear vowels above background noise, but prolonged vowels in speech or speaker playback can still trigger it; this is not a speech-intent classifier.
 
 ## Code map
 
-- `run.py`: local environment setup and launcher (head mode by default).
+- `run.py`: local environment setup and launcher (camera off by default; `--head` enables it).
 - `browserkit/__main__.py`: application lifecycle and terminal commands.
 - `browserkit/controller.py`: browser control and scripts injected on navigation/new tabs.
 - `browserkit/head.py`: head-mode launcher; attaches head control and the status HUD.
 - `browserkit/head_control.py`: camera capture and head-tilt detection (MediaPipe).
 - `browserkit/ai_check.py`: passive AI image checking (sniff responses, ask the server, mark verdicts).
 - `ai-check.json`: AI check configuration.
-- `browserkit/voice.py`, `browserkit/voice_control.py`, `ui/voice.js`: voice/humming stack (currently disabled).
+- `browserkit/voice.py`: reusable vowel processing and stricter one-shot `ClickDetector`.
+- `browserkit/voice_control.py`, `ui/voice_click.js`: audio lifecycle, focus identity, and left/right click dispatch. Legacy `ui/voice.js` scrolling remains dormant.
 - `ui/ai_scan.js`, `ui/ai_mark.css`: in-page AI scan and marking.
 - `ui/image-lab.html`: debug lab; its card list is generated from `test_images.txt` at browser start.
 - `ui/home.html`, `ui/home.js`, `ui/theme.css`: redesigned home (website 2.0) — sun/moon/clouds theme, cloud nav, founders section, GSAP/Lenis animations from CDNs.
@@ -60,9 +63,9 @@ The local voice/humming stack is present but disabled by design: `VoiceControl.s
 ## Collaboration notes
 
 - One microphone serves all tabs; audio stays in Python. Do not expose microphone access or Python command bindings to websites.
-- Preserve hold continuity: spectral matching, 300 ms coast + 250 ms fade, and no reactivation after short gaps. Direction stays locked during a hold.
+- Clicks must use fresh confirmation, never the legacy scrolling hold/fade. Preserve one click per utterance, quiet rearming, and cancellation when focus changes; never retry an uncertain click.
 - Learning must preserve confident default matches. Hold references refresh only from confirmed vowels; room-noise samples expire and reset when the microphone starts.
-- Preserve focus checks and the page's 250 ms watchdog. Playwright focus emulation is disabled so background tabs do not scroll.
+- Preserve real focus checks and target identity. Playwright focus emulation is disabled so voice clicks target the active page; serialize clicks with head/keyboard focus movement.
 - Commit source and `requirements.txt`; keep environments, captures, secrets, and `artifacts/voice-profile.json` local.
 - Recognition is experimental. Test real voices after detector changes; synthetic tests cannot establish accuracy. Browser-internal pages, PDFs, and cross-origin panels have scrolling limitations.
 - AI image check: image bytes/URLs are sent to the configured server with the API key; keep `.env` local and never commit it.
@@ -74,10 +77,11 @@ Run using the project's environment (Windows shown; use `.venv/bin/python` on ma
 
 ```sh
 .venv/Scripts/python.exe -m unittest test_voice -v
+.venv/Scripts/python.exe -m unittest test_voice_click -v
 .venv/Scripts/python.exe -m unittest test_ai_check -v
 .venv/Scripts/python.exe smoke_test.py
 .venv/Scripts/python.exe smoke_ai.py
 .venv/Scripts/python.exe smoke_voice.py
 ```
 
-Smoke tests open temporary browsers. Voice checks use generated audio and simulated tab focus, not your microphone or native OS focus. `smoke_voice.py` is a dormancy guard: it passes while the voice stack is disabled.
+Smoke tests open temporary browsers. `smoke_voice.py` uses generated audio and simulated window focus to verify trusted left/right clicks and cancellation; it does not measure real-speech accuracy or native OS focus.

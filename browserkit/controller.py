@@ -1,4 +1,5 @@
 """Async Python control of a visible, disposable Chromium session."""
+import asyncio
 import json
 from pathlib import Path
 
@@ -24,6 +25,7 @@ def lab_urls(text):
 
 class BrowserController:
     async def __aenter__(self):
+        self.focus_lock = asyncio.Lock()
         self.playwright = await async_playwright().start()
         try:
             self.browser = await self.playwright.chromium.launch(headless=False)
@@ -33,8 +35,8 @@ class BrowserController:
             css = (ROOT / "ui/inject.css").read_text(encoding="utf-8")
             css += "\n" + (ROOT / "ui/ai_mark.css").read_text(encoding="utf-8")
             script = (ROOT / "ui/inject.js").read_text(encoding="utf-8")
-            # To be changed from scrolling to another function
-            # script += "\n" + (ROOT / "ui/voice.js").read_text(encoding="utf-8")
+            # The old scrolling script stays dormant; clicks only track focus.
+            script += "\n" + (ROOT / "ui/voice_click.js").read_text(encoding="utf-8")
             script += "\n" + (ROOT / "ui/ai_scan.js").read_text(encoding="utf-8")
             await self.context.add_init_script(script="window.__starterCSS = " + json.dumps(css) + ";\n" + script)
             self.context.on("page", self._select_page)
@@ -71,10 +73,37 @@ class BrowserController:
         await self.page.mouse.wheel(0, pixels)
 
     async def next_focus(self):
-        await self.page.keyboard.press("Tab")
+        async with self.focus_lock:
+            await self.page.keyboard.press("Tab")
 
     async def previous_focus(self):
-        await self.page.keyboard.press("Shift+Tab")
+        async with self.focus_lock:
+            await self.page.keyboard.press("Shift+Tab")
+
+    async def click_focused(self, target, button):
+        """Use a real mouse click, but only on the still-selected element."""
+        page, frame, key = target
+        async with self.focus_lock:
+            if page.is_closed() or not await page.evaluate('document.hasFocus()'):
+                return False
+            handle = await frame.evaluate_handle("""key => {
+                const s = window.__voiceFocus?.();
+                return s?.active && s.key === key ? s.element : null;
+            }""", key)
+            try:
+                element = handle.as_element()
+                if element is None:
+                    return False
+                await element.click(button=button, trial=True, timeout=400)
+                if not await element.evaluate("""(el, key) => {
+                    const s = window.__voiceFocus?.();
+                    return el.isConnected && s?.active && s.key === key && s.element === el;
+                }""", key):
+                    return False
+                await element.click(button=button, timeout=250)
+                return True
+            finally:
+                await handle.dispose()
 
     async def activate(self):
         await self.page.keyboard.press("Enter")
