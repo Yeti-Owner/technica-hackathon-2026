@@ -17,9 +17,20 @@ The AI image check needs a server and key. Copy `.env.example` to `.env` and fil
 
 Real environment variables override `.env`. Restart the app to load values. Without this, the AI check idles with a message and everything else runs normally.
 
+## Browser control shortcuts (Windows)
+
+While the Chromium window launched by this app is focused:
+
+- **Ctrl+Alt+V** toggles detection of `ooo` / `aaa` voice clicks.
+- **Ctrl+Alt+H** toggles all camera actions: forward/backward focus, scrolling, and the head-roll gesture.
+
+The shortcuts work in every tab, frames, and the address bar. Each physical press toggles once; holding the keys does not repeat. Only the terminal prints the new state—no new page badges, toasts, or overlays. Other applications and separate browser instances are unaffected.
+
+Pausing cancels unfinished and queued actions. Returning to voice control requires a fresh quiet pause and vowel hold; returning to head control requires centering your head first. These switches pause control processing without closing the microphone or camera, and preserve the separate head-scroll setting. They do not start a missing camera: launch with `--head` to enable head tracking. On other operating systems, the existing terminal microphone commands and head-scroll controls remain available.
+
 ## Head control
 
-- Turn head right / left → next / previous focus (Tab / Shift+Tab, always on).
+- Turn head right / left → next / previous focus (Tab / Shift+Tab, while head controls are on).
 - Tilt head up / down → scroll, while head scroll is enabled.
 - Hold head rolled (ear to shoulder) ~1.2 s, or press Ctrl+Shift+H, to toggle head scrolling.
 - A status pill at the top of every page shows the current direction and whether scrolling is on.
@@ -43,6 +54,8 @@ Head left/right (or Tab/Shift+Tab) selects an element. After a brief quiet pause
 `mic on/off/status`, `mic list`, `mic use NUMBER`, `mic default`, and `mic reset` control input and preferences. Startup checks the default microphone. No voice overlay or voice scrolling is enabled. Detection rejects brief syllables and requires stable, clear vowels above background noise, but prolonged vowels in speech or speaker playback can still trigger it; this is not a speech-intent classifier.
 
 ## Code map
+
+- `browserkit/shortcuts.py`: native Windows shortcuts scoped to this app's Chromium process; no page-accessible command bindings.
 
 - `run.py`: local environment setup and launcher (camera off by default; `--head` enables it).
 - `browserkit/__main__.py`: application lifecycle and terminal commands.
@@ -82,9 +95,13 @@ Run using the project's environment (Windows shown; use `.venv/bin/python` on ma
 .venv/Scripts/python.exe -m unittest test_voice_click -v
 .venv/Scripts/python.exe -m unittest test_voice_dispatch -v
 .venv/Scripts/python.exe -m unittest test_ai_check -v
+.venv/Scripts/python.exe -m unittest test_control_shortcuts -v
 .venv/Scripts/python.exe smoke_test.py
 .venv/Scripts/python.exe smoke_ai.py
 .venv/Scripts/python.exe smoke_voice.py
+.venv/Scripts/python.exe smoke_shortcuts.py
 ```
 
 Smoke tests open temporary browsers. `smoke_voice.py` uses generated audio and simulated window focus to verify trusted left/right clicks and cancellation; it does not measure real-speech accuracy or native OS focus.
+
+`smoke_shortcuts.py` is Windows-only and opens temporary Chromium windows to send native shortcut keypresses; it does not open the microphone or camera.

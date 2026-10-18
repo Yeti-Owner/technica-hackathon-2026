@@ -6,7 +6,7 @@
     Tilt head DOWN   -> controller.scroll(+px)       (only while head scroll is enabled)
     Hold head rolled (ear to shoulder) ~1.2s -> toggles head scroll on/off
 
-Left/right Tab navigation is always on. Only up/down scrolling is toggled, so it can be handed
+While head controls are enabled, left/right Tab navigation is on. Up/down scrolling can be handed
 over to another input (like humming) with head.set_scroll_enabled(False).
 
 Setup (once):  python -m pip install mediapipe opencv-python
@@ -69,6 +69,11 @@ class HeadControl:
         self._stop = threading.Event()
         self._thread = None
         self._scroll_on = True
+        self._controls_on = True
+        self._control_lock = threading.RLock()
+        self._control_generation = 0
+        self._actions = set()
+        self._wait_for_center = False
         self._toggle_count = 0
         self._recalibrate = False
         self._last_ts = 0
@@ -94,6 +99,26 @@ class HeadControl:
         self._preview_at = 0.0
 
     # ---------- public API ----------
+    @property
+    def controls_enabled(self):
+        return self._controls_on
+
+    def set_controls_enabled(self, enabled):
+        with self._control_lock:
+            self._controls_on = bool(enabled)
+            self._control_generation += 1
+            for future in list(self._actions):
+                future.cancel()
+            self.current = self._candidate = 'CENTER'
+            self._candidate_frames = 0
+            self._last_horiz = None
+            self._tab_next = self._roll_start = 0.
+            self._roll_latched = False
+            self._latest = None
+            self._wait_for_center = self._controls_on
+        # Do not change the scroll preference, HUD toggle counter, or camera preview.
+        print(f'[controls] Head controls {"ON — center your head to resume" if enabled else "OFF"}', flush=True)
+
     @property
     def scroll_enabled(self) -> bool:
         return self._scroll_on
@@ -208,6 +233,12 @@ class HeadControl:
         return yaw_dir if self._yaw_n >= self._pitch_n else pitch_dir
 
     def _on_pose(self, yaw, pitch, roll, now):
+        with self._control_lock:
+            if not self._controls_on:
+                return
+            self._update_pose(yaw, pitch, roll, now)
+
+    def _update_pose(self, yaw, pitch, roll, now):
         c = self.cfg
         self._face_lost_at = None
         raw = (yaw, pitch, roll)
@@ -231,12 +262,22 @@ class HeadControl:
                 n = len(self._center_buf)
                 self._neutral = tuple(sum(p[i] for p in self._center_buf) / n for i in range(3))
                 self._center_buf = []
+                self._wait_for_center = False
                 self._say("Centered. Head control is on.")
             return
 
         dyaw = self._latest[0] - self._neutral[0]
         dpitch = self._latest[1] - self._neutral[1]
         droll = self._latest[2] - self._neutral[2]
+
+        if self._wait_for_center:
+            centered = (abs(dyaw) < c.yaw_threshold * c.release and
+                        abs(dpitch) < c.pitch_threshold * c.release and abs(droll) < c.roll_guard)
+            self._candidate_frames = self._candidate_frames + 1 if centered else 0
+            if self._candidate_frames >= c.hold_frames:
+                self._wait_for_center = False
+                self._candidate_frames = 0
+            return
 
         if c.enable_roll_toggle:
             if abs(droll) >= c.roll_threshold:
@@ -261,6 +302,8 @@ class HeadControl:
         self._report()
 
     def _on_no_face(self, now):
+        if not self._controls_on:
+            return
         self.current = self._candidate = "CENTER"
         if self._face_lost_at is None:
             self._face_lost_at = now
@@ -291,24 +334,59 @@ class HeadControl:
 
     @staticmethod
     def _log_failure(future):
+        if future.cancelled():
+            return
         try:
             future.result()
         except Exception as error:    # e.g. page closed or navigating
             print(f"[head] action skipped: {error}")
 
     def _fire(self, coro):
-        future = self._submit(coro)
-        if future:
-            future.add_done_callback(self._log_failure)
-        return future
+        with self._control_lock:
+            if not self._controls_on or self._wait_for_center:
+                coro.close()
+                return None
+            generation = self._control_generation
+            started = [False]
+
+            async def guarded():
+                try:
+                    if self._controls_on and generation == self._control_generation:
+                        started[0] = True
+                        await coro
+                finally:
+                    if not started[0]:
+                        coro.close()
+
+            future = self._submit(guarded())
+            if future:
+                self._actions.add(future)
+
+                def finished(done):
+                    if not started[0]:
+                        coro.close()
+                    with self._control_lock:
+                        self._actions.discard(done)
+                    self._log_failure(done)
+
+                future.add_done_callback(finished)
+            else:
+                coro.close()
+            return future
 
     def _tick(self, now):
+        with self._control_lock:
+            if not self._controls_on or self._wait_for_center:
+                return
+            self._dispatch_tick(now)
+
+    def _dispatch_tick(self, now):
         c = self.cfg
         if now - self._last_tick < c.tick_ms / 1000:
             return
         self._last_tick = now
 
-        # Left / right -> Tab navigation (always on); repeats while the turn is held
+        # Left / right -> Tab navigation; repeats while controls are enabled and the turn is held
         horiz = self.current if self.current in ("LEFT", "RIGHT") else None
         if horiz:
             backwards = horiz == "LEFT"

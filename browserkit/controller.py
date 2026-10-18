@@ -83,7 +83,15 @@ class BrowserController:
     async def click_focused(self, target, button):
         """Use a real mouse click, but only on the still-selected element."""
         page, frame, key = target
+        generation = getattr(self, 'voice_control_generation', 0)
+
+        def allowed():
+            return (getattr(self, 'voice_controls_enabled', True) and
+                    generation == getattr(self, 'voice_control_generation', 0))
+
         async with self.focus_lock:
+            if not allowed():
+                return False
             if page.is_closed() or not await page.evaluate('document.hasFocus()'):
                 return False
             handle = await frame.evaluate_handle("""key => {
@@ -99,6 +107,8 @@ class BrowserController:
                     const s = window.__voiceFocus?.();
                     return el.isConnected && s?.active && s.key === key && s.element === el;
                 }""", key):
+                    return False
+                if not allowed():
                     return False
                 await element.click(button=button, timeout=500)
                 return True

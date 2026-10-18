@@ -4,7 +4,7 @@
 
 It runs the project's normal command loop exactly as `python -m browserkit` does, and turns on head
 tilt control as soon as the browser opens, with a small status bar at the top of every page:
-    turn head right / left  -> Tab / Shift+Tab (always on)
+    turn head right / left  -> Tab / Shift+Tab (while head controls are enabled)
     tilt head up / down     -> scroll (switch off with browser._head.set_scroll_enabled(False))
     hold ear to shoulder    -> toggles up/down head scrolling      (or press Ctrl+Shift+H)
 

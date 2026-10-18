@@ -8,6 +8,7 @@ from .controller import BrowserController
 from .voice_control import VoiceControl
 from .voice import Microphone
 from .ai_check import AICheck
+from .shortcuts import BrowserShortcuts
 
 HELP = """Commands:
   home | go URL | back | forward | reload
@@ -18,6 +19,7 @@ HELP = """Commands:
   mic list | mic use NUMBER | mic default
   ai on | ai off | ai status | ai concurrency 1-3
 Image and tab indices start at 0. Output files go to artifacts/.
+Windows shortcuts (while this browser is focused): Ctrl+Alt+V voice, Ctrl+Alt+H head controls.
 AI image check marks likely AI images with a red banner; tune concurrency after testing."""
 
 
@@ -39,9 +41,12 @@ async def main():
         voice.start()
         ai = AICheck(b)
         ai.start()
+        shortcuts = BrowserShortcuts(b, voice)
         try:
+            await shortcuts.start()
             await command_loop(b, commands, read_commands, voice, ai)
         finally:
+            await shortcuts.close()
             await ai.close()
             await voice.close()
 

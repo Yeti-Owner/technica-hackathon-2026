@@ -17,6 +17,9 @@ class VoiceControl:
         self.gesture = ClickDetector(self.detector)
         self.mic = None
         self.enabled = False
+        self.controls_enabled = True
+        self._controls_generation = 0
+        self._dispatch_task = None
         self.message = 'Mic off'
         self.task = self.audio_task = None
         self.device = None
@@ -51,7 +54,27 @@ class VoiceControl:
         self.start()
 
     def status(self):
-        return f'{self.message} · {self.device_label or "No microphone open"} · {self.gesture.reason}'
+        gate = 'Voice controls on' if self.controls_enabled else 'Voice controls paused'
+        return f'{gate} · {self.message} · {self.device_label or "No microphone open"} · {self.gesture.reason}'
+
+    def set_controls_enabled(self, enabled):
+        self.controls_enabled = bool(enabled)
+        self._controls_generation += 1
+        if self._dispatch_task:
+            self._dispatch_task.cancel()
+        # Also guard a click that is already waiting for Playwright's focus lock.
+        self.browser.voice_controls_enabled = self.controls_enabled
+        self.browser.voice_control_generation = getattr(self.browser, 'voice_control_generation', 0) + 1
+        self._cancel()
+        self.window = np.zeros(0, dtype=np.float32)
+        self.last_audio = 0.
+        if self.mic:
+            while True:
+                try:
+                    self.mic.blocks.get_nowait()
+                except queue.Empty:
+                    break
+        print(f'[controls] Voice controls {"ON" if self.controls_enabled else "OFF"}', flush=True)
 
     def _cancel(self, reason='voice controls paused or reset', preserve_pending=False):
         self.gesture.cancel()
@@ -66,20 +89,30 @@ class VoiceControl:
             return
         stamp, action, intended = self.pending
         self.pending = None  # Consume before dispatch: never retry a click.
-        if not self.enabled or target != intended:
+        if not self.enabled or not self.controls_enabled or target != intended:
             print('Voice click skipped: focus changed or microphone paused.', flush=True)
             return
         if time.monotonic()-stamp > .75:
             print('Voice click skipped: browser response took too long.', flush=True)
             return
+        generation = self._controls_generation
+        dispatch = asyncio.create_task(self.browser.click_focused(target, 'left' if action == 1 else 'right'))
+        self._dispatch_task = dispatch
         try:
-            clicked = await self.browser.click_focused(target, 'left' if action == 1 else 'right')
+            clicked = await dispatch
             if clicked:
                 print('Voice left click sent' if action == 1 else 'Voice right click sent', flush=True)
             else:
                 print('Voice click skipped: selected item or browser lost focus.', flush=True)
+        except asyncio.CancelledError:
+            if generation == self._controls_generation:
+                raise
+            print('Voice click skipped: voice controls toggled.', flush=True)
         except Error:
             print('Voice click skipped: selected item moved, is covered, or is unavailable.', flush=True)
+        finally:
+            if self._dispatch_task is dispatch:
+                self._dispatch_task = None
 
     def pause(self):
         self.enabled = False
@@ -150,7 +183,7 @@ class VoiceControl:
         try:
             while True:
                 now = time.monotonic()
-                if self.enabled and self.mic:
+                if self.enabled and self.controls_enabled and self.mic:
                     while True:
                         try:
                             stamp, block, overflow = self.mic.blocks.get_nowait()
@@ -181,6 +214,13 @@ class VoiceControl:
                         # An audio gap cancels an unfinished sound, not a click
                         # already confirmed and waiting for browser validation.
                         self._cancel(preserve_pending=True)
+                elif self.mic:
+                    # Keep the capture stream live, but never classify or replay paused audio.
+                    while True:
+                        try:
+                            self.mic.blocks.get_nowait()
+                        except queue.Empty:
+                            break
                 await asyncio.sleep(.01)
         except Exception as error:
             self.pause()
