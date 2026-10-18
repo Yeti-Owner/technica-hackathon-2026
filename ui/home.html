@@ -1,15 +1,607 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Home · Browser studio</title><link rel="stylesheet" href="theme.css"><script src="bookmarks.js" defer></script><script src="home.js" defer></script></head>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nod — Hands-free browsing for everyone</title>
+  <meta name="description" content="Nod replaces typing and clicking with simple head movements and voice, making hands-free internet browsing effortless, intuitive, and accessible.">
+  
+  <!-- Google Fonts: Space Grotesk (display) + IBM Plex Sans (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="theme.css">
+
+  <!-- Smooth Scroll (Lenis) & Motion (GSAP + ScrollTrigger) -->
+  <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+
+  <script>
+    (function() {
+      try {
+        const saved = localStorage.getItem('nod-theme');
+        if (saved === 'dark' || (!saved && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.dataset.theme = 'dark';
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <script src="home.js" defer></script>
+</head>
 <body>
-<header><a href="home.html" class="brand">Browser studio</a><button id="theme" type="button" aria-pressed="false">Dark theme</button></header>
-<main>
-  <h1>Where to next?</h1>
-  <form action="https://www.google.com/search" method="get" class="search">
-    <label for="query">Search the web</label>
-    <div><input id="query" name="q" type="search" placeholder="Something you’re curious about…" required><button type="submit">Search</button></div>
-  </form>
-  <section aria-labelledby="bookmarks-title"><h2 id="bookmarks-title">Your places</h2><nav id="bookmarks" aria-label="Bookmarks"></nav></section>
-  <p class="hint">Use Tab to move, Shift + Tab to go back, and Enter to open.</p>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<!-- ═══ CELESTIAL SUN & MOON (TOP-LEFT CORNER) ═══ -->
+<div class="celestial-container" aria-hidden="true">
+  <div class="celestial-body celestial-sun">
+    <img src="assets/sun.png" alt="" class="celestial-img sun-img" width="190" height="190" loading="eager">
+  </div>
+  <div class="celestial-body celestial-moon">
+    <img src="assets/moon.png" alt="" class="celestial-img moon-img" width="190" height="190" loading="eager">
+  </div>
+</div>
+
+<!-- ═══ AMBIENT SKY CLOUDS (PARALLAX + DRIFT) ═══ -->
+<div class="sky-clouds-layer" aria-hidden="true">
+  <div class="sky-cloud sky-cloud-5" data-speed="0.28">
+    <img src="../Images for ui/Cloud 1.png" alt="" class="cloud-img" width="330" height="250" loading="lazy">
+  </div>
+
+  <div class="sky-cloud sky-cloud-6" data-speed="0.40">
+    <img src="../Images for ui/Cloud 2.png" alt="" class="cloud-img" width="360" height="270" loading="lazy">
+  </div>
+
+  <div class="sky-cloud sky-cloud-7" data-speed="0.22">
+    <img src="../Images for ui/Cloud 1.png" alt="" class="cloud-img" width="300" height="230" loading="lazy">
+  </div>
+</div>
+
+
+<!-- ── Navigation Bar with Individual Floating Clouds ──────── -->
+<header class="site-header">
+  <div class="header-inner">
+    <!-- Mobile "Menu" Cloud Button (Shown on mobile screens <= 768px) -->
+    <button type="button" class="nav-cloud-link nav-menu-btn" id="mobile-menu-toggle" aria-expanded="false" aria-controls="mobile-nav-menu" aria-label="Toggle navigation menu">
+      <span class="nav-cloud-bg" aria-hidden="true">
+        <svg class="nav-cloud-svg" viewBox="0 0 160 52" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+          <defs>
+            <linearGradient id="gradNavMenu" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="var(--nav-cloud-fill-top)"/>
+              <stop offset="55%" stop-color="var(--nav-cloud-fill-mid)"/>
+              <stop offset="100%" stop-color="var(--nav-cloud-fill-bottom)"/>
+            </linearGradient>
+          </defs>
+          <path class="nav-cloud-path" fill="url(#gradNavMenu)" d="M 20 22 C 8 10, 4 32, 4 36 C 4 45, 12 48, 22 47 C 55 49, 105 49, 138 47 C 150 47, 156 38, 156 32 C 156 22, 148 14, 138 18 C 128 8, 108 5, 92 12 C 78 3, 52 4, 40 12 C 30 8, 24 14, 20 22 Z" />
+        </svg>
+      </span>
+      <span class="nav-cloud-text">Menu</span>
+    </button>
+    
+    <!-- 2–5. Four Link Clouds (Features, Mission, Team, Contact) -->
+    <nav class="header-nav" aria-label="Primary navigation">
+      <a href="#features" class="nav-cloud-link" data-nav-section="features">
+        <span class="nav-cloud-bg" aria-hidden="true">
+          <svg class="nav-cloud-svg" viewBox="0 0 160 52" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+            <defs>
+              <linearGradient id="gradNavFeatures" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="var(--nav-cloud-fill-top)"/>
+                <stop offset="55%" stop-color="var(--nav-cloud-fill-mid)"/>
+                <stop offset="100%" stop-color="var(--nav-cloud-fill-bottom)"/>
+              </linearGradient>
+            </defs>
+            <path class="nav-cloud-path" fill="url(#gradNavFeatures)" d="M 20 22 C 8 10, 4 32, 4 36 C 4 45, 12 48, 22 47 C 55 49, 105 49, 138 47 C 150 47, 156 38, 156 32 C 156 22, 148 14, 138 18 C 128 8, 108 5, 92 12 C 78 3, 52 4, 40 12 C 30 8, 24 14, 20 22 Z" />
+          </svg>
+        </span>
+        <span class="nav-cloud-text">Features</span>
+      </a>
+
+      <a href="#mission" class="nav-cloud-link" data-nav-section="mission">
+        <span class="nav-cloud-bg" aria-hidden="true">
+          <svg class="nav-cloud-svg" viewBox="0 0 160 52" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+            <defs>
+              <linearGradient id="gradNavMission" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="var(--nav-cloud-fill-top)"/>
+                <stop offset="55%" stop-color="var(--nav-cloud-fill-mid)"/>
+                <stop offset="100%" stop-color="var(--nav-cloud-fill-bottom)"/>
+              </linearGradient>
+            </defs>
+            <path class="nav-cloud-path" fill="url(#gradNavMission)" d="M 20 25 C 6 14, 4 34, 4 37 C 4 45, 14 48, 24 47 C 60 49, 100 48, 136 47 C 148 47, 156 40, 156 33 C 156 24, 146 16, 136 20 C 124 6, 98 4, 84 12 C 70 5, 48 7, 38 15 C 28 12, 22 18, 20 25 Z" />
+          </svg>
+        </span>
+        <span class="nav-cloud-text">Mission</span>
+      </a>
+
+      <a href="#team" class="nav-cloud-link" data-nav-section="team">
+        <span class="nav-cloud-bg" aria-hidden="true">
+          <svg class="nav-cloud-svg" viewBox="0 0 160 52" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+            <defs>
+              <linearGradient id="gradNavTeam" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="var(--nav-cloud-fill-top)"/>
+                <stop offset="55%" stop-color="var(--nav-cloud-fill-mid)"/>
+                <stop offset="100%" stop-color="var(--nav-cloud-fill-bottom)"/>
+              </linearGradient>
+            </defs>
+            <path class="nav-cloud-path" fill="url(#gradNavTeam)" d="M 22 24 C 6 12, 4 32, 4 36 C 4 45, 14 48, 24 47 C 58 48, 102 49, 136 47 C 148 47, 156 38, 156 31 C 156 21, 145 13, 134 17 C 120 7, 102 6, 90 14 C 76 4, 48 4, 36 12 C 28 8, 24 16, 22 24 Z" />
+          </svg>
+        </span>
+        <span class="nav-cloud-text">Team</span>
+      </a>
+
+      <a href="#contact" class="nav-cloud-link" data-nav-section="contact">
+        <span class="nav-cloud-bg" aria-hidden="true">
+          <svg class="nav-cloud-svg" viewBox="0 0 160 52" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+            <defs>
+              <linearGradient id="gradNavContact" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="var(--nav-cloud-fill-top)"/>
+                <stop offset="55%" stop-color="var(--nav-cloud-fill-mid)"/>
+                <stop offset="100%" stop-color="var(--nav-cloud-fill-bottom)"/>
+              </linearGradient>
+            </defs>
+            <path class="nav-cloud-path" fill="url(#gradNavContact)" d="M 20 22 C 8 10, 4 32, 4 36 C 4 45, 12 48, 22 47 C 55 49, 105 49, 138 47 C 150 47, 156 38, 156 32 C 156 22, 148 14, 138 18 C 128 8, 108 5, 92 12 C 78 3, 52 4, 40 12 C 30 8, 24 14, 20 22 Z" />
+          </svg>
+        </span>
+        <span class="nav-cloud-text">Contact</span>
+      </a>
+    </nav>
+
+    <!-- 6. Theme Toggle Cloud Button -->
+    <div class="header-actions">
+      <button id="theme" type="button" class="nav-cloud-link nav-theme-cloud theme-toggle-btn" aria-pressed="false">
+        <span class="nav-cloud-bg" aria-hidden="true">
+          <svg class="nav-cloud-svg" viewBox="0 0 160 52" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+            <defs>
+              <linearGradient id="gradNavTheme" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="var(--nav-cloud-fill-top)"/>
+                <stop offset="55%" stop-color="var(--nav-cloud-fill-mid)"/>
+                <stop offset="100%" stop-color="var(--nav-cloud-fill-bottom)"/>
+              </linearGradient>
+            </defs>
+            <path class="nav-cloud-path" fill="url(#gradNavTheme)" d="M 20 25 C 6 14, 4 34, 4 37 C 4 45, 14 48, 24 47 C 60 49, 100 48, 136 47 C 148 47, 156 40, 156 33 C 156 24, 146 16, 136 20 C 124 6, 98 4, 84 12 C 70 5, 48 7, 38 15 C 28 12, 22 18, 20 25 Z" />
+          </svg>
+        </span>
+        <span class="nav-cloud-text">Dark theme</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Floating Cloud Nav Drawer -->
+  <div class="mobile-nav-panel" id="mobile-nav-menu" hidden aria-label="Mobile navigation">
+    <div class="mobile-nav-clouds">
+      <a href="#features" class="nav-cloud-link" data-nav-section="features">
+        <span class="nav-cloud-bg" aria-hidden="true">
+          <svg class="nav-cloud-svg" viewBox="0 0 160 52" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+            <defs>
+              <linearGradient id="gradNavMFeatures" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="var(--nav-cloud-fill-top)"/>
+                <stop offset="55%" stop-color="var(--nav-cloud-fill-mid)"/>
+                <stop offset="100%" stop-color="var(--nav-cloud-fill-bottom)"/>
+              </linearGradient>
+            </defs>
+            <path class="nav-cloud-path" fill="url(#gradNavMFeatures)" d="M 20 22 C 8 10, 4 32, 4 36 C 4 45, 12 48, 22 47 C 55 49, 105 49, 138 47 C 150 47, 156 38, 156 32 C 156 22, 148 14, 138 18 C 128 8, 108 5, 92 12 C 78 3, 52 4, 40 12 C 30 8, 24 14, 20 22 Z" />
+          </svg>
+        </span>
+        <span class="nav-cloud-text">Features</span>
+      </a>
+      <a href="#mission" class="nav-cloud-link" data-nav-section="mission">
+        <span class="nav-cloud-bg" aria-hidden="true">
+          <svg class="nav-cloud-svg" viewBox="0 0 160 52" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+            <defs>
+              <linearGradient id="gradNavMMission" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="var(--nav-cloud-fill-top)"/>
+                <stop offset="55%" stop-color="var(--nav-cloud-fill-mid)"/>
+                <stop offset="100%" stop-color="var(--nav-cloud-fill-bottom)"/>
+              </linearGradient>
+            </defs>
+            <path class="nav-cloud-path" fill="url(#gradNavMMission)" d="M 20 25 C 6 14, 4 34, 4 37 C 4 45, 14 48, 24 47 C 60 49, 100 48, 136 47 C 148 47, 156 40, 156 33 C 156 24, 146 16, 136 20 C 124 6, 98 4, 84 12 C 70 5, 48 7, 38 15 C 28 12, 22 18, 20 25 Z" />
+          </svg>
+        </span>
+        <span class="nav-cloud-text">Mission</span>
+      </a>
+      <a href="#team" class="nav-cloud-link" data-nav-section="team">
+        <span class="nav-cloud-bg" aria-hidden="true">
+          <svg class="nav-cloud-svg" viewBox="0 0 160 52" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+            <defs>
+              <linearGradient id="gradNavMTeam" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="var(--nav-cloud-fill-top)"/>
+                <stop offset="55%" stop-color="var(--nav-cloud-fill-mid)"/>
+                <stop offset="100%" stop-color="var(--nav-cloud-fill-bottom)"/>
+              </linearGradient>
+            </defs>
+            <path class="nav-cloud-path" fill="url(#gradNavMTeam)" d="M 22 24 C 6 12, 4 32, 4 36 C 4 45, 14 48, 24 47 C 58 48, 102 49, 136 47 C 148 47, 156 38, 156 31 C 156 21, 145 13, 134 17 C 120 7, 102 6, 90 14 C 76 4, 48 4, 36 12 C 28 8, 24 16, 22 24 Z" />
+          </svg>
+        </span>
+        <span class="nav-cloud-text">Team</span>
+      </a>
+      <a href="#contact" class="nav-cloud-link" data-nav-section="contact">
+        <span class="nav-cloud-bg" aria-hidden="true">
+          <svg class="nav-cloud-svg" viewBox="0 0 160 52" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+            <defs>
+              <linearGradient id="gradNavMContact" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="var(--nav-cloud-fill-top)"/>
+                <stop offset="55%" stop-color="var(--nav-cloud-fill-mid)"/>
+                <stop offset="100%" stop-color="var(--nav-cloud-fill-bottom)"/>
+              </linearGradient>
+            </defs>
+            <path class="nav-cloud-path" fill="url(#gradNavMContact)" d="M 20 22 C 8 10, 4 32, 4 36 C 4 45, 12 48, 22 47 C 55 49, 105 49, 138 47 C 150 47, 156 38, 156 32 C 156 22, 148 14, 138 18 C 128 8, 108 5, 92 12 C 78 3, 52 4, 40 12 C 30 8, 24 14, 20 22 Z" />
+          </svg>
+        </span>
+        <span class="nav-cloud-text">Contact</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- ── Main Content (Day Sky Section) ─────────────────────── -->
+<main id="main-content">
+
+  <!-- ── Hero Section with Clouds Nestling the Black Headline ── -->
+  <section class="hero-section" aria-labelledby="hero-title">
+    <div class="hero-cloud-stage" aria-hidden="true">
+      <!-- Left side clouds (2 clouds: 1 large watercolor, 1 medium new cloud style) -->
+      <div class="hero-cloud hero-cloud-back hero-cloud-lt">
+        <img src="../Images for ui/Cloud 1.png" alt="" class="cloud-img" width="400" height="300" loading="eager">
+      </div>
+      <div class="hero-cloud hero-cloud-front hero-cloud-lm">
+        <img src="assets/clouds/cloud-new-1.png" alt="" class="cloud-img-new" width="300" height="200" loading="eager">
+      </div>
+
+      <!-- Right side clouds (2 clouds: 1 large watercolor, 1 medium/small watercolor) -->
+      <div class="hero-cloud hero-cloud-back hero-cloud-rt">
+        <img src="../Images for ui/Cloud 2.png" alt="" class="cloud-img" width="440" height="320" loading="eager">
+      </div>
+      <div class="hero-cloud hero-cloud-front hero-cloud-rm">
+        <img src="../Images for ui/Cloud 1.png" alt="" class="cloud-img" width="280" height="210" loading="eager">
+      </div>
+
+      <!-- Below search bar clouds (3 clouds: filling empty sky before mission card) -->
+      <div class="hero-cloud hero-cloud-front hero-cloud-bl">
+        <img src="assets/clouds/cloud-new-1.png" alt="" class="cloud-img-new" width="320" height="220" loading="lazy">
+      </div>
+      <div class="hero-cloud hero-cloud-front hero-cloud-br">
+        <img src="assets/clouds/cloud-new-1.png" alt="" class="cloud-img-new" width="400" height="270" loading="lazy">
+      </div>
+      <div class="hero-cloud hero-cloud-back hero-cloud-bc">
+        <img src="../Images for ui/Cloud 2.png" alt="" class="cloud-img" width="320" height="240" loading="lazy">
+      </div>
+    </div>
+
+    <div class="hero-content">
+      <div class="hero-logo-wrapper">
+        <img src="assets/nod-logo.png" alt="Nod" class="hero-logo" width="400" height="260" loading="eager">
+      </div>
+
+      <h1 id="hero-title" class="hero-title">
+        <span class="word">Where</span> <span class="word">to</span> <span class="word">next?</span>
+      </h1>
+
+      <!-- Search Bar Shaped as a Long Fluffy Horizontal Cloud -->
+      <form action="https://www.google.com/search" method="get" class="hero-search" id="search-form" role="search">
+        <label for="query" class="search-label">Search the web hands-free</label>
+        <div class="search-cloud-container">
+          <!-- Decorative SVG Cloud Silhouette Background (Ignored by screen readers) -->
+          <div class="search-cloud-bg" aria-hidden="true">
+            <svg class="search-cloud-svg" viewBox="0 0 780 130" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+              <defs>
+                <linearGradient id="cloudSearchGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="var(--search-cloud-fill-top)"/>
+                  <stop offset="55%" stop-color="var(--search-cloud-fill-mid)"/>
+                  <stop offset="100%" stop-color="var(--search-cloud-fill-bottom)"/>
+                </linearGradient>
+              </defs>
+              <path class="search-cloud-path"
+                    d="M 60 55
+                       C 34 38, 14 55, 14 78
+                       C 14 98, 30 114, 55 115
+                       C 120 120, 200 117, 260 114
+                       C 325 120, 455 122, 535 115
+                       C 605 120, 685 119, 725 114
+                       C 752 110, 768 95, 768 76
+                       C 768 54, 750 36, 726 44
+                       C 708 20, 665 12, 624 24
+                       C 592 8, 536 4, 492 18
+                       C 450 -4, 355 -3, 305 16
+                       C 265 4, 195 8, 155 24
+                       C 122 10, 74 18, 60 55 Z" />
+            </svg>
+          </div>
+
+          <!-- Functional Semantic Form Controls Layered Directly on Top -->
+          <div class="search-box-wrapper">
+            <svg class="search-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input id="query" name="q" type="search" placeholder="Something you're curious about…" required autocomplete="off">
+            <button type="submit" class="search-btn">Search</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ── Big Cloud Transition (Center of Page Statement) ─────── -->
+  <section class="cloud-transition-section" id="mission" aria-label="Our Mission Statement">
+    <div class="transition-cloud-curtain curtain-left" aria-hidden="true">
+      <img src="../Images for ui/Cloud 1.png" alt="" class="curtain-cloud-img curtain-img-1" width="550" height="400">
+    </div>
+    
+    <div class="transition-cloud-curtain curtain-right" aria-hidden="true">
+      <img src="../Images for ui/Cloud 2.png" alt="" class="curtain-cloud-img curtain-img-3" width="550" height="400">
+    </div>
+
+    <div class="cloud-statement-inner">
+      <p class="statement-eyebrow">Our Mission</p>
+      <h2 class="statement-heading">Being able to use the internet shouldn't be a luxury.</h2>
+      <p class="statement-body">
+        We want to make sure everyone has an equal chance to explore the digital world. A physical disability or motor limitation should never keep anyone from reading the news, paying bills, shopping, or chatting with friends — comfortably, independently, and without fatigue.
+      </p>
+    </div>
+  </section>
+
+  <!-- ── Horizontal Scroll Section (Pinned with GSAP) ────────── -->
+  <section class="horizontal-pin-section" id="features" aria-label="How Nod Works">
+    <div class="pin-header-wrapper">
+      <div class="pin-eyebrow">Why Nod Matters</div>
+      <h2 class="pin-title">A computer you control without your hands</h2>
+      <div class="pin-progress-track" aria-hidden="true">
+        <div class="pin-progress-bar" id="horizontal-progress"></div>
+      </div>
+    </div>
+
+    <div class="horizontal-container">
+      <div class="horizontal-track" id="features-track">
+        
+        <!-- Panel 1 -->
+        <article class="feature-card" tabindex="0">
+          <div class="card-num">01</div>
+          <h3>No Mouse Required</h3>
+          <p>Nod completely removed the need to scroll or struggle with a standard mouse. Click on exactly what you want, select buttons, scroll web pages, all entirely hand free.</p>
+          <div class="card-footer">Effortless interactions</div>
+        </article>
+
+        <!-- Panel 2 -->
+        <article class="feature-card" tabindex="0">
+          <div class="card-num">02</div>
+          <h3>Simple head movements</h3>
+          <p>By trading the fine hand movements of a normal mouse for simple head movements and voice commands, Nod takes away the physical strain of getting online.</p>
+          <div class="card-footer">Zero wrist or hand fatigue</div>
+        </article>
+
+        <!-- Panel 3 -->
+        <article class="feature-card" tabindex="0">
+          <div class="card-num">03</div>
+          <h3>Built for independence</h3>
+          <p>For people with arthritis, cerebral palsy, ALS, or spinal cord injuries, just using a computer can be exhausting. Nod restores independence so anyone can explore online freely.</p>
+          <div class="card-footer">Empowering autonomy</div>
+        </article>
+
+        <!-- Panel 4 -->
+        <article class="feature-card" tabindex="0">
+          <div class="card-num">04</div>
+          <h3>Affordable access</h3>
+          <p>Special accessibility hardware can cost thousands of dollars. Nod is lightweight software that runs on standard computers with standard webcams — no expensive gear required.</p>
+          <div class="card-footer">Available to anyone</div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
 </main>
-</body></html>
+
+
+<!-- ═══ NIGHT SKY TRANSITION (SCALLOPED EDGE + MOON + TEAM) ═══ -->
+<div class="night-transition-wrapper">
+
+  <!-- Fluffy Cloud Scalloped Wave SVG Transition + Seam Clouds (Natural Multi-layer Overlap) -->
+  <div class="wave-cloud-divider" aria-hidden="true">
+    <!-- Back seam clouds: puff up into day sky, naturally tucked behind the scalloped wave curve -->
+    <div class="seam-clouds-behind">
+      <img src="../Images for ui/Cloud 1.png" alt="" class="seam-cloud seam-behind-1" width="380" height="280" loading="lazy">
+      <img src="../Images for ui/Cloud 2.png" alt="" class="seam-cloud seam-behind-2" width="400" height="290" loading="lazy">
+      <img src="../Images for ui/Cloud 1.png" alt="" class="seam-cloud seam-behind-3" width="360" height="270" loading="lazy">
+    </div>
+
+    <!-- The Scalloped Night Wave SVG Divider -->
+    <svg viewBox="0 0 1440 180" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,180 L0,70
+        C60,95 120,115 180,105
+        C240,95 280,60 360,50
+        C440,40 500,70 560,80
+        C620,90 680,80 720,70
+        C760,60 820,40 900,45
+        C980,50 1020,80 1080,90
+        C1140,100 1200,85 1260,70
+        C1320,55 1380,60 1440,70
+        L1440,180 Z"
+        fill="currentColor"/>
+    </svg>
+
+    <!-- Front seam clouds: sit in front of the wave crest, softly overlapping with full rounded cloud shapes -->
+    <div class="seam-clouds-front">
+      <img src="../Images for ui/Cloud 2.png" alt="" class="seam-cloud seam-front-1" width="370" height="270" loading="lazy">
+      <img src="../Images for ui/Cloud 1.png" alt="" class="seam-cloud seam-front-2" width="380" height="280" loading="lazy">
+      <img src="../Images for ui/Cloud 2.png" alt="" class="seam-cloud seam-front-3" width="340" height="250" loading="lazy">
+    </div>
+  </div>
+
+  <!-- Deep Navy Night Sky Section -->
+  <section class="night-sky-section" aria-labelledby="night-closing-title">
+
+    <!-- Twinkling Stars & Sparkles Layer -->
+    <div class="night-stars-layer" id="night-stars-container" aria-hidden="true"></div>
+
+    <!-- Night Clouds: Edge Framing, Corners & Multi-Layer Bottom Bank -->
+    <div class="night-clouds-layer" aria-hidden="true">
+      <!-- Framing Edges & Corners (Partially cropped off-screen) -->
+      <img src="assets/clouds/night-clouds-1.png" alt="" class="nc-frame nc-top-left" width="460" height="460" loading="lazy">
+      <img src="assets/clouds/night-clouds-3.png" alt="" class="nc-frame nc-top-right" width="500" height="380" loading="lazy">
+      <img src="assets/clouds/night-clouds-2.png" alt="" class="nc-frame nc-mid-left" width="420" height="320" loading="lazy">
+      <img src="assets/clouds/night-clouds-1.png" alt="" class="nc-frame nc-mid-right" width="460" height="460" loading="lazy">
+      <img src="assets/clouds/night-clouds-3.png" alt="" class="nc-frame nc-bottom-left" width="520" height="400" loading="lazy">
+      <img src="assets/clouds/night-clouds-2.png" alt="" class="nc-frame nc-bottom-right" width="480" height="360" loading="lazy">
+
+      <!-- Bottom Overlapping Cloud Bank: Layer 1 (Back - Darker, Subtle Blur) -->
+      <div class="nc-bottom-row nc-row-back">
+        <img src="assets/clouds/night-clouds-2.png" alt="" class="nc-bottom-cloud ncb-1" width="560" height="400" loading="lazy">
+        <img src="assets/clouds/night-clouds-1.png" alt="" class="nc-bottom-cloud ncb-2" width="620" height="600" loading="lazy">
+        <img src="assets/clouds/night-clouds-3.png" alt="" class="nc-bottom-cloud ncb-3" width="600" height="420" loading="lazy">
+        <img src="assets/clouds/night-clouds-2.png" alt="" class="nc-bottom-cloud ncb-4" width="540" height="380" loading="lazy">
+      </div>
+
+      <!-- Bottom Overlapping Cloud Bank: Layer 2 (Mid - Natural Shading) -->
+      <div class="nc-bottom-row nc-row-mid">
+        <img src="assets/clouds/night-clouds-3.png" alt="" class="nc-bottom-cloud ncm-1" width="540" height="380" loading="lazy">
+        <img src="assets/clouds/night-clouds-2.png" alt="" class="nc-bottom-cloud ncm-2" width="580" height="420" loading="lazy">
+        <img src="assets/clouds/night-clouds-1.png" alt="" class="nc-bottom-cloud ncm-3" width="590" height="570" loading="lazy">
+        <img src="assets/clouds/night-clouds-3.png" alt="" class="nc-bottom-cloud ncm-4" width="520" height="370" loading="lazy">
+      </div>
+
+      <!-- Bottom Overlapping Cloud Bank: Layer 3 (Front - Brighter, Rolling Foreground) -->
+      <div class="nc-bottom-row nc-row-front">
+        <img src="assets/clouds/night-clouds-1.png" alt="" class="nc-bottom-cloud ncf-1" width="620" height="600" loading="lazy">
+        <img src="assets/clouds/night-clouds-3.png" alt="" class="nc-bottom-cloud ncf-2" width="580" height="410" loading="lazy">
+        <img src="assets/clouds/night-clouds-2.png" alt="" class="nc-bottom-cloud ncf-3" width="560" height="400" loading="lazy">
+        <img src="assets/clouds/night-clouds-1.png" alt="" class="nc-bottom-cloud ncf-4" width="580" height="560" loading="lazy">
+      </div>
+
+      <!-- Small Pink & Lavender Stars Sitting Among the Bottom Clouds -->
+      <div class="bottom-pastel-stars" aria-hidden="true">
+        <span class="pastel-star p-star-1" style="left: 10%; bottom: 130px;">★</span>
+        <span class="pastel-star p-star-2" style="left: 24%; bottom: 175px;">✦</span>
+        <span class="pastel-star p-star-3" style="left: 42%; bottom: 145px;">★</span>
+        <span class="pastel-star p-star-4" style="left: 58%; bottom: 190px;">✦</span>
+        <span class="pastel-star p-star-5" style="left: 74%; bottom: 160px;">★</span>
+        <span class="pastel-star p-star-6" style="left: 88%; bottom: 135px;">✦</span>
+      </div>
+    </div>
+
+    <div class="night-content-container">
+
+      <!-- Closing Accent Headline (Reference Style: "Any thoughts?") -->
+      <div class="closing-callout" id="contact">
+        <p class="closing-eyebrow">Get in touch</p>
+        <h2 id="night-closing-title" class="closing-headline">Any thoughts?</h2>
+        <p class="closing-sub">
+          We're constantly improving Nod for the Technica Hackathon and beyond. Test the browser, try our practice tools, or share how we can make hands-free browsing even better.
+        </p>
+        <div class="closing-actions">
+          <a href="./practice.html" class="closing-btn primary-btn">Try Practice Tools</a>
+          <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="closing-btn secondary-btn">Project Repository</a>
+        </div>
+
+        <!-- Glowing Crescent Moon with Radial Halo -->
+        <div class="crescent-moon-wrapper" id="night-moon" aria-hidden="true">
+          <div class="moon-halo"></div>
+          <img src="../Images for ui/moon.png" alt="" class="moon-img" width="200" height="200">
+          <div class="sparkle sparkle-1">✦</div>
+          <div class="sparkle sparkle-2">★</div>
+          <div class="sparkle sparkle-3">✦</div>
+          <div class="sparkle sparkle-4">★</div>
+        </div>
+      </div>
+
+
+
+      <hr class="night-divider" aria-hidden="true">
+
+      <!-- Founders Section -->
+      <div class="founders-section" id="team">
+        <div class="founders-header">
+          <p class="section-label">The Team Behind Nod</p>
+          <h3 class="founders-title">Built by three students who care.</h3>
+          <p class="founders-lead">Computer science and cybersecurity students dedicated to open, hands-free accessibility for everyone.</p>
+        </div>
+
+        <div class="founders-grid">
+
+          <!-- Tomas Karounas -->
+          <article class="founder-card" tabindex="0">
+            <div class="founder-photo-frame">
+              <img
+                src="../Images for ui/tomas pfp.jpg"
+                alt="Portrait of Tomas Karounas"
+                class="founder-photo"
+                width="140" height="140"
+                loading="lazy"
+              >
+            </div>
+            <div class="founder-info">
+              <h4 class="founder-name">Tomas Karounas</h4>
+              <p class="founder-school">University of North Georgia</p>
+              <p class="founder-major">Computer Science</p>
+              <div class="founder-pill-box">
+                <span class="founder-pill">Reading</span>
+                <span class="founder-pill">Chess</span>
+                <span class="founder-pill">Judo</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Callum Maclean -->
+          <article class="founder-card" tabindex="0">
+            <div class="founder-photo-frame">
+              <img
+                src="../Images for ui/callum pfp.jpg"
+                alt="Portrait of Callum Maclean"
+                class="founder-photo"
+                width="140" height="140"
+                loading="lazy"
+              >
+            </div>
+            <div class="founder-info">
+              <h4 class="founder-name">Callum Maclean</h4>
+              <p class="founder-school">University of North Georgia</p>
+              <p class="founder-major">Computer Science</p>
+              <div class="founder-pill-box">
+                <span class="founder-pill">Hiking</span>
+                <span class="founder-pill">Dogs</span>
+                <span class="founder-pill">Game Dev</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Nick McDowell -->
+          <article class="founder-card" tabindex="0">
+            <div class="founder-photo-frame">
+              <img
+                src="../Images for ui/nick pfp.jpg"
+                alt="Portrait of Nick McDowell"
+                class="founder-photo"
+                width="140" height="140"
+                loading="lazy"
+              >
+            </div>
+            <div class="founder-info">
+              <h4 class="founder-name">Nick McDowell</h4>
+              <p class="founder-school">Georgia Tech</p>
+              <p class="founder-major">Cybersecurity</p>
+              <div class="founder-pill-box">
+                <span class="founder-pill">Homelabbing</span>
+                <span class="founder-pill">Videogames</span>
+                <span class="founder-pill">Walking Dogs</span>
+              </div>
+            </div>
+          </article>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <p class="footer-copy">Nod · Technica Hackathon 2026</p>
+        <p class="footer-motto">Built with care for hands-free digital accessibility.</p>
+      </div>
+    </footer>
+
+  </section>
+</div>
+
+</body>
+</html>
