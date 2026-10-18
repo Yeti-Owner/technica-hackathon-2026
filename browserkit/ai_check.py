@@ -25,11 +25,15 @@ DEFAULTS = {
     "requestTimeoutSeconds": 35,
     "maxBodyBytes": 15728640,
     "whitelist": [],
+    "imageWhitelist": [],
 }
 
 SNIFF_BYTES = 32 * 1024 * 1024
 SNIFF_ENTRIES = 64
 URL_ENTRIES = 4096
+
+IMAGE_WHITELIST_DIRS = ("assets", "ui/assets", "Images for ui")
+IMAGE_EXTENSIONS = frozenset({".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".bmp", ".ico"})
 
 
 class RateLimited(RuntimeError):
@@ -116,6 +120,9 @@ def validate_config(raw):
     whitelist = raw.get("whitelist")
     if isinstance(whitelist, list):
         config["whitelist"] = [item for item in whitelist if isinstance(item, str) and item]
+    image_whitelist = raw.get("imageWhitelist")
+    if isinstance(image_whitelist, list):
+        config["imageWhitelist"] = [item for item in image_whitelist if isinstance(item, str) and item]
     return config
 
 
@@ -141,6 +148,34 @@ def is_whitelisted(url, whitelist, builtin=()):
     if not url:
         return False
     for prefix in list(whitelist or []) + list(builtin):
+        if prefix and url.startswith(prefix):
+            return True
+    return False
+
+
+def builtin_image_whitelist(root=ROOT):
+    """Project-owned images are never checked or sent to the server."""
+    hashes = set()
+    prefixes = []
+    for rel in IMAGE_WHITELIST_DIRS:
+        folder = Path(root) / rel
+        if folder.is_dir():
+            for path in folder.rglob("*"):
+                if path.is_file() and path.suffix.lower() in IMAGE_EXTENSIONS:
+                    try:
+                        hashes.add(hashlib.sha256(path.read_bytes()).hexdigest())
+                    except OSError:
+                        pass
+        prefixes.append("file:///" + str(folder).replace("\\", "/").replace(" ", "%20") + "/")
+    return hashes, prefixes
+
+
+def is_image_whitelisted(url, sha, builtin_hashes, builtin_prefixes, extra_prefixes=()):
+    if sha and sha in builtin_hashes:
+        return True
+    if not url:
+        return False
+    for prefix in list(extra_prefixes or []) + list(builtin_prefixes):
         if prefix and url.startswith(prefix):
             return True
     return False
@@ -221,6 +256,7 @@ class AICheck:
         self.config_path = Path(config_path) if config_path else ROOT / "ai-check.json"
         self.config = dict(DEFAULTS)
         self.builtin = builtin_whitelist()
+        self.image_hashes, self.image_prefixes = builtin_image_whitelist()
         self.server = ""
         self.key = ""
         self.enabled = False
@@ -348,6 +384,9 @@ class AICheck:
     def is_whitelisted(self, url):
         return is_whitelisted(url, self.config.get("whitelist", []), self.builtin)
 
+    def is_image_whitelisted(self, url, sha=None):
+        return is_image_whitelisted(url, sha, self.image_hashes, self.image_prefixes, self.config.get("imageWhitelist", []))
+
     def _start_workers(self):
         self.workers = [task for task in self.workers if not task.done()]
         while len(self.workers) < self.config["concurrency"]:
@@ -406,6 +445,8 @@ class AICheck:
             length = headers.get("content-length")
             if length and length.isdigit() and too_large(int(length), self.config["maxBodyBytes"]):
                 return
+            if self.is_image_whitelisted(response.url):
+                return
             try:
                 frame = response.frame
                 page = frame.page if frame else None
@@ -420,6 +461,8 @@ class AICheck:
             if not data or too_large(len(data), self.config["maxBodyBytes"]):
                 return
             sha = hashlib.sha256(data).hexdigest()
+            if self.is_image_whitelisted(response.url, sha):
+                return
             urls = {response.url}
             try:
                 request = response.request
@@ -482,6 +525,8 @@ class AICheck:
                         continue
                     sha = self.url_to_sha.get(url)
                     if not sha:
+                        continue
+                    if self.is_image_whitelisted(url, sha):
                         continue
                     if self.attempt_counts.get(sha, 0) >= self.config["maxAttemptsPerImage"]:
                         # This image's attempt budget is spent for the session.
@@ -579,6 +624,9 @@ class AICheck:
                 return
             if self.attempt_counts.get(sha, 0) >= self.config["maxAttemptsPerImage"]:
                 # Session attempt budget for this image is already spent.
+                self._forget_candidate(page, url, sha)
+                return
+            if self.is_image_whitelisted(url, sha):
                 self._forget_candidate(page, url, sha)
                 return
             self.inflight.add(sha)

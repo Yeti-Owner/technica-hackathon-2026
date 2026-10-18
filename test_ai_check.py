@@ -1,4 +1,5 @@
 """Pure-logic tests for the passive AI image checker; no network or browser."""
+import hashlib
 import json
 import os
 import tempfile
@@ -11,8 +12,10 @@ from browserkit.ai_check import (
     AICheck,
     DEFAULTS,
     RunawayBreaker,
+    builtin_image_whitelist,
     builtin_whitelist,
     is_configured,
+    is_image_whitelisted,
     is_whitelisted,
     load_config,
     passes_min_size,
@@ -114,6 +117,42 @@ class AICheckTests(unittest.TestCase):
         self.assertTrue(is_whitelisted((ROOT / "ui/home.html").as_uri(), [], prefixes))
         self.assertTrue(is_whitelisted((ROOT / "ui/practice.html").as_uri(), [], prefixes))
         self.assertFalse(is_whitelisted((ROOT / "ui/image-lab.html").as_uri(), [], prefixes))
+
+    def test_config_validation_keeps_image_whitelist_strings(self):
+        config = validate_config({"imageWhitelist": ["http://example.com", 7, ""]})
+        self.assertEqual(config["imageWhitelist"], ["http://example.com"])
+        self.assertEqual(validate_config({})["imageWhitelist"], [])
+
+    def test_builtin_image_whitelist_hashes_project_images(self):
+        hashes, prefixes = builtin_image_whitelist()
+        for rel in ("assets/sun.png", "ui/assets/nod-logo.png", "Images for ui/moon.png"):
+            expected = hashlib.sha256((ROOT / rel).read_bytes()).hexdigest()
+            self.assertIn(expected, hashes)
+        self.assertTrue(is_image_whitelisted(
+            (ROOT / "ui/assets/clouds/night-clouds-1.png").as_uri(), None, hashes, prefixes))
+        self.assertTrue(is_image_whitelisted(
+            (ROOT / "Images for ui/Cloud 1.png").as_uri(), None, hashes, prefixes))
+        self.assertFalse(is_image_whitelisted(
+            (ROOT / "scratch/test_logo_cloud.png").as_uri(), None, hashes, prefixes))
+        self.assertFalse(is_image_whitelisted("http://example.com/x.png", None, hashes, prefixes))
+
+    def test_is_image_whitelisted_hash_prefix_and_empty(self):
+        hashes = {"a" * 64}
+        prefixes = ["file:///C:/x/assets/"]
+        self.assertTrue(is_image_whitelisted("http://example.com/x.png", "a" * 64, hashes, prefixes))
+        self.assertTrue(is_image_whitelisted(None, "a" * 64, hashes, prefixes))
+        self.assertTrue(is_image_whitelisted("file:///C:/x/assets/y.png", None, hashes, prefixes))
+        self.assertFalse(is_image_whitelisted("http://example.com/x.png", None, set(), []))
+        self.assertFalse(is_image_whitelisted(None, None, hashes, prefixes))
+        self.assertTrue(is_image_whitelisted(
+            "http://example.com/x.png", None, set(), [], ["http://example.com"]))
+
+    def test_ai_check_image_whitelist_method_honors_config(self):
+        ai = AICheck(browser_controller=None)
+        ai.config = dict(DEFAULTS)
+        ai.config["imageWhitelist"] = ["http://example.com/owned"]
+        self.assertTrue(ai.is_image_whitelisted("http://example.com/owned/x.png"))
+        self.assertFalse(ai.is_image_whitelisted("http://example.com/other/x.png"))
 
     def test_min_size_requires_both_dimensions(self):
         self.assertTrue(passes_min_size(80, 80, 80))
