@@ -51,7 +51,7 @@ Head left/right (or Tab/Shift+Tab) selects an element. After a brief quiet pause
 - `browserkit/ai_check.py`: passive AI image checking (sniff responses, ask the server, mark verdicts).
 - `ai-check.json`: AI check configuration.
 - `browserkit/voice.py`: reusable vowel processing and stricter one-shot `ClickDetector`.
-- `browserkit/voice_control.py`, `ui/voice_click.js`: audio lifecycle, focus identity, and left/right click dispatch. Legacy `ui/voice.js` scrolling remains dormant.
+- `browserkit/voice_control.py`, `ui/voice_click.js`: audio lifecycle, focus identity, and left/right click dispatch. The legacy `ui/voice.js` scroll script has been removed; humming is mapped to clicks only.
 - `ui/ai_scan.js`, `ui/ai_mark.css`: in-page AI scan and marking.
 - `ui/image-lab.html`: debug lab; its card list is generated from `test_images.txt` at browser start.
 - `ui/home.html`, `ui/home.js`, `ui/theme.css`: redesigned home (website 2.0) — sun/moon/clouds theme, cloud nav, founders section, GSAP/Lenis animations from CDNs.
