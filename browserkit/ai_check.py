@@ -44,7 +44,7 @@ def read_env(path):
     values = {}
     try:
         text = Path(path).read_text(encoding="utf-8")
-    except OSError:
+    except (OSError, ValueError):
         return values
     for line in text.splitlines():
         line = line.strip()
