@@ -7,6 +7,7 @@ import os
 import time
 from collections import OrderedDict, deque
 from pathlib import Path
+from urllib.parse import urlsplit
 
 import requests
 from playwright.async_api import Error
@@ -34,6 +35,7 @@ URL_ENTRIES = 4096
 
 IMAGE_WHITELIST_DIRS = ("assets", "ui/assets", "Images for ui")
 IMAGE_EXTENSIONS = frozenset({".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".bmp", ".ico"})
+WHITELISTED_EXTENSIONS = (".svg", ".ico")
 
 
 class RateLimited(RuntimeError):
@@ -179,6 +181,13 @@ def is_image_whitelisted(url, sha, builtin_hashes, builtin_prefixes, extra_prefi
         if prefix and url.startswith(prefix):
             return True
     return False
+
+
+def has_whitelisted_extension(url):
+    """Any SVG or ICO image is never checked or sent to the server."""
+    if not url:
+        return False
+    return urlsplit(url).path.lower().endswith(WHITELISTED_EXTENSIONS)
 
 
 def passes_min_size(width, height, min_size):
@@ -385,7 +394,8 @@ class AICheck:
         return is_whitelisted(url, self.config.get("whitelist", []), self.builtin)
 
     def is_image_whitelisted(self, url, sha=None):
-        return is_image_whitelisted(url, sha, self.image_hashes, self.image_prefixes, self.config.get("imageWhitelist", []))
+        return has_whitelisted_extension(url) or is_image_whitelisted(
+            url, sha, self.image_hashes, self.image_prefixes, self.config.get("imageWhitelist", []))
 
     def _start_workers(self):
         self.workers = [task for task in self.workers if not task.done()]

@@ -14,6 +14,7 @@ from browserkit.ai_check import (
     RunawayBreaker,
     builtin_image_whitelist,
     builtin_whitelist,
+    has_whitelisted_extension,
     is_configured,
     is_image_whitelisted,
     is_whitelisted,
@@ -153,6 +154,23 @@ class AICheckTests(unittest.TestCase):
         ai.config["imageWhitelist"] = ["http://example.com/owned"]
         self.assertTrue(ai.is_image_whitelisted("http://example.com/owned/x.png"))
         self.assertFalse(ai.is_image_whitelisted("http://example.com/other/x.png"))
+
+    def test_has_whitelisted_extension_matches_svg_and_ico(self):
+        self.assertTrue(has_whitelisted_extension("http://example.com/a.svg"))
+        self.assertTrue(has_whitelisted_extension("http://example.com/a.ico"))
+        self.assertTrue(has_whitelisted_extension("http://example.com/a.SVG"))
+        self.assertTrue(has_whitelisted_extension("http://example.com/a.ICO"))
+        self.assertTrue(has_whitelisted_extension("http://example.com/a.svg?x=1"))
+        self.assertFalse(has_whitelisted_extension("http://example.com/a.png"))
+        self.assertFalse(has_whitelisted_extension(None))
+        self.assertFalse(has_whitelisted_extension(""))
+        self.assertFalse(has_whitelisted_extension("http://example.com/a.png?file=b.svg"))
+
+    def test_ai_check_image_whitelist_method_honors_extension(self):
+        ai = AICheck(browser_controller=None)
+        ai.config = dict(DEFAULTS)
+        self.assertTrue(ai.is_image_whitelisted("https://anywhere.example/icon.svg"))
+        self.assertFalse(ai.is_image_whitelisted("https://anywhere.example/photo.png"))
 
     def test_min_size_requires_both_dimensions(self):
         self.assertTrue(passes_min_size(80, 80, 80))
