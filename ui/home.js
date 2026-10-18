@@ -509,7 +509,7 @@ function initNavScroll() {
       const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       const navHeader = document.querySelector('.site-header');
       const navHeight = navHeader ? navHeader.offsetHeight : 104;
-      const breathingRoom = 24;
+      const breathingRoom = targetId === '#contact' ? 48 : 24;
       const offset = navHeight + breathingRoom;
 
       // If ScrollTrigger is active, ensure layout coordinates are fresh

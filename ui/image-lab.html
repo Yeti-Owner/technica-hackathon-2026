@@ -8,10 +8,11 @@
   <!-- Modern Display & Body Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="theme.css">
   <link rel="stylesheet" href="ai_mark.css">
+  <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js" defer></script>
 
   <script>
     (function() {
@@ -37,7 +38,7 @@
       
       /* Layout & Spacing */
       --section-gap-x: clamp(48px, 6vw, 84px);
-      --section-padding-y: clamp(70px, 14vh, 140px);
+      --section-padding-y: clamp(40px, 6vh, 72px);
       --card-stagger-offset: clamp(40px, 5vh, 70px);
       
       /* Animation Timings */
@@ -90,74 +91,7 @@
     }
 
     [data-theme="dark"] body {
-      background: var(--night-deep, #041018);
-    }
-
-    /* ── Slim Scroll Progress Indicator ───────────────────────────── */
-    .scroll-progress-track {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 4px;
-      background: rgba(255, 255, 255, 0.2);
-      z-index: 1000;
-      pointer-events: none;
-    }
-
-    .scroll-progress-fill {
-      width: 0%;
-      height: 100%;
-      background: linear-gradient(90deg, #ffffff, #62e9ff, #ffffff);
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-      transition: width 0.1s linear;
-    }
-
-    /* ── Celestial Sun: Scrolls Away with Day Sky (Not Fixed in Night) ── */
-    .celestial-container {
-      position: absolute !important;
-      top: clamp(-55px, -4.5vw, -20px);
-      left: clamp(-55px, -4.5vw, -20px);
-      width: clamp(140px, 16vw, 210px);
-      height: clamp(140px, 16vw, 210px);
-      pointer-events: none;
-      z-index: 2;
-      user-select: none;
-    }
-
-    /* ── Sticky Cloud Header & Nav ────────────────────────────────── */
-    .lab-header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      padding: 16px 5vw;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      transition: transform 0.3s ease, background 0.4s ease;
-    }
-
-    .lab-header.is-night-nav {
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-    }
-
-    .lab-header.is-night-nav .nav-cloud-text {
-      color: #081c28;
-    }
-
-    .lab-header-inner {
-      max-width: 1360px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-    }
-
-    .lab-nav-links {
-      display: flex;
-      align-items: center;
-      gap: 14px;
+      background: var(--sky-top);
     }
 
     /* ── MASTER GRID & WRAPPER (Single #lab-grid for Smoke Tests) ─── */
@@ -198,9 +132,9 @@
 
     [data-theme="dark"] .lab-day-zone {
       background: linear-gradient(180deg, 
-        var(--sky-night-top) 0%, 
-        var(--sky-night-mid) 55%, 
-        var(--night-base) 100%
+        var(--sky-top) 0%,
+        var(--sky-base) 65%,
+        var(--sky-bottom) 100%
       );
     }
 
@@ -216,7 +150,7 @@
     .lab-intro-section {
       text-align: center;
       max-width: 840px;
-      margin: 20px auto 50px;
+      margin: clamp(48px, 7vw, 96px) auto 32px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -225,60 +159,9 @@
       padding: 0 20px;
     }
 
-    .lab-eyebrow {
-      display: inline-block;
-      font-size: 0.82rem;
-      font-weight: 800;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: #082032;
-      background: rgba(255, 255, 255, 0.65);
-      backdrop-filter: blur(8px);
-      padding: 6px 16px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.8);
-      margin-bottom: 16px;
-      box-shadow: 0 4px 12px rgba(8, 48, 72, 0.08);
-    }
-
-    [data-theme="dark"] .lab-eyebrow {
-      color: #e2f2fa;
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.16);
-    }
-
-    .lab-title {
-      font-family: var(--font-display);
-      font-size: clamp(2.4rem, 4.6vw, 3.8rem);
-      font-weight: 700;
-      line-height: 1.1;
-      letter-spacing: -0.03em;
-      color: var(--hero-title-color);
-      margin: 0 0 20px;
-      text-shadow: 0 2px 14px rgba(255, 255, 255, 0.35);
-    }
-
-    [data-theme="dark"] .lab-title {
-      text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
-    }
-
-    .lab-intro-card {
-      background: var(--card-bg);
-      border: 1.5px solid var(--card-border);
-      border-radius: 24px;
-      padding: 18px 28px;
-      box-shadow: var(--card-shadow);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      max-width: 720px;
-    }
-
-    .lab-intro-card .hint {
-      margin: 0;
-      font-size: 1rem;
-      line-height: 1.6;
-      color: var(--text-main);
-    }
+    /* Reuse the home mission panel's typography and surface. */
+    .lab-intro-card { width: 100%; text-wrap: pretty; }
+    .lab-intro-card .statement-body + .statement-body { margin-top: 16px; }
 
     .lab-day-sections,
     .lab-night-sections {
@@ -295,7 +178,7 @@
 
     /* ── Roomy Section Layout (2 Pictures Per Section) ────────────── */
     .lab-section {
-      min-height: clamp(560px, 78vh, 880px);
+      min-height: 0;
       padding: var(--section-padding-y) 0;
       display: flex;
       flex-direction: column;
@@ -344,10 +227,10 @@
       transform: translateY(-6px);
     }
 
-    .lab-card:focus-visible {
-      outline: 3px solid var(--focus-ring, #082032);
-      outline-offset: 8px;
-      border-radius: 28px;
+    .lab-card:focus-visible { outline: none; }
+    .lab-card:focus-visible .card-frame-outer {
+      outline: var(--focus-ring);
+      outline-offset: 6px;
     }
 
     .card-frame-outer {
@@ -385,7 +268,7 @@
       max-height: var(--card-max-height);
       overflow: hidden;
       border-radius: 18px;
-      background: rgba(140, 180, 210, 0.25);
+      background: rgba(140, 180, 210, 0.12);
       box-shadow: inset 0 0 0 1.5px rgba(180, 215, 235, 0.4), 0 4px 12px rgba(8, 48, 72, 0.12);
       transition: transform 0.35s ease, box-shadow 0.35s ease;
       box-sizing: border-box;
@@ -395,13 +278,10 @@
       display: block;
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: scale-down;
       transition: transform 0.45s ease;
     }
 
-    .lab-card:hover .img-window img {
-      transform: scale(1.035);
-    }
 
     .lab-card-meta {
       display: flex;
@@ -416,7 +296,7 @@
 
     .meta-tag {
       font-family: var(--font-display);
-      font-weight: 800;
+      font-weight: 700;
       font-size: 0.84rem;
       color: var(--hero-title-color);
       background: rgba(255, 255, 255, 0.65);
@@ -661,9 +541,8 @@
     .lab-night-end-footer {
       position: relative;
       width: 100%;
-      min-height: clamp(520px, 64vh, 760px);
-      padding-top: 60px;
-      padding-bottom: clamp(100px, 16vh, 200px);
+      min-height: 0;
+      padding: 40px 0 64px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -678,7 +557,7 @@
       position: relative;
       width: clamp(200px, 24vw, 320px);
       height: clamp(200px, 24vw, 320px);
-      margin: 0 auto clamp(60px, 8vh, 100px);
+      margin: 0 auto;
       z-index: 2;
       pointer-events: none;
       will-change: transform, opacity;
@@ -836,7 +715,7 @@
     /* ── Scroll Reveal Animations ─────────────────────────────────── */
     .js-enabled .lab-card.is-hidden {
       opacity: 0;
-      transform: translateY(50px) rotate(var(--entry-rot, 1.5deg));
+      transform: translateY(24px);
       pointer-events: none;
     }
 
@@ -865,14 +744,14 @@
       }
     }
 
-    @media (max-width: 680px) {
+    @media (max-width: 760px) {
       .lab-section-row {
         flex-direction: column;
         align-items: center;
         gap: 48px;
       }
       .lab-card {
-        width: min(92vw, 440px);
+        width: min(100%, 440px);
       }
       .lab-card.is-staggered {
         margin-top: 0;
@@ -1016,6 +895,154 @@
         transform: none !important;
       }
     }
+    /* Keep the shared corner sun above the lab sky; contain footer decoration. */
+    .lab-page-wrapper { overflow: clip; z-index: 1; }
+    .lab-card { min-width: 0; flex: 0 1 var(--card-max-width); }
+    .lab-night-zone[hidden], .lab-cloud-line-transition[hidden] { display: none; }
+    @media (max-width: 760px) {
+      .lab-card { flex-basis: auto; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .lab-card, .img-window, .img-window img, .lab-end-moon {
+        transition: none !important;
+      }
+    }
+
+    /* Frames follow the actual picture, including small and portrait sources. */
+    .lab-card { align-items: center; }
+    .lab-card .card-frame-outer {
+      width: fit-content;
+      max-width: 100%;
+      padding: 7px;
+      border-radius: 23px;
+    }
+    .lab-card .img-window {
+      width: auto;
+      max-width: 100%;
+      aspect-ratio: auto;
+      max-height: none;
+      border-radius: 16px;
+      background: transparent;
+      box-shadow: none;
+    }
+    .lab-card .img-window img {
+      width: auto;
+      height: auto;
+      max-width: 100%;
+      max-height: clamp(260px, 44vh, 420px);
+      object-fit: contain;
+    }
+    .lab-card-meta { width: 100%; max-width: 360px; margin-top: 24px; }
+    .lab-card.is-ai-card .card-frame-outer { padding: 7px; }
+    .lab-card .cloud-frame-svg, .lightbox-media-wrap .cloud-frame-svg {
+      inset: -3px;
+      width: calc(100% + 6px);
+      height: calc(100% + 6px);
+      animation: none;
+      filter: drop-shadow(0 8px 14px rgba(8, 32, 50, .18));
+    }
+    :root[data-theme="dark"] .lab-card .cloud-frame-svg,
+    :root[data-theme="dark"] .lightbox-media-wrap .cloud-frame-svg {
+      filter: drop-shadow(0 0 12px rgba(171, 218, 244, .22));
+    }
+    .lab-card .ai-cloud-badge, .lightbox-media-wrap .ai-cloud-badge {
+      bottom: -14px;
+      padding: 6px 12px;
+      font-family: var(--font-body);
+      font-size: .78rem;
+      font-weight: 600;
+      letter-spacing: 0;
+      text-transform: none;
+      animation: none;
+      box-shadow: 0 3px 9px rgba(8, 32, 50, .12);
+    }
+    .lab-card.is-ai-card .lab-card-meta { margin-top: 30px; }
+    .lightbox-media-wrap.is-ai { padding: 7px; }
+
+    /* Preserve the watercolor silhouettes; avoid inherited crop/height rules. */
+    .lab-cloud-line-transition .seam-cloud {
+      height: auto;
+      max-height: none;
+      object-fit: contain;
+    }
+    .lab-cloud-line-transition { isolation: isolate; }
+    /* Fade wandering background clouds before a section can paint over them. */
+    .lab-ambient-clouds-day {
+      mask-image: linear-gradient(#000 0%, #000 80%, transparent 100%);
+    }
+    .lab-ambient-clouds-night {
+      mask-image: linear-gradient(transparent, #000 8%, #000 82%, transparent 98%);
+    }
+    .seam-clouds-behind { opacity: .65; }
+    .seam-clouds-front { opacity: .95; }
+    .lab-night-end-footer {
+      isolation: isolate;
+      padding: 56px 0 100px;
+    }
+    .lab-night-end-footer .nc-bottom-row {
+      inset: auto -4% 0;
+      width: 108%;
+      height: auto;
+      overflow: visible;
+      gap: 0;
+    }
+    .lab-night-end-footer .nc-bottom-cloud {
+      width: 34%;
+      height: auto;
+      max-height: none;
+      object-fit: contain;
+      margin: 0 -5%;
+    }
+    .lab-night-end-footer .nc-row-back { bottom: 90px; opacity: .4; filter: brightness(.75); }
+    .lab-night-end-footer .nc-row-mid { bottom: 30px; opacity: .7; filter: brightness(.9); }
+    .lab-night-end-footer .nc-row-front { bottom: -25px; opacity: .95; filter: none; }
+    .lab-night-end-footer .nc-row-front .nc-bottom-cloud:nth-child(even) { translate: 0 -24px; }
+    .lab-night-end-footer .nc-row-mid .nc-bottom-cloud:nth-child(odd) { translate: 0 24px; }
+    .lab-night-end-footer::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0;
+      height: 60px;
+      background: linear-gradient(transparent, var(--night-deep));
+      z-index: 6;
+      pointer-events: none;
+    }
+    @media (max-width: 760px) {
+      .lab-night-end-footer .nc-bottom-cloud { width: 60%; margin: 0 -12%; }
+      .lab-night-end-footer .nc-bottom-cloud:nth-child(n+3) { display: none; }
+      .lab-cloud-line-transition .seam-cloud { width: 65vw; }
+      .seam-behind-2, .seam-front-2, .seam-behind-4 { display: none; }
+    }
+
+    html.lenis, html.lenis body { height: auto; }
+    .lenis.lenis-smooth { scroll-behavior: auto !important; }
+    .lenis.lenis-stopped { overflow: hidden; }
+    .lab-card.is-ai-card .card-frame-outer,
+    .lightbox-media-wrap.is-ai {
+      border: 2px solid #36c7e8;
+      box-shadow: 0 0 0 4px #fff, 0 0 0 7px #238aaf, 0 12px 30px rgba(8, 48, 72, .25);
+    }
+    .lab-card.is-ai-card .ai-cloud-badge, .lightbox-media-wrap.is-ai .ai-cloud-badge {
+      background: #08384e;
+      color: #fff;
+      border: 2px solid #fff;
+      padding: 8px 14px;
+      font-size: .86rem;
+      font-weight: 700;
+      bottom: -20px;
+    }
+    .lab-card.is-ai-card .lab-card-meta { margin-top: 38px; }
+    .footer-cloud-bank { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
+    .footer-cloud { position: absolute; height: auto; animation: ncbFloat 18s ease-in-out infinite alternate; }
+    .footer-cloud-left { width: 46%; left: -5%; bottom: -8%; opacity: .7; }
+    .footer-cloud-right { width: 43%; right: -3%; bottom: -15%; animation-delay: -9s; }
+    .footer-cloud-low { width: 34%; left: 29%; bottom: -30%; opacity: .65; filter: brightness(.7) saturate(1.4); animation-delay: -5s; }
+    @media (max-width: 760px) {
+      .footer-cloud-left { width: 85%; left: -25%; bottom: 0; }
+      .footer-cloud-right { width: 80%; right: -25%; bottom: -5%; }
+      .footer-cloud-low { width: 65%; left: 18%; bottom: -15%; }
+    }
+    @media (prefers-reduced-motion: reduce) { .footer-cloud { animation: none; } }
   </style>
 </head>
 <body>
@@ -1023,9 +1050,7 @@
 <a href="#main-content" class="skip-link">Skip to main content</a>
 
 <!-- ═══ SLIM SCROLL PROGRESS TRACK ═══ -->
-<div class="scroll-progress-track" aria-hidden="true">
-  <div class="scroll-progress-fill" id="scroll-progress-fill"></div>
-</div>
+
 
 <!-- ═══ CELESTIAL SUN & MOON (TOP-LEFT CORNER) ═══ -->
 <div class="celestial-container" aria-hidden="true">
@@ -1038,9 +1063,24 @@
 </div>
 
 <!-- ═══ STICKY CLOUD NAVBAR ═══ -->
-<header class="lab-header" role="banner">
-  <div class="lab-header-inner">
-    <nav class="lab-nav-links" aria-label="Page navigation">
+<header class="site-header" role="banner">
+  <div class="header-inner">
+    <button type="button" class="nav-cloud-link nav-menu-btn" id="mobile-menu-toggle" aria-expanded="false" aria-controls="mobile-nav-menu" aria-label="Toggle navigation menu">
+      <span class="nav-cloud-bg" aria-hidden="true">
+        <svg class="nav-cloud-svg" viewBox="0 0 160 52" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+          <defs>
+            <linearGradient id="gradNavMenu" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="var(--nav-cloud-fill-top)"/>
+              <stop offset="55%" stop-color="var(--nav-cloud-fill-mid)"/>
+              <stop offset="100%" stop-color="var(--nav-cloud-fill-bottom)"/>
+            </linearGradient>
+          </defs>
+          <path class="nav-cloud-path" fill="url(#gradNavMenu)" d="M 20 22 C 8 10, 4 32, 4 36 C 4 45, 12 48, 22 47 C 55 49, 105 49, 138 47 C 150 47, 156 38, 156 32 C 156 22, 148 14, 138 18 C 128 8, 108 5, 92 12 C 78 3, 52 4, 40 12 C 30 8, 24 14, 20 22 Z" />
+        </svg>
+      </span>
+      <span class="nav-cloud-text">Menu</span>
+    </button>
+    <nav class="header-nav" aria-label="Page navigation">
       <!-- Return Home Cloud Button -->
       <a href="home.html" class="nav-cloud-link">
         <span class="nav-cloud-bg" aria-hidden="true">
@@ -1056,23 +1096,6 @@
           </svg>
         </span>
         <span class="nav-cloud-text">Home</span>
-      </a>
-
-      <!-- Practice Tools Cloud Button -->
-      <a href="practice.html" class="nav-cloud-link">
-        <span class="nav-cloud-bg" aria-hidden="true">
-          <svg class="nav-cloud-svg" viewBox="0 0 160 52" preserveAspectRatio="none" focusable="false" aria-hidden="true">
-            <defs>
-              <linearGradient id="gradNavPractice" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stop-color="var(--nav-cloud-fill-top)"/>
-                <stop offset="55%" stop-color="var(--nav-cloud-fill-mid)"/>
-                <stop offset="100%" stop-color="var(--nav-cloud-fill-bottom)"/>
-              </linearGradient>
-            </defs>
-            <path class="nav-cloud-path" fill="url(#gradNavPractice)" d="M 20 25 C 6 14, 4 34, 4 37 C 4 45, 14 48, 24 47 C 60 49, 100 48, 136 47 C 148 47, 156 40, 156 33 C 156 24, 146 16, 136 20 C 124 6, 98 4, 84 12 C 70 5, 48 7, 38 15 C 28 12, 22 18, 20 25 Z" />
-          </svg>
-        </span>
-        <span class="nav-cloud-text">Practice</span>
       </a>
     </nav>
 
@@ -1095,6 +1118,24 @@
       </button>
     </div>
   </div>
+<div class="mobile-nav-panel" id="mobile-nav-menu" hidden aria-label="Mobile navigation"><div class="mobile-nav-clouds">
+      <!-- Return Home Cloud Button -->
+      <a href="home.html" class="nav-cloud-link">
+        <span class="nav-cloud-bg" aria-hidden="true">
+          <svg class="nav-cloud-svg" viewBox="0 0 160 52" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+            <defs>
+              <linearGradient id="gradNavMobileHome" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="var(--nav-cloud-fill-top)"/>
+                <stop offset="55%" stop-color="var(--nav-cloud-fill-mid)"/>
+                <stop offset="100%" stop-color="var(--nav-cloud-fill-bottom)"/>
+              </linearGradient>
+            </defs>
+            <path class="nav-cloud-path" fill="url(#gradNavMobileHome)" d="M 20 22 C 8 10, 4 32, 4 36 C 4 45, 12 48, 22 47 C 55 49, 105 49, 138 47 C 150 47, 156 38, 156 32 C 156 22, 148 14, 138 18 C 128 8, 108 5, 92 12 C 78 3, 52 4, 40 12 C 30 8, 24 14, 20 22 Z" />
+          </svg>
+        </span>
+        <span class="nav-cloud-text">Home</span>
+      </a>
+    </div></div>
 </header>
 
 <!-- ═══ MAIN PAGE WRAPPER ═══ -->
@@ -1110,11 +1151,10 @@
 
       <!-- Intro Section -->
       <header class="lab-intro-section">
-        <span class="lab-eyebrow">DETECTION &amp; VERIFICATION LAB</span>
-        <h1 class="lab-title">AI image lab</h1>
-
-        <div class="lab-intro-card">
-          <p class="hint">The detector scores each image passively as you scroll. A white cloud frame marks AI-generated pictures with confidence over 50%. Scroll slowly and watch how the page reacts.</p>
+        <div class="cloud-statement-inner lab-intro-card">
+          <h1 class="statement-heading">A closer look at the pictures you see.</h1>
+          <p class="statement-body">Explore the gallery at your own pace. Nod checks each picture as you browse and adds a bright blue-and-white frame when its AI confidence score is above 50%.</p>
+          <p class="statement-body">Select a picture to see the full image. A score is a clue, not proof of how an image was made.</p>
         </div>
       </header>
 
@@ -1240,26 +1280,11 @@
           <span class="pastel-star p-star-6" style="left: 90%; bottom: 115px;">✦</span>
         </div>
 
-        <!-- 3-Layer Overlapping Night Clouds Bank -->
-        <div class="nc-bottom-row nc-row-back">
-          <img src="assets/clouds/cloud-night-2.png" alt="" class="nc-bottom-cloud ncb-1" width="560" height="400" loading="lazy">
-          <img src="assets/clouds/cloud-night-1.png" alt="" class="nc-bottom-cloud ncb-2" width="620" height="600" loading="lazy">
-          <img src="assets/clouds/cloud-night-3.png" alt="" class="nc-bottom-cloud ncb-3" width="600" height="420" loading="lazy">
-          <img src="assets/clouds/cloud-night-2.png" alt="" class="nc-bottom-cloud ncb-4" width="540" height="380" loading="lazy">
-        </div>
-
-        <div class="nc-bottom-row nc-row-mid">
-          <img src="assets/clouds/cloud-night-3.png" alt="" class="nc-bottom-cloud ncm-1" width="540" height="380" loading="lazy">
-          <img src="assets/clouds/cloud-night-2.png" alt="" class="nc-bottom-cloud ncm-2" width="580" height="420" loading="lazy">
-          <img src="assets/clouds/cloud-night-1.png" alt="" class="nc-bottom-cloud ncm-3" width="590" height="570" loading="lazy">
-          <img src="assets/clouds/cloud-night-3.png" alt="" class="nc-bottom-cloud ncm-4" width="520" height="370" loading="lazy">
-        </div>
-
-        <div class="nc-bottom-row nc-row-front">
-          <img src="assets/clouds/cloud-night-1.png" alt="" class="nc-bottom-cloud ncf-1" width="620" height="600" loading="lazy">
-          <img src="assets/clouds/cloud-night-3.png" alt="" class="nc-bottom-cloud ncf-2" width="580" height="410" loading="lazy">
-          <img src="assets/clouds/cloud-night-2.png" alt="" class="nc-bottom-cloud ncf-3" width="560" height="400" loading="lazy">
-          <img src="assets/clouds/cloud-night-1.png" alt="" class="nc-bottom-cloud ncf-4" width="580" height="560" loading="lazy">
+        <!-- Three distinct silhouettes with space around the moon. -->
+        <div class="footer-cloud-bank">
+          <img class="footer-cloud footer-cloud-left" src="assets/clouds/night-clouds-2.png" alt="" width="2000" height="2000" loading="lazy">
+          <img class="footer-cloud footer-cloud-right" src="assets/clouds/cloud-night-3.png" alt="" width="2000" height="2000" loading="lazy">
+          <img class="footer-cloud footer-cloud-low" src="assets/clouds/cloud-day-3.png" alt="" width="2000" height="2000" loading="lazy">
         </div>
       </div>
     </div>
@@ -1281,7 +1306,7 @@
     <div class="lightbox-media-wrap" id="lightbox-media-wrap">
       <svg class="cloud-frame-svg" id="lightbox-cloud-svg" aria-hidden="true" focusable="false"></svg>
       <img id="lightbox-img" src="" alt="Enlarged view" data-no-ai-scan="true">
-      <div class="ai-cloud-badge" id="lightbox-badge" role="status">AI GENERATED</div>
+      <div class="ai-cloud-badge" id="lightbox-badge" role="status">AI detected</div>
     </div>
     
     <div class="lightbox-caption" id="lightbox-caption"></div>
@@ -1292,6 +1317,24 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   document.documentElement.classList.add('js-enabled');
+
+  const menuButton = document.getElementById('mobile-menu-toggle');
+  const mobileMenu = document.getElementById('mobile-nav-menu');
+  function setMenu(open) {
+    menuButton.setAttribute('aria-expanded', String(open));
+    mobileMenu.hidden = !open;
+  }
+  menuButton.addEventListener('click', () => setMenu(mobileMenu.hidden));
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !mobileMenu.hidden) {
+      setMenu(false);
+      menuButton.focus();
+    }
+  });
+  document.addEventListener('click', (event) => {
+    if (!event.target.closest('.site-header')) setMenu(false);
+  });
+  window.matchMedia('(min-width: 769px)').addEventListener('change', () => setMenu(false));
 
   // ===================================================================
   // 1. CLOUD CONFIGURATION LISTS (EASILY TWEAKABLE)
@@ -1310,13 +1353,13 @@ document.addEventListener('DOMContentLoaded', function () {
   ];
 
   const NIGHT_CLOUDS_CONFIG = [
-    { file: 'assets/clouds/cloud-night-1.png', side: 'left',  topPct: 6,  widthVw: 27, offsetPx: -75, layer: 2, opacity: 0.70, driftDur: 28, driftDelay: -2,  speed: 0.22 },
+    { file: 'assets/clouds/night-clouds-2.png', side: 'left',  topPct: 6,  widthVw: 27, offsetPx: -75, layer: 2, opacity: 0.70, driftDur: 28, driftDelay: -2,  speed: 0.22 },
     { file: 'assets/clouds/cloud-night-2.png', side: 'right', topPct: 16, widthVw: 29, offsetPx: -85, layer: 3, opacity: 0.80, driftDur: 34, driftDelay: -9,  speed: 0.32 },
     { file: 'assets/clouds/cloud-night-3.png', side: 'left',  topPct: 30, widthVw: 22, offsetPx: -40, layer: 1, opacity: 0.50, driftDur: 24, driftDelay: -5,  speed: 0.14 },
-    { file: 'assets/clouds/cloud-night-1.png', side: 'right', topPct: 42, widthVw: 26, offsetPx: -65, layer: 2, opacity: 0.68, driftDur: 30, driftDelay: -14, speed: 0.24 },
+    { file: 'assets/clouds/night-clouds-2.png', side: 'right', topPct: 42, widthVw: 26, offsetPx: -65, layer: 2, opacity: 0.68, driftDur: 30, driftDelay: -14, speed: 0.24 },
     { file: 'assets/clouds/cloud-night-2.png', side: 'left',  topPct: 56, widthVw: 28, offsetPx: -80, layer: 3, opacity: 0.82, driftDur: 36, driftDelay: -7,  speed: 0.35 },
     { file: 'assets/clouds/cloud-night-3.png', side: 'right', topPct: 68, widthVw: 21, offsetPx: -35, layer: 1, opacity: 0.52, driftDur: 22, driftDelay: -16, speed: 0.15 },
-    { file: 'assets/clouds/cloud-night-1.png', side: 'left',  topPct: 80, widthVw: 26, offsetPx: -60, layer: 2, opacity: 0.72, driftDur: 32, driftDelay: -11, speed: 0.25 },
+    { file: 'assets/clouds/night-clouds-2.png', side: 'left',  topPct: 80, widthVw: 26, offsetPx: -60, layer: 2, opacity: 0.72, driftDur: 32, driftDelay: -11, speed: 0.25 },
     { file: 'assets/clouds/cloud-night-2.png', side: 'right', topPct: 90, widthVw: 30, offsetPx: -90, layer: 3, opacity: 0.85, driftDur: 35, driftDelay: -4,  speed: 0.33 }
   ];
 
@@ -1351,7 +1394,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   renderConfigClouds(document.getElementById('lab-ambient-clouds-day'), DAY_CLOUDS_CONFIG, false);
-  renderConfigClouds(document.getElementById('lab-ambient-clouds-night'), NIGHT_CLOUDS_CONFIG, true);
+  renderConfigClouds(document.getElementById('lab-ambient-clouds-night'), NIGHT_CLOUDS_CONFIG.filter(cloud => cloud.topPct < 65), true);
 
   // ===================================================================
   // 2. TWINKLING STARS IN NIGHT SKY
@@ -1394,21 +1437,68 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  // Apply scroll depth to the image, leaving the outer cloud free to drift.
+  const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let smoothScroll = null;
+  let smoothFrame = 0;
+  function configureSmoothScroll() {
+    cancelAnimationFrame(smoothFrame);
+    if (smoothScroll) smoothScroll.destroy();
+    smoothScroll = window.lenis = null;
+    if (motionPreference.matches || typeof Lenis === 'undefined') return;
+    smoothScroll = window.lenis = new Lenis({
+      duration: 1.15,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: 'vertical', gestureOrientation: 'vertical',
+      smoothWheel: true, wheelMultiplier: 0.95, touchMultiplier: 1.5,
+    });
+    if (document.getElementById('lightbox-dialog').open) smoothScroll.stop();
+    function animate(time) {
+      smoothScroll.raf(time);
+      smoothFrame = requestAnimationFrame(animate);
+    }
+    smoothFrame = requestAnimationFrame(animate);
+  }
+  configureSmoothScroll();
+  motionPreference.addEventListener('change', configureSmoothScroll);
+  const seamClouds = Array.from(document.querySelectorAll('.seam-cloud'));
+  const ambientClouds = Array.from(document.querySelectorAll('.ambient-cloud'));
+  let scrollFrame = 0;
+  function scheduleScroll() {
+    if (scrollFrame) return;
+    scrollFrame = requestAnimationFrame(() => {
+      scrollFrame = 0;
+      onScroll();
+      ambientClouds.forEach(cloud => {
+        const rect = cloud.getBoundingClientRect();
+        const offset = motionPreference.matches ? 0 :
+          Math.max(-48, Math.min(48, (innerHeight / 2 - rect.top) * Number(cloud.dataset.speed) * 0.25));
+        const direction = cloud.dataset.driftDir === 'left' ? -1 : 1;
+        cloud.firstElementChild.style.transform = `translate(${offset * direction}px, ${offset}px)`;
+      });
+      const seamRect = document.getElementById('lab-cloud-line').getBoundingClientRect();
+      const progress = motionPreference.matches ? 0 :
+        Math.max(0, Math.min(1, (innerHeight * .85 - seamRect.top) / (innerHeight * .8)));
+      seamClouds.forEach((cloud, index) => {
+        const direction = cloud.classList.contains('seam-night-1') ||
+          cloud.classList.contains('seam-front-1') || cloud.classList.contains('seam-behind-1') ||
+          cloud.classList.contains('seam-behind-2') ? -1 : 1;
+        const distance = Math.min(innerWidth * .18, 240) * progress;
+        cloud.style.translate = `${direction * distance}px ${-progress * (20 + index * 3)}px`;
+        cloud.style.rotate = `${direction * progress * 4}deg`;
+      });
+    });
+  }
+  motionPreference.addEventListener('change', scheduleScroll);
+  window.addEventListener('resize', scheduleScroll, { passive: true });
+
   // ===================================================================
-  // 4. SCROLL PROGRESS & TRANSITION CONTROLLER (LINKED TO WAVE MIDPOINT)
+  // 4. NIGHT SKY TRANSITION (LINKED TO WAVE MIDPOINT)
   // ===================================================================
-  const progressFill = document.getElementById('scroll-progress-fill');
   const cloudLine = document.getElementById('lab-cloud-line');
-  const headerEl = document.querySelector('.lab-header');
   const moonEl = document.getElementById('lab-end-moon');
 
   function onScroll() {
-    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-    if (maxScroll > 0 && progressFill) {
-      const pct = Math.min(100, Math.max(0, (window.scrollY / maxScroll) * 100));
-      progressFill.style.width = pct + '%';
-    }
-
     if (cloudLine && starsContainer) {
       const rect = cloudLine.getBoundingClientRect();
       const waveMid = rect.top + rect.height * 0.5;
@@ -1421,20 +1511,11 @@ document.addEventListener('DOMContentLoaded', function () {
       } else {
         starsContainer.style.opacity = '0';
       }
-
-      // Sticky navbar switches to night aesthetic when the wave reaches top header area
-      if (headerEl) {
-        if (rect.top + rect.height * 0.3 <= 50) {
-          headerEl.classList.add('is-night-nav');
-        } else {
-          headerEl.classList.remove('is-night-nav');
-        }
-      }
     }
   }
 
-  window.addEventListener('scroll', onScroll, { passive: true });
-  onScroll();
+  window.addEventListener('scroll', scheduleScroll, { passive: true });
+  scheduleScroll();
 
   // Moon Rise IntersectionObserver
   if (moonEl) {
@@ -1452,108 +1533,16 @@ document.addEventListener('DOMContentLoaded', function () {
   // ===================================================================
   // 5. DETERMINISTIC CONTINUOUS SVG CLOUD OUTLINE GENERATOR
   // ===================================================================
-  function makePRNG(seed) {
-    let s = (seed * 9301 + 49297) % 233280;
-    return function () {
-      s = (s * 9301 + 49297) % 233280;
-      return s / 233280;
-    };
-  }
-
-  function generateCloudPath(w, h, seed, isBack) {
-    const rand = makePRNG(seed);
-    const padT = 26 + (isBack ? 5 : 0);
-    const padB = 34 + (isBack ? 5 : 0);
-    const padS = 24 + (isBack ? 5 : 0);
-
-    const fw = w + padS * 2;
-    const fh = h + padT + padB;
-
-    const x0 = padS * 0.72;
-    const y0 = padT * 0.72;
-    const x1 = fw - padS * 0.72;
-    const y1 = fh - padB * 0.72;
-
-    const nTop = 4;
-    const nRight = 3;
-    const nBottom = 4;
-    const nLeft = 3;
-
-    const points = [];
-
-    // Top edge (left -> right)
-    for (let i = 0; i < nTop; i++) {
-      const frac = i / nTop;
-      points.push({ x: x0 + (x1 - x0) * frac, y: y0, bump: 16 + rand() * 10 });
-    }
-    // Right edge (top -> bottom)
-    for (let i = 0; i < nRight; i++) {
-      const frac = i / nRight;
-      points.push({ x: x1, y: y0 + (y1 - y0) * frac, bump: 10 + rand() * 7 });
-    }
-    // Bottom edge (right -> left)
-    for (let i = 0; i < nBottom; i++) {
-      const frac = i / nBottom;
-      points.push({ x: x1 - (x1 - x0) * frac, y: y1, bump: 14 + rand() * 8 });
-    }
-    // Left edge (bottom -> top)
-    for (let i = 0; i < nLeft; i++) {
-      const frac = i / nLeft;
-      points.push({ x: x0, y: y1 - (y1 - y0) * frac, bump: 10 + rand() * 7 });
-    }
-
-    const segments = [];
-    const n = points.length;
-    segments.push(`M ${points[0].x.toFixed(1)} ${points[0].y.toFixed(1)}`);
-
-    for (let i = 0; i < n; i++) {
-      const p1 = points[i];
-      const p2 = points[(i + 1) % n];
-
-      const dx = p2.x - p1.x;
-      const dy = p2.y - p1.y;
-      const dist = Math.hypot(dx, dy);
-      if (dist < 0.001) continue;
-
-      const tx = dx / dist;
-      const ty = dy / dist;
-      const nx = ty;
-      const ny = -tx;
-
-      const hBump = (p1.bump + p2.bump) * 0.5 * (isBack ? 1.15 : 1.0);
-
-      const c1x = p1.x + tx * (dist * 0.28) + nx * hBump;
-      const c1y = p1.y + ty * (dist * 0.28) + ny * hBump;
-      const c2x = p2.x - tx * (dist * 0.28) + nx * hBump;
-      const c2y = p2.y - ty * (dist * 0.28) + ny * hBump;
-
-      segments.push(`C ${c1x.toFixed(1)} ${c1y.toFixed(1)}, ${c2x.toFixed(1)} ${c2y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`);
-    }
-
-    segments.push('Z');
-    return { path: segments.join(' '), fw, fh, padS, padT };
-  }
-
+  // A close-fitting porcelain rim, sized to the image rather than its grid cell.
   function renderCloudSVG(svgEl, w, h, seed) {
-    const front = generateCloudPath(w, h, seed, false);
-    const back = generateCloudPath(w, h, seed + 107, true);
-
-    svgEl.setAttribute('viewBox', `0 0 ${front.fw.toFixed(1)} ${front.fh.toFixed(1)}`);
+    const width = w + 20;
+    const height = h + 20;
+    svgEl.setAttribute('viewBox', `0 0 ${width} ${height}`);
     svgEl.innerHTML = `
-      <defs>
-        <linearGradient id="cGradFront-${seed}" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#ffffff"/>
-          <stop offset="68%" stop-color="#f5faff"/>
-          <stop offset="100%" stop-color="#e3f1fb"/>
-        </linearGradient>
-        <linearGradient id="cGradBack-${seed}" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="rgba(255, 255, 255, 0.9)"/>
-          <stop offset="100%" stop-color="rgba(215, 238, 252, 0.6)"/>
-        </linearGradient>
-      </defs>
-      <path class="cloud-layer-back" d="${back.path}" fill="url(#cGradBack-${seed})" />
-      <path class="cloud-layer-front" d="${front.path}" fill="url(#cGradFront-${seed})" />
-    `;
+      <rect x="1" y="1" width="${width - 2}" height="${height - 2}" rx="23"
+            fill="#f5fbff" stroke="#1686ad" stroke-width="4"/>
+      <rect x="6" y="6" width="${width - 12}" height="${height - 12}" rx="18"
+            fill="none" stroke="#36c7e8" stroke-width="2"/>`;
   }
 
   // ===================================================================
@@ -1567,6 +1556,13 @@ document.addEventListener('DOMContentLoaded', function () {
   const lbBadge = document.getElementById('lightbox-badge');
   const lbCloudSvg = document.getElementById('lightbox-cloud-svg');
   let lastActiveElement = null;
+  function resizeLightboxFrame() {
+    if (!dialog.open || !lbWrap.classList.contains('is-ai')) return;
+    const rect = lbImg.getBoundingClientRect();
+    if (rect.width && rect.height) renderCloudSVG(lbCloudSvg, rect.width, rect.height);
+  }
+  lbImg.addEventListener('load', resizeLightboxFrame);
+  if (window.ResizeObserver) new ResizeObserver(resizeLightboxFrame).observe(lbImg);
 
   function openLightbox(url, index, host, file, card) {
     lastActiveElement = card;
@@ -1578,7 +1574,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (isAi) {
       lbWrap.classList.add('is-ai');
       const score = card.dataset.aiScore || '';
-      lbBadge.textContent = score ? `AI GENERATED · ${score}` : 'AI GENERATED';
+      lbBadge.textContent = score ? `AI detected · ${score}` : 'AI detected';
 
       requestAnimationFrame(() => {
         const rect = lbImg.getBoundingClientRect();
@@ -1592,11 +1588,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     dialog.style.display = 'flex';
     dialog.showModal();
+    if (smoothScroll) smoothScroll.stop();
     closeBtn.focus();
   }
 
   function closeLightbox() {
     dialog.close();
+    if (smoothScroll) smoothScroll.start();
     dialog.style.display = 'none';
     lbImg.removeAttribute('src');
     if (lastActiveElement && typeof lastActiveElement.focus === 'function') {
@@ -1622,11 +1620,16 @@ document.addEventListener('DOMContentLoaded', function () {
   const nightSectionsContainer = document.getElementById('lab-night-sections');
   const urls = window.LAB_URLS || [];
 
+  if (urls.length <= 2) {
+    document.getElementById('lab-cloud-line').hidden = true;
+    document.getElementById('lab-night-zone').hidden = true;
+  }
+
   if (!urls.length) {
     const empty = document.createElement('div');
-    empty.className = 'lab-intro-card';
+    empty.className = 'cloud-statement-inner lab-intro-card';
     empty.style.margin = '40px auto';
-    empty.innerHTML = '<p class="hint">No test images yet — add URLs to test_images.txt and restart the browser.</p>';
+    empty.innerHTML = '<h2 class="statement-heading">No pictures yet.</h2><p class="statement-body">Add pictures to the image list, then reopen the browser to explore them here.</p>';
     daySectionsContainer.appendChild(empty);
     return;
   }
@@ -1644,7 +1647,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Calculate dynamic midpoint so transition splits day and night accurately
   const totalSections = Math.ceil(urls.length / 2);
-  const daySectionCount = Math.floor(totalSections / 2); // e.g. for 7 sections: 3 day, 4 night
+  const daySectionCount = Math.ceil(totalSections / 2);
 
   for (let i = 0; i < urls.length; i += 2) {
     const sectionIndex = Math.floor(i / 2) + 1;
@@ -1711,11 +1714,12 @@ document.addEventListener('DOMContentLoaded', function () {
     img.src = url;
     img.alt = 'Test image ' + index;
     imgWindow.appendChild(img);
+    img.addEventListener('load', updateFrameShape);
 
     const badge = document.createElement('div');
     badge.className = 'ai-cloud-badge';
     badge.setAttribute('role', 'status');
-    badge.textContent = 'AI GENERATED';
+    badge.textContent = 'AI detected';
 
     frameOuter.appendChild(cloudSvg);
     frameOuter.appendChild(imgWindow);
@@ -1723,10 +1727,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const meta = document.createElement('figcaption');
     meta.className = 'lab-card-meta';
-    meta.innerHTML = `
-      <span class="meta-tag">#${index}</span>
-      <span class="meta-info">${host} ${file ? '· ' + file : ''}</span>
-    `;
+    const number = document.createElement('span');
+    number.className = 'meta-tag';
+    number.textContent = String(index).padStart(2, '0');
+    const source = document.createElement('span');
+    source.className = 'meta-info';
+    source.textContent = host || 'Gallery image';
+    source.title = file ? `${host} · ${file}` : host;
+    meta.append(number, source);
 
     card.appendChild(frameOuter);
     card.appendChild(meta);
@@ -1748,9 +1756,10 @@ document.addEventListener('DOMContentLoaded', function () {
     card.addEventListener('ai-detected', (e) => {
       card.classList.add('is-ai-card');
       const score = e.detail && e.detail.score;
-      if (score) {
-        badge.textContent = `AI GENERATED · ${score}`;
-        badge.setAttribute('aria-label', `Detected as AI Generated with confidence score ${score}`);
+      card.dataset.aiScore = score == null ? '' : String(score);
+      if (score != null) {
+        badge.textContent = `AI detected · ${score}`;
+        badge.setAttribute('aria-label', `Detected as AI-generated with confidence score ${score}`);
       }
       updateFrameShape();
     });

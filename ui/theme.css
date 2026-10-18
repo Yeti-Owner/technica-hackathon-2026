@@ -1408,7 +1408,7 @@ main {
   position: relative;
   background: linear-gradient(180deg, var(--night-base) 0%, var(--night-deep) 100%);
   color: var(--night-text);
-  padding: 40px 24px 100px;
+  padding: 40px 24px 0;
   overflow: hidden;
 }
 
@@ -1932,9 +1932,9 @@ main {
   position: relative;
   z-index: 10;
   border-top: 1px solid rgba(255, 255, 255, 0.12);
-  padding: 30px 24px 36px;
-  margin-top: 60px;
-  background: rgba(7, 24, 43, 0.55);
+  padding: 24px clamp(24px, 4vw, 56px) max(24px, env(safe-area-inset-bottom));
+  margin: 60px -24px 0;
+  background: linear-gradient(180deg, rgba(7, 24, 43, 0.92), var(--night-deep));
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
