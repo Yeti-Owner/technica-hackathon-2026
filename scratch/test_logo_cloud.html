@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+:root {
+  --sky-top: #3ad3ee;
+  --sky-base: #22c8e8;
+  --sky-bottom: #19b4d4;
+  --nav-text: #082032;
+  --nav-cloud-fill-top: #ffffff;
+  --nav-cloud-fill-mid: #f3f9fd;
+  --nav-cloud-fill-bottom: #dcebf8;
+  --nav-cloud-stroke: rgba(255, 255, 255, 0.95);
+  --nav-cloud-shadow: drop-shadow(0 10px 20px rgba(8, 48, 72, 0.14)) drop-shadow(0 2px 6px rgba(8, 48, 72, 0.06));
+
+  /* Tweakable tokens for Logo Cloud */
+  --nav-logo-cloud-width: 175px;
+  --nav-logo-cloud-height: 82px;
+  --nav-logo-height: 48px;
+  --nav-logo-padding-x: 18px;
+  --nav-logo-nudge-y: 3px;
+}
+
+body {
+  margin: 0;
+  background: linear-gradient(180deg, var(--sky-top), var(--sky-base));
+  height: 100vh;
+  font-family: sans-serif;
+  padding: 40px;
+}
+
+.site-header {
+  display: flex;
+  align-items: center; /* Common centerline */
+  gap: 20px;
+}
+
+.nav-cloud-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: var(--nav-text);
+  background: transparent;
+  border: none;
+  outline: none;
+  box-sizing: border-box;
+  transition: transform 0.22s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.nav-cloud-link:hover {
+  transform: scale(1.04) translateY(-2px);
+}
+
+.nav-cloud-link:active {
+  transform: scale(0.97) translateY(0);
+}
+
+.nav-cloud-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  filter: var(--nav-cloud-shadow);
+  z-index: 1;
+}
+
+.nav-cloud-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.nav-cloud-path {
+  stroke: var(--nav-cloud-stroke);
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Logo Cloud: 180px wide by 82px tall */
+.nav-brand-cloud {
+  width: var(--nav-logo-cloud-width);
+  height: var(--nav-logo-cloud-height);
+  padding: 0 var(--nav-logo-padding-x);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Logo Frame: optically centered in the middle band (slight nudge down to account for top bumps) */
+.brand-logo-frame {
+  position: relative;
+  z-index: 2;
+  height: var(--nav-logo-height);
+  max-width: calc(var(--nav-logo-cloud-width) - (var(--nav-logo-padding-x) * 2));
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(var(--nav-logo-nudge-y));
+}
+
+.brand-logo-img {
+  height: calc(var(--nav-logo-height) / 0.3545);
+  width: auto;
+  max-width: none;
+  display: block;
+  object-fit: contain;
+  margin-top: calc(-1 * ((0.392 - 0.2535) / 2) * (var(--nav-logo-height) / 0.3545));
+}
+
+/* Link Clouds: 48px min-height */
+.nav-link-cloud {
+  min-height: 48px;
+  padding: 0 24px;
+}
+.nav-cloud-text {
+  position: relative;
+  z-index: 2;
+  font-weight: 600;
+  font-size: 0.96rem;
+  transform: translateY(1.5px);
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <!-- 1. Logo Cloud -->
+  <a href="home.html" class="nav-cloud-link nav-brand-cloud" aria-label="Nod home">
+    <span class="nav-cloud-bg" aria-hidden="true">
+      <svg class="nav-cloud-svg" viewBox="0 0 180 82" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+        <defs>
+          <linearGradient id="gradNavLogo" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="var(--nav-cloud-fill-top)"/>
+            <stop offset="55%" stop-color="var(--nav-cloud-fill-mid)"/>
+            <stop offset="100%" stop-color="var(--nav-cloud-fill-bottom)"/>
+          </linearGradient>
+        </defs>
+        <!-- Generous top bumps (peak at y:8 and y:14) and flatter bottom (y:76) providing wide middle safe area -->
+        <path class="nav-cloud-path" fill="url(#gradNavLogo)"
+          d="M 22 42 C 6 24, 4 56, 4 64 C 4 76, 16 80, 32 79 C 74 81, 120 81, 150 79 C 166 79, 176 68, 176 58 C 176 38, 164 24, 146 30 C 132 10, 106 6, 90 18 C 74 6, 46 8, 36 22 C 26 18, 22 30, 22 42 Z" />
+      </svg>
+    </span>
+    <div class="brand-logo-frame">
+      <img src="../ui/assets/nod-logo.png" alt="Nod home" class="brand-logo-img">
+    </div>
+  </a>
+
+  <!-- 2. Features Cloud -->
+  <a href="#features" class="nav-cloud-link nav-link-cloud">
+    <span class="nav-cloud-bg" aria-hidden="true">
+      <svg class="nav-cloud-svg" viewBox="0 0 160 52" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+        <defs>
+          <linearGradient id="gradNavFeatures" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="var(--nav-cloud-fill-top)"/>
+            <stop offset="55%" stop-color="var(--nav-cloud-fill-mid)"/>
+            <stop offset="100%" stop-color="var(--nav-cloud-fill-bottom)"/>
+          </linearGradient>
+        </defs>
+        <path class="nav-cloud-path" fill="url(#gradNavFeatures)" d="M 20 22 C 8 10, 4 32, 4 36 C 4 45, 12 48, 22 47 C 55 49, 105 49, 138 47 C 150 47, 156 38, 156 32 C 156 22, 148 14, 138 18 C 128 8, 108 5, 92 12 C 78 3, 52 4, 40 12 C 30 8, 24 14, 20 22 Z" />
+      </svg>
+    </span>
+    <span class="nav-cloud-text">Features</span>
+  </a>
+
+  <!-- 3. Dark theme Cloud -->
+  <button type="button" class="nav-cloud-link nav-link-cloud">
+    <span class="nav-cloud-bg" aria-hidden="true">
+      <svg class="nav-cloud-svg" viewBox="0 0 160 52" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+        <defs>
+          <linearGradient id="gradNavTheme" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="var(--nav-cloud-fill-top)"/>
+            <stop offset="55%" stop-color="var(--nav-cloud-fill-mid)"/>
+            <stop offset="100%" stop-color="var(--nav-cloud-fill-bottom)"/>
+          </linearGradient>
+        </defs>
+        <path class="nav-cloud-path" fill="url(#gradNavTheme)" d="M 20 25 C 6 14, 4 34, 4 37 C 4 45, 14 48, 24 47 C 60 49, 100 48, 136 47 C 148 47, 156 40, 156 33 C 156 24, 146 16, 136 20 C 124 6, 98 4, 84 12 C 70 5, 48 7, 38 15 C 28 12, 22 18, 20 25 Z" />
+      </svg>
+    </span>
+    <span class="nav-cloud-text">Dark theme</span>
+  </button>
+</header>
+
+</body>
+</html>

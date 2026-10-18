@@ -10,11 +10,32 @@ function initThemeToggle() {
   const themeBtn = document.querySelector('#theme');
   if (!themeBtn) return;
 
+  // Sync initial button label and state with current dataset.theme
+  const isCurrentlyDark = document.documentElement.dataset.theme === 'dark';
+  themeBtn.setAttribute('aria-pressed', String(isCurrentlyDark));
+  const textSpan = themeBtn.querySelector('.nav-cloud-text');
+  const initialLabel = isCurrentlyDark ? 'Light theme' : 'Dark theme';
+  if (textSpan) {
+    textSpan.textContent = initialLabel;
+  } else {
+    themeBtn.textContent = initialLabel;
+  }
+
   themeBtn.addEventListener('click', (event) => {
     const isDark = document.documentElement.dataset.theme !== 'dark';
     document.documentElement.dataset.theme = isDark ? 'dark' : 'light';
+    try {
+      localStorage.setItem('nod-theme', isDark ? 'dark' : 'light');
+    } catch (e) {}
+
     event.currentTarget.setAttribute('aria-pressed', String(isDark));
-    event.currentTarget.textContent = isDark ? 'Light theme' : 'Dark theme';
+    const label = isDark ? 'Light theme' : 'Dark theme';
+    const currentSpan = event.currentTarget.querySelector('.nav-cloud-text');
+    if (currentSpan) {
+      currentSpan.textContent = label;
+    } else {
+      event.currentTarget.textContent = label;
+    }
     
     // Refresh ScrollTrigger to accommodate any slight theme shifts
     if (window.ScrollTrigger) {
@@ -420,20 +441,60 @@ function initAnimations() {
   }
 }
 
-/* ── 5. Navigation Smooth Scrolling & Active Section Highlighting ── */
+/* ── 5. Mobile Navigation Menu Toggle ────────────────────────────── */
+function initMobileMenu() {
+  const toggleBtn = document.getElementById('mobile-menu-toggle');
+  const panel = document.getElementById('mobile-nav-menu');
+  if (!toggleBtn || !panel) return;
+
+  function closeMenu() {
+    toggleBtn.setAttribute('aria-expanded', 'false');
+    panel.hidden = true;
+  }
+
+  function openMenu() {
+    toggleBtn.setAttribute('aria-expanded', 'true');
+    panel.hidden = false;
+  }
+
+  toggleBtn.addEventListener('click', () => {
+    const isExpanded = toggleBtn.getAttribute('aria-expanded') === 'true';
+    if (isExpanded) {
+      closeMenu();
+    } else {
+      openMenu();
+    }
+  });
+
+  // Escape key closes mobile menu and returns focus
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && toggleBtn.getAttribute('aria-expanded') === 'true') {
+      closeMenu();
+      toggleBtn.focus();
+    }
+  });
+
+  // Click outside closes menu
+  document.addEventListener('click', (e) => {
+    if (toggleBtn.getAttribute('aria-expanded') === 'true' &&
+        !panel.contains(e.target) &&
+        !toggleBtn.contains(e.target)) {
+      closeMenu();
+    }
+  });
+
+  // Close mobile drawer when any link is clicked
+  panel.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      closeMenu();
+    });
+  });
+}
+
+/* ── 6. Navigation Smooth Scrolling (No Active Highlight) ───────── */
 function initNavScroll() {
-  const navLinks = document.querySelectorAll('.header-nav a[href^="#"]');
+  const navLinks = document.querySelectorAll('.header-nav a[href^="#"], .mobile-nav-panel a[href^="#"]');
   if (!navLinks.length) return;
-
-  const getTargetElements = () => {
-    return Array.from(navLinks).map(link => {
-      const hash = link.getAttribute('href');
-      const target = hash ? document.querySelector(hash) : null;
-      return { link, hash, target };
-    }).filter(item => item.target !== null);
-  };
-
-  const navItems = getTargetElements();
 
   navLinks.forEach((link) => {
     link.addEventListener('click', (event) => {
@@ -447,8 +508,8 @@ function initNavScroll() {
 
       const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       const navHeader = document.querySelector('.site-header');
-      const navHeight = navHeader ? navHeader.offsetHeight : 90;
-      const breathingRoom = 26;
+      const navHeight = navHeader ? navHeader.offsetHeight : 104;
+      const breathingRoom = 24;
       const offset = navHeight + breathingRoom;
 
       // If ScrollTrigger is active, ensure layout coordinates are fresh
@@ -487,57 +548,8 @@ function initNavScroll() {
         targetEl.setAttribute('tabindex', '-1');
       }
       targetEl.focus({ preventScroll: true });
-
-      // Immediate visual feedback on clicked nav link
-      setActiveLink(targetId);
     });
   });
-
-  function setActiveLink(activeHash) {
-    navLinks.forEach(link => {
-      const href = link.getAttribute('href');
-      const isActive = href === activeHash;
-      link.classList.toggle('active', isActive);
-      if (isActive) {
-        link.setAttribute('aria-current', 'page');
-      } else {
-        link.removeAttribute('aria-current');
-      }
-    });
-  }
-
-  // Active link detection using IntersectionObserver
-  if ('IntersectionObserver' in window && navItems.length > 0) {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const id = entry.target.id;
-          if (id) {
-            setActiveLink(`#${id}`);
-          }
-        }
-      });
-    }, {
-      rootMargin: '-25% 0px -50% 0px',
-      threshold: [0, 0.1, 0.25]
-    });
-
-    navItems.forEach(({ target }) => observer.observe(target));
-  }
-
-  // Scroll event fallback for continuous active link tracking
-  window.addEventListener('scroll', () => {
-    const scrollPosition = (window.scrollY || window.pageYOffset) + 160;
-    
-    for (let i = navItems.length - 1; i >= 0; i--) {
-      const { hash, target } = navItems[i];
-      const elTop = target.getBoundingClientRect().top + window.pageYOffset;
-      if (scrollPosition >= elTop - 60) {
-        setActiveLink(hash);
-        break;
-      }
-    }
-  }, { passive: true });
 }
 
 /* ── DOM Ready Initialization ────────────────────────────────────── */
@@ -545,5 +557,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initThemeToggle();
   initNightStars();
   initAnimations();
+  initMobileMenu();
   initNavScroll();
 });

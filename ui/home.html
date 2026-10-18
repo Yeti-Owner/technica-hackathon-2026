@@ -18,11 +18,31 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
 
+  <script>
+    (function() {
+      try {
+        const saved = localStorage.getItem('nod-theme');
+        if (saved === 'dark' || (!saved && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.dataset.theme = 'dark';
+        }
+      } catch (e) {}
+    })();
+  </script>
   <script src="home.js" defer></script>
 </head>
 <body>
 
 <a href="#main-content" class="skip-link">Skip to main content</a>
+
+<!-- ═══ CELESTIAL SUN & MOON (TOP-LEFT CORNER) ═══ -->
+<div class="celestial-container" aria-hidden="true">
+  <div class="celestial-body celestial-sun">
+    <img src="assets/sun.png" alt="" class="celestial-img sun-img" width="190" height="190" loading="eager">
+  </div>
+  <div class="celestial-body celestial-moon">
+    <img src="assets/moon.png" alt="" class="celestial-img moon-img" width="190" height="190" loading="eager">
+  </div>
+</div>
 
 <!-- ═══ AMBIENT SKY CLOUDS (PARALLAX + DRIFT) ═══ -->
 <div class="sky-clouds-layer" aria-hidden="true">
@@ -40,22 +60,195 @@
 </div>
 
 
-<!-- ── Navigation Bar ──────────────────────────────────────── -->
+<!-- ── Navigation Bar with Individual Floating Clouds ──────── -->
 <header class="site-header">
   <div class="header-inner">
-    <a href="home.html" class="brand" aria-label="Nod home">
-      <img src="assets/nod-logo.png" alt="Nod home" class="brand-logo" height="68" width="auto">
+    <!-- 1. Logo Cloud (Enlarged brand cloud with ample breathing room) -->
+    <a href="home.html" class="nav-cloud-link nav-brand-cloud" aria-label="Nod home">
+      <span class="nav-cloud-bg" aria-hidden="true">
+        <svg class="nav-cloud-svg" viewBox="0 0 180 82" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+          <defs>
+            <linearGradient id="gradNavLogo" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="var(--nav-cloud-fill-top)"/>
+              <stop offset="55%" stop-color="var(--nav-cloud-fill-mid)"/>
+              <stop offset="100%" stop-color="var(--nav-cloud-fill-bottom)"/>
+            </linearGradient>
+          </defs>
+          <path class="nav-cloud-path" fill="url(#gradNavLogo)" d="M 22 42 C 6 24, 4 56, 4 64 C 4 76, 16 80, 32 79 C 74 81, 120 81, 150 79 C 166 79, 176 68, 176 58 C 176 38, 164 24, 146 30 C 132 10, 106 6, 90 18 C 74 6, 46 8, 36 22 C 26 18, 22 30, 22 42 Z" />
+        </svg>
+      </span>
+      <div class="brand-logo-frame">
+        <img src="assets/nod-logo.png" alt="Nod home" class="brand-logo-img" width="125" height="46">
+      </div>
     </a>
+
+    <!-- Mobile "Menu" Cloud Button (Shown on mobile screens <= 768px) -->
+    <button type="button" class="nav-cloud-link nav-menu-btn" id="mobile-menu-toggle" aria-expanded="false" aria-controls="mobile-nav-menu" aria-label="Toggle navigation menu">
+      <span class="nav-cloud-bg" aria-hidden="true">
+        <svg class="nav-cloud-svg" viewBox="0 0 160 52" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+          <defs>
+            <linearGradient id="gradNavMenu" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="var(--nav-cloud-fill-top)"/>
+              <stop offset="55%" stop-color="var(--nav-cloud-fill-mid)"/>
+              <stop offset="100%" stop-color="var(--nav-cloud-fill-bottom)"/>
+            </linearGradient>
+          </defs>
+          <path class="nav-cloud-path" fill="url(#gradNavMenu)" d="M 20 22 C 8 10, 4 32, 4 36 C 4 45, 12 48, 22 47 C 55 49, 105 49, 138 47 C 150 47, 156 38, 156 32 C 156 22, 148 14, 138 18 C 128 8, 108 5, 92 12 C 78 3, 52 4, 40 12 C 30 8, 24 14, 20 22 Z" />
+        </svg>
+      </span>
+      <span class="nav-cloud-text">Menu</span>
+    </button>
     
+    <!-- 2–5. Four Link Clouds (Features, Mission, Team, Contact) -->
     <nav class="header-nav" aria-label="Primary navigation">
-      <a href="#features" class="nav-link">Features</a>
-      <a href="#mission" class="nav-link">Mission</a>
-      <a href="#team" class="nav-link">Team</a>
-      <a href="#contact" class="nav-link">Contact</a>
+      <a href="#features" class="nav-cloud-link" data-nav-section="features">
+        <span class="nav-cloud-bg" aria-hidden="true">
+          <svg class="nav-cloud-svg" viewBox="0 0 160 52" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+            <defs>
+              <linearGradient id="gradNavFeatures" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="var(--nav-cloud-fill-top)"/>
+                <stop offset="55%" stop-color="var(--nav-cloud-fill-mid)"/>
+                <stop offset="100%" stop-color="var(--nav-cloud-fill-bottom)"/>
+              </linearGradient>
+            </defs>
+            <path class="nav-cloud-path" fill="url(#gradNavFeatures)" d="M 20 22 C 8 10, 4 32, 4 36 C 4 45, 12 48, 22 47 C 55 49, 105 49, 138 47 C 150 47, 156 38, 156 32 C 156 22, 148 14, 138 18 C 128 8, 108 5, 92 12 C 78 3, 52 4, 40 12 C 30 8, 24 14, 20 22 Z" />
+          </svg>
+        </span>
+        <span class="nav-cloud-text">Features</span>
+      </a>
+
+      <a href="#mission" class="nav-cloud-link" data-nav-section="mission">
+        <span class="nav-cloud-bg" aria-hidden="true">
+          <svg class="nav-cloud-svg" viewBox="0 0 160 52" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+            <defs>
+              <linearGradient id="gradNavMission" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="var(--nav-cloud-fill-top)"/>
+                <stop offset="55%" stop-color="var(--nav-cloud-fill-mid)"/>
+                <stop offset="100%" stop-color="var(--nav-cloud-fill-bottom)"/>
+              </linearGradient>
+            </defs>
+            <path class="nav-cloud-path" fill="url(#gradNavMission)" d="M 20 25 C 6 14, 4 34, 4 37 C 4 45, 14 48, 24 47 C 60 49, 100 48, 136 47 C 148 47, 156 40, 156 33 C 156 24, 146 16, 136 20 C 124 6, 98 4, 84 12 C 70 5, 48 7, 38 15 C 28 12, 22 18, 20 25 Z" />
+          </svg>
+        </span>
+        <span class="nav-cloud-text">Mission</span>
+      </a>
+
+      <a href="#team" class="nav-cloud-link" data-nav-section="team">
+        <span class="nav-cloud-bg" aria-hidden="true">
+          <svg class="nav-cloud-svg" viewBox="0 0 160 52" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+            <defs>
+              <linearGradient id="gradNavTeam" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="var(--nav-cloud-fill-top)"/>
+                <stop offset="55%" stop-color="var(--nav-cloud-fill-mid)"/>
+                <stop offset="100%" stop-color="var(--nav-cloud-fill-bottom)"/>
+              </linearGradient>
+            </defs>
+            <path class="nav-cloud-path" fill="url(#gradNavTeam)" d="M 22 24 C 6 12, 4 32, 4 36 C 4 45, 14 48, 24 47 C 58 48, 102 49, 136 47 C 148 47, 156 38, 156 31 C 156 21, 145 13, 134 17 C 120 7, 102 6, 90 14 C 76 4, 48 4, 36 12 C 28 8, 24 16, 22 24 Z" />
+          </svg>
+        </span>
+        <span class="nav-cloud-text">Team</span>
+      </a>
+
+      <a href="#contact" class="nav-cloud-link" data-nav-section="contact">
+        <span class="nav-cloud-bg" aria-hidden="true">
+          <svg class="nav-cloud-svg" viewBox="0 0 160 52" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+            <defs>
+              <linearGradient id="gradNavContact" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="var(--nav-cloud-fill-top)"/>
+                <stop offset="55%" stop-color="var(--nav-cloud-fill-mid)"/>
+                <stop offset="100%" stop-color="var(--nav-cloud-fill-bottom)"/>
+              </linearGradient>
+            </defs>
+            <path class="nav-cloud-path" fill="url(#gradNavContact)" d="M 20 22 C 8 10, 4 32, 4 36 C 4 45, 12 48, 22 47 C 55 49, 105 49, 138 47 C 150 47, 156 38, 156 32 C 156 22, 148 14, 138 18 C 128 8, 108 5, 92 12 C 78 3, 52 4, 40 12 C 30 8, 24 14, 20 22 Z" />
+          </svg>
+        </span>
+        <span class="nav-cloud-text">Contact</span>
+      </a>
     </nav>
 
+    <!-- 6. Theme Toggle Cloud Button -->
     <div class="header-actions">
-      <button id="theme" type="button" class="theme-toggle-btn" aria-pressed="false">Dark theme</button>
+      <button id="theme" type="button" class="nav-cloud-link nav-theme-cloud theme-toggle-btn" aria-pressed="false">
+        <span class="nav-cloud-bg" aria-hidden="true">
+          <svg class="nav-cloud-svg" viewBox="0 0 160 52" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+            <defs>
+              <linearGradient id="gradNavTheme" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="var(--nav-cloud-fill-top)"/>
+                <stop offset="55%" stop-color="var(--nav-cloud-fill-mid)"/>
+                <stop offset="100%" stop-color="var(--nav-cloud-fill-bottom)"/>
+              </linearGradient>
+            </defs>
+            <path class="nav-cloud-path" fill="url(#gradNavTheme)" d="M 20 25 C 6 14, 4 34, 4 37 C 4 45, 14 48, 24 47 C 60 49, 100 48, 136 47 C 148 47, 156 40, 156 33 C 156 24, 146 16, 136 20 C 124 6, 98 4, 84 12 C 70 5, 48 7, 38 15 C 28 12, 22 18, 20 25 Z" />
+          </svg>
+        </span>
+        <span class="nav-cloud-text">Dark theme</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Floating Cloud Nav Drawer -->
+  <div class="mobile-nav-panel" id="mobile-nav-menu" hidden aria-label="Mobile navigation">
+    <div class="mobile-nav-clouds">
+      <a href="#features" class="nav-cloud-link" data-nav-section="features">
+        <span class="nav-cloud-bg" aria-hidden="true">
+          <svg class="nav-cloud-svg" viewBox="0 0 160 52" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+            <defs>
+              <linearGradient id="gradNavMFeatures" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="var(--nav-cloud-fill-top)"/>
+                <stop offset="55%" stop-color="var(--nav-cloud-fill-mid)"/>
+                <stop offset="100%" stop-color="var(--nav-cloud-fill-bottom)"/>
+              </linearGradient>
+            </defs>
+            <path class="nav-cloud-path" fill="url(#gradNavMFeatures)" d="M 20 22 C 8 10, 4 32, 4 36 C 4 45, 12 48, 22 47 C 55 49, 105 49, 138 47 C 150 47, 156 38, 156 32 C 156 22, 148 14, 138 18 C 128 8, 108 5, 92 12 C 78 3, 52 4, 40 12 C 30 8, 24 14, 20 22 Z" />
+          </svg>
+        </span>
+        <span class="nav-cloud-text">Features</span>
+      </a>
+      <a href="#mission" class="nav-cloud-link" data-nav-section="mission">
+        <span class="nav-cloud-bg" aria-hidden="true">
+          <svg class="nav-cloud-svg" viewBox="0 0 160 52" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+            <defs>
+              <linearGradient id="gradNavMMission" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="var(--nav-cloud-fill-top)"/>
+                <stop offset="55%" stop-color="var(--nav-cloud-fill-mid)"/>
+                <stop offset="100%" stop-color="var(--nav-cloud-fill-bottom)"/>
+              </linearGradient>
+            </defs>
+            <path class="nav-cloud-path" fill="url(#gradNavMMission)" d="M 20 25 C 6 14, 4 34, 4 37 C 4 45, 14 48, 24 47 C 60 49, 100 48, 136 47 C 148 47, 156 40, 156 33 C 156 24, 146 16, 136 20 C 124 6, 98 4, 84 12 C 70 5, 48 7, 38 15 C 28 12, 22 18, 20 25 Z" />
+          </svg>
+        </span>
+        <span class="nav-cloud-text">Mission</span>
+      </a>
+      <a href="#team" class="nav-cloud-link" data-nav-section="team">
+        <span class="nav-cloud-bg" aria-hidden="true">
+          <svg class="nav-cloud-svg" viewBox="0 0 160 52" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+            <defs>
+              <linearGradient id="gradNavMTeam" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="var(--nav-cloud-fill-top)"/>
+                <stop offset="55%" stop-color="var(--nav-cloud-fill-mid)"/>
+                <stop offset="100%" stop-color="var(--nav-cloud-fill-bottom)"/>
+              </linearGradient>
+            </defs>
+            <path class="nav-cloud-path" fill="url(#gradNavMTeam)" d="M 22 24 C 6 12, 4 32, 4 36 C 4 45, 14 48, 24 47 C 58 48, 102 49, 136 47 C 148 47, 156 38, 156 31 C 156 21, 145 13, 134 17 C 120 7, 102 6, 90 14 C 76 4, 48 4, 36 12 C 28 8, 24 16, 22 24 Z" />
+          </svg>
+        </span>
+        <span class="nav-cloud-text">Team</span>
+      </a>
+      <a href="#contact" class="nav-cloud-link" data-nav-section="contact">
+        <span class="nav-cloud-bg" aria-hidden="true">
+          <svg class="nav-cloud-svg" viewBox="0 0 160 52" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+            <defs>
+              <linearGradient id="gradNavMContact" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="var(--nav-cloud-fill-top)"/>
+                <stop offset="55%" stop-color="var(--nav-cloud-fill-mid)"/>
+                <stop offset="100%" stop-color="var(--nav-cloud-fill-bottom)"/>
+              </linearGradient>
+            </defs>
+            <path class="nav-cloud-path" fill="url(#gradNavMContact)" d="M 20 22 C 8 10, 4 32, 4 36 C 4 45, 12 48, 22 47 C 55 49, 105 49, 138 47 C 150 47, 156 38, 156 32 C 156 22, 148 14, 138 18 C 128 8, 108 5, 92 12 C 78 3, 52 4, 40 12 C 30 8, 24 14, 20 22 Z" />
+          </svg>
+        </span>
+        <span class="nav-cloud-text">Contact</span>
+      </a>
     </div>
   </div>
 </header>
