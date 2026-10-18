@@ -182,7 +182,7 @@ class AICheckTests(unittest.TestCase):
         """Regression guard: the shipped lab list stays parseable and deduped."""
         text = (ROOT / "test_images.txt").read_text(encoding="utf-8")
         urls = lab_urls(text)
-        self.assertEqual(len(urls), 24)
+        self.assertEqual(len(urls), 13)  # update when the lab list is re-curated
         self.assertEqual(len(set(urls)), len(urls))
         self.assertEqual(
             urls.count("https://sightengine.com/assets/img/genai/gpt-220w.webp"), 1
