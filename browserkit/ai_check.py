@@ -33,7 +33,7 @@ SNIFF_BYTES = 32 * 1024 * 1024
 SNIFF_ENTRIES = 64
 URL_ENTRIES = 4096
 
-IMAGE_WHITELIST_DIRS = ("assets", "ui/assets", "Images for ui")
+IMAGE_WHITELIST_DIRS = ("ui/assets", "Images for ui")
 IMAGE_EXTENSIONS = frozenset({".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".bmp", ".ico"})
 WHITELISTED_EXTENSIONS = (".svg", ".ico")
 

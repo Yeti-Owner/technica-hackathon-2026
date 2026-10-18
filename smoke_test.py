@@ -4,7 +4,7 @@ from pathlib import Path
 
 from playwright.async_api import expect
 from browserkit import BrowserController
-from browserkit.controller import ROOT
+from browserkit.controller import ROOT, lab_urls
 
 
 async def main():
@@ -17,10 +17,11 @@ async def main():
 
         # The redesigned home's closing button opens the AI image lab.
         await b.click_link("Try Practice Tools")
-        await expect(b.page.get_by_role("heading", name="AI image lab", exact=True)).to_be_visible()
+        await expect(b.page.get_by_role("heading", name="A closer look at the pictures you see.", exact=True)).to_be_visible()
         await expect(b.page.locator("#lab-grid")).to_have_count(1)
         await expect(b.page.get_by_role("link", name="Home", exact=True)).to_be_visible()
-        await expect(b.page.locator("#lab-grid figure")).to_have_count(13)
+        expected_images = lab_urls((ROOT / "test_images.txt").read_text(encoding="utf-8"))
+        await expect(b.page.locator("#lab-grid figure")).to_have_count(len(expected_images))
 
         # The practice page is UI-orphaned but still reachable by direct URL.
         await b.goto((ROOT / "ui/practice.html").as_uri())

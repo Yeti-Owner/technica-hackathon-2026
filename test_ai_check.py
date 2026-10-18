@@ -126,7 +126,7 @@ class AICheckTests(unittest.TestCase):
 
     def test_builtin_image_whitelist_hashes_project_images(self):
         hashes, prefixes = builtin_image_whitelist()
-        for rel in ("assets/sun.png", "ui/assets/nod-logo.png", "Images for ui/moon.png"):
+        for rel in ("ui/assets/sun.png", "ui/assets/nod-logo.png", "Images for ui/moon.png"):
             expected = hashlib.sha256((ROOT / rel).read_bytes()).hexdigest()
             self.assertIn(expected, hashes)
         self.assertTrue(is_image_whitelisted(

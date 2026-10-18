@@ -62,3 +62,10 @@ Desktop.ini
 
 # Vultr server runbook (local-only build instructions)
 vultr-server-info/RUNBOOK.md
+
+# Regenerable frontend previews (keep source harnesses and the whitelist fixture)
+/scratch/*.png
+!/scratch/test_logo_cloud.png
+/scratch/test_cloud.html
+/scratch/test_nav.html
+/scratch/focus_test.html

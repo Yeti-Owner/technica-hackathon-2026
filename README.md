@@ -55,10 +55,10 @@ Head left/right (or Tab/Shift+Tab) selects an element. After a brief quiet pause
 - `ui/ai_scan.js`, `ui/ai_mark.css`: in-page AI scan and marking.
 - `ui/image-lab.html`: debug lab; its card list is generated from `test_images.txt` at browser start.
 - `ui/home.html`, `ui/home.js`, `ui/theme.css`: redesigned home (website 2.0) — sun/moon/clouds theme, cloud nav, founders section, GSAP/Lenis animations from CDNs.
-- `ui/assets/`, `Images for ui/`: home-page images (sun, moon, clouds, logos, team photos).
-- `scratch/`: Tomas's dev harness (preview/verify scripts and screenshots).
+- `ui/assets/`: runtime images (sun, moon, clouds, logos). `Images for ui/` preserves original artwork and team photos; several are referenced directly by the home page. The redundant root `assets/` copy was removed.
+- `scratch/`: frontend preview and verification scripts. Generated screenshots and HTML previews are ignored; rerun the corresponding script to recreate them.
 - `CLAUDEwebdesign copy.md`, `Founders Descriptions.md`, `website description.md`: design and notes docs.
-- Other `ui/` files: practice page (reachable by direct URL only), bookmarks, and shared page styling.
+- Other `ui/` files: practice page (reachable by direct URL only) and shared page styling.
 
 ## Collaboration notes
 
