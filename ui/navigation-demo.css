@@ -22,7 +22,7 @@ kbd { font: inherit; font-size: .86em; font-weight: 600; white-space: nowrap; bo
 .demo-card.is-complete .demo-result { color: var(--text-main); font-weight: 600; }
 .demo-card.is-complete .demo-art { color: #a66500; }
 .demo-feedback { display: flex; justify-content: center; align-items: center; gap: 24px; margin: 28px auto 0; min-height: 52px; flex-wrap: wrap; }
-.demo-feedback p { margin: 0; text-align: center; }
+.demo-feedback p { margin: 0; text-align: center; font-size: 1.25rem; }
 .demo-reset { min-height: 44px; padding: 8px 16px; background: transparent; color: var(--text-main); border: 1px solid var(--text-subtle); border-radius: 999px; font: inherit; cursor: pointer; }
 .demo-reset:hover { background: var(--card-bg); }
 .demo-note { text-align: center; color: var(--text-muted); font-size: .9rem; margin: 22px auto 0; }

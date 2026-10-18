@@ -43,7 +43,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   clickButton.addEventListener('click', () => {
     clicks++;
-    document.getElementById('click-result').textContent = clicks === 1 ? 'You did it! One click.' : `You did it! ${clicks} clicks.`;
+    const result = document.getElementById('click-result');
+    result.hidden = false;
+    result.textContent = clicks === 1 ? 'You did it! One click.' : `You did it! ${clicks} clicks.`;
     status.textContent = `Button activated ${clicks} ${clicks === 1 ? 'time' : 'times'}. Your focus stays here.`;
     celebrate('click-card');
   });
@@ -52,13 +54,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const opening = surprise.hidden;
     surprise.hidden = !opening;
     openLink.setAttribute('aria-expanded', String(opening));
-    status.textContent = opening ? 'Surprise opened. You found a little sunshine!' : 'Surprise closed. Open it again whenever you like.';
+    status.textContent = opening ? 'Surprise opened. Great work!' : 'Surprise closed. Open it again whenever you like.';
     if (opening) celebrate('open-card');
   });
   function rightClick(event) {
     event.preventDefault();
     rightClicks++;
-    document.getElementById('right-result').textContent = `Right click received! ${rightClicks === 1 ? 'A new cloud says hello.' : `${rightClicks} and counting.`}`;
+    const result = document.getElementById('right-result');
+    result.hidden = false;
+    result.textContent = `Right click received! ${rightClicks === 1 ? '' : `${rightClicks} and counting.`}`;
     status.textContent = `Right click ${rightClicks} worked. No menu or new page opened.`;
     celebrate('right-card');
   }
@@ -75,8 +79,12 @@ document.addEventListener('DOMContentLoaded', () => {
       card.classList.remove('is-complete');
       card.querySelector('.demo-art span').getAnimations().forEach(animation => animation.cancel());
     });
-    document.getElementById('click-result').textContent = 'Ready when you are.';
-    document.getElementById('right-result').textContent = 'Something extra is waiting.';
+    const clickResult = document.getElementById('click-result');
+    clickResult.textContent = '';
+    clickResult.hidden = true;
+    const rightResult = document.getElementById('right-result');
+    rightResult.textContent = '';
+    rightResult.hidden = true;
     surprise.hidden = true;
     openLink.setAttribute('aria-expanded', 'false');
     status.textContent = 'All reset. Try the controls again.';
