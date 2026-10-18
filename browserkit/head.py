@@ -44,11 +44,27 @@ HUD_JS = r"""
              border: 1.5px solid rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
              opacity: 0; transform: translateY(-6px); transition: opacity 0.2s, transform 0.2s; }
     .toast.show { opacity: 1; transform: none; }
+    .camera { position: fixed; top: 16px; right: 16px; z-index: 2147483647;
+              width: min(240px, calc(100vw - 32px)); overflow: hidden; border-radius: 20px;
+              color: #081c28; background: rgba(255,255,255,.92); border: 1.5px solid #8aa0b5;
+              box-shadow: 0 6px 20px rgba(14,52,85,.14); backdrop-filter: blur(12px);
+              font: 700 13px/1.2 'Plus Jakarta Sans', system-ui, sans-serif; }
+    .camera.collapsed { width: auto; border-radius: 999px; }
+    .camera button { display: flex; align-items: center; justify-content: space-between; gap: 16px;
+                     width: 100%; padding: 12px 15px; border: 0; background: transparent;
+                     color: inherit; font: inherit; cursor: pointer; }
+    .camera button:hover { background: rgba(77,163,255,.12); }
+    .camera button:focus-visible { outline: 3px solid #4da3ff; outline-offset: -4px; }
+    .camera canvas { display: block; width: 100%; height: auto; transform: scaleX(-1); }
+    .camera [hidden] { display: none; }
+    .camera-status { padding: 24px 15px; text-align: center; color: #3a4b5c; }
   `;
   const THEME = { CENTER: "#8aa0b5", LEFT: "#ffbf00", RIGHT: "#ffbf00", UP: "#4da3ff", DOWN: "#4da3ff",
                   WARN: "#e0504a", WAIT: "#b08cff" };
 
   let host, wrap, pill, msg, chip, toast, toastTimer, lastToggle = null;
+  let camera, cameraButton, canvas, cameraStatus, previewVisible = true, lastFrame = null;
+  let polling = false, changingPreview = false;
 
   function mount() {
     if (host && host.isConnected) return true;
@@ -75,6 +91,23 @@ HUD_JS = r"""
     toast = document.createElement("div"); toast.className = "toast";
     wrap.append(pill, toast);
     root.appendChild(wrap);
+    camera = document.createElement("section"); camera.className = "camera";
+    camera.setAttribute("aria-label", "Camera preview");
+    cameraButton = document.createElement("button"); cameraButton.type = "button";
+    cameraButton.addEventListener("click", async () => {
+      if (changingPreview) return;
+      changingPreview = true;
+      try {
+        await window.__headCommand(previewVisible ? "hide-preview" : "show-preview");
+        await tick();
+      } finally { changingPreview = false; }
+    });
+    canvas = document.createElement("canvas"); canvas.hidden = true;
+    canvas.setAttribute("role", "img"); canvas.setAttribute("aria-label", "Live camera preview");
+    cameraStatus = document.createElement("div"); cameraStatus.className = "camera-status";
+    camera.append(cameraButton, canvas, cameraStatus);
+    root.appendChild(camera);
+    lastFrame = null;
     parent.appendChild(host);
     return true;
   }
@@ -86,7 +119,7 @@ HUD_JS = r"""
     toastTimer = setTimeout(() => toast.classList.remove("show"), 1600);
   }
 
-  function render(s) {
+  async function render(s) {
     if (!mount()) return;
     let key = s.dir, text;
     if (!s.alive) { key = "WARN"; text = "Head control stopped"; }
@@ -103,11 +136,30 @@ HUD_JS = r"""
     chip.className = "chip " + (s.scroll ? "on" : "off");
     if (lastToggle !== null && s.toggles !== lastToggle) showToast(s.scroll ? "Head scroll ON" : "Head scroll OFF");
     lastToggle = s.toggles;
+    previewVisible = s.previewVisible;
+    camera.classList.toggle("collapsed", !previewVisible);
+    cameraButton.textContent = previewVisible ? "Camera  −" : "Camera  +";
+    cameraButton.setAttribute("aria-label", previewVisible ? "Hide camera preview" : "Show camera preview");
+    cameraButton.setAttribute("aria-expanded", String(previewVisible));
+    canvas.hidden = !previewVisible || !s.alive || !s.preview;
+    cameraStatus.hidden = !previewVisible || (s.alive && !!s.preview);
+    cameraStatus.textContent = s.alive ? "Waiting for camera…" : "Camera unavailable";
+    if (previewVisible && s.alive && s.preview && s.preview !== lastFrame) {
+      // Decode directly to a canvas so sites' image CSP does not block the preview.
+      const bytes = Uint8Array.from(atob(s.preview), c => c.charCodeAt(0));
+      const bitmap = await createImageBitmap(new Blob([bytes], { type: "image/jpeg" }));
+      canvas.width = bitmap.width; canvas.height = bitmap.height;
+      canvas.getContext("2d").drawImage(bitmap, 0, 0);
+      bitmap.close();
+      lastFrame = s.preview;
+    }
   }
 
   async function tick() {
-    if (document.hidden || typeof window.__headState !== "function") return;
-    try { render(await window.__headState()); } catch (e) { /* page is closing or navigating */ }
+    if (polling || document.hidden || typeof window.__headState !== "function") return;
+    polling = true;
+    try { await render(await window.__headState()); } catch (e) { /* page is closing or navigating */ }
+    finally { polling = false; }
   }
   setInterval(tick, 120);
   tick();

@@ -17,6 +17,7 @@ Quick camera test with no browser:   python head_control.py
 from __future__ import annotations
 
 import asyncio
+import base64
 import math
 import sys
 import threading
@@ -88,6 +89,9 @@ class HeadControl:
         self._last_tick = 0.0
         self._scroll_future = None
         self._reported = ""
+        self._preview_visible = True
+        self._preview_frame = None
+        self._preview_at = 0.0
 
     # ---------- public API ----------
     @property
@@ -114,6 +118,10 @@ class HeadControl:
             self.toggle_scroll()
         elif name == "center":
             self.calibrate()
+        elif name == "hide-preview":
+            self._preview_visible = False
+        elif name == "show-preview":
+            self._preview_visible = True
 
     def hud_state(self) -> dict:
         """Everything the status bar needs, as plain data."""
@@ -123,6 +131,8 @@ class HeadControl:
             "dir": self._reported or "CENTER",
             "scroll": self._scroll_on,
             "toggles": self._toggle_count,
+            "previewVisible": self._preview_visible,
+            "preview": self._preview_frame if self._preview_visible else None,
         }
 
     def start(self):
@@ -348,8 +358,17 @@ class HeadControl:
             while not self._stop.is_set():
                 ok, frame = cap.read()
                 if not ok:
+                    self._preview_frame = None
                     time.sleep(0.01)
                     continue
+                now = time.monotonic()
+                # Reuse capture, with a small preview at no more than eight frames per second.
+                if self._preview_visible and now - self._preview_at >= 0.125:
+                    height, width = frame.shape[:2]
+                    preview = cv2.resize(frame, (320, max(1, round(height * 320 / width))))
+                    encoded, jpeg = cv2.imencode(".jpg", preview, [cv2.IMWRITE_JPEG_QUALITY, 70])
+                    self._preview_frame = base64.b64encode(jpeg).decode("ascii") if encoded else None
+                    self._preview_at = now
                 rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb)
                 self._last_ts = max(self._last_ts + 1, int(time.monotonic() * 1000))
@@ -363,6 +382,7 @@ class HeadControl:
         except Exception as error:
             print(f"[head] Head tracking stopped: {error}")
         finally:
+            self._preview_frame = None
             cap.release()
             landmarker.close()
 

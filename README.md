@@ -23,6 +23,7 @@ Real environment variables override `.env`. Restart the app to load values. With
 - Tilt head up / down → scroll, while head scroll is enabled.
 - Hold head rolled (ear to shoulder) ~1.2 s, or press Ctrl+Shift+H, to toggle head scrolling.
 - A status pill at the top of every page shows the current direction and whether scrolling is on.
+- With `--head`, a mirrored camera preview appears in the top-right corner. Click its header to hide or show it; your choice follows navigation and new tabs for the session. Hiding it leaves head control running.
 
 Camera frames are processed locally by MediaPipe; nothing is uploaded.
 
