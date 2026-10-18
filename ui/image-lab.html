@@ -56,17 +56,16 @@
       --frame-glow: drop-shadow(0 0 25px rgba(220, 240, 255, 0.55)) drop-shadow(0 0 50px rgba(98, 233, 255, 0.32));
     }
 
-    /* ── Full-Page Fixed Sky Blue Background (Light & Dark) ─────────── */
+    /* ── Seamless Full-Page Document Background ────────────────────── */
     html, body {
       margin: 0;
       padding: 0;
       min-height: 100vh;
-      background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-base) 45%, var(--sky-bottom) 100%);
-      background-attachment: fixed;
+      background: var(--night-deep, #041018);
       color: var(--text-main);
       font-family: var(--font-body);
       overflow-x: hidden;
-      transition: background 0.4s ease, color 0.4s ease;
+      transition: color 0.4s ease;
     }
 
     /* ── Slim Scroll Progress Indicator ───────────────────────────── */
@@ -89,39 +88,16 @@
       transition: width 0.1s linear;
     }
 
-    /* ── Ambient Decorative Margin Clouds ─────────────────────────── */
-    .lab-ambient-clouds {
-      position: fixed;
-      inset: 0;
+    /* ── Celestial Sun: Scrolls Away with Day Sky (Not Fixed in Night) ── */
+    .celestial-container {
+      position: absolute !important;
+      top: clamp(-55px, -4.5vw, -20px);
+      left: clamp(-55px, -4.5vw, -20px);
+      width: clamp(140px, 16vw, 210px);
+      height: clamp(140px, 16vw, 210px);
       pointer-events: none;
-      z-index: 0;
-      overflow: hidden;
-    }
-
-    .ambient-cloud {
-      position: absolute;
-      opacity: 0.65;
-      will-change: transform;
+      z-index: 2;
       user-select: none;
-      transition: opacity 0.4s ease;
-    }
-
-    .ambient-cloud img {
-      display: block;
-      width: 100%;
-      height: auto;
-    }
-
-    .cloud-tl { top: -30px; left: -60px; width: clamp(280px, 30vw, 440px); }
-    .cloud-tr { top: 60px; right: -80px; width: clamp(300px, 32vw, 480px); }
-    .cloud-mid-left { top: 40vh; left: -100px; width: clamp(260px, 28vw, 420px); opacity: 0.55; }
-    .cloud-mid-right { top: 75vh; right: -90px; width: clamp(280px, 30vw, 450px); opacity: 0.5; }
-    .cloud-bottom-left { top: 120vh; left: -70px; width: clamp(320px, 34vw, 500px); opacity: 0.6; }
-    .cloud-bottom-right { top: 160vh; right: -80px; width: clamp(300px, 32vw, 460px); opacity: 0.55; }
-
-    :root[data-theme="dark"] .ambient-cloud {
-      opacity: 0.3;
-      filter: brightness(0.65) contrast(1.2) drop-shadow(0 0 35px rgba(70, 130, 200, 0.25));
     }
 
     /* ── Sticky Cloud Header & Nav ────────────────────────────────── */
@@ -132,7 +108,16 @@
       padding: 16px 5vw;
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
-      transition: transform 0.3s ease;
+      transition: transform 0.3s ease, background 0.4s ease;
+    }
+
+    .lab-header.is-night-nav {
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .lab-header.is-night-nav .nav-cloud-text {
+      color: #081c28;
     }
 
     .lab-header-inner {
@@ -150,25 +135,56 @@
       gap: 14px;
     }
 
-    /* ── Main Layout ──────────────────────────────────────────────── */
-    .lab-main {
+    /* ── MASTER GRID & WRAPPER (Single #lab-grid for Smoke Tests) ─── */
+    .lab-page-wrapper {
       position: relative;
-      z-index: 10;
-      flex-grow: 1;
-      padding: 20px 5vw 120px;
-      max-width: 1360px;
-      margin: 0 auto;
       width: 100%;
-      box-sizing: border-box;
+      overflow: visible;
+    }
+
+    .lab-grid-master {
+      position: relative;
+      width: 100%;
+      overflow: visible;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── 1. DAY SKY ZONE (Bright Sky Blue Gradient) ──────────────── */
+    .lab-day-zone {
+      position: relative;
+      width: 100%;
+      background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-base) 45%, var(--sky-bottom) 85%, #8de5f8 100%);
+      background-repeat: no-repeat;
+      color: var(--text-main);
+      transition: background 0.4s ease;
+      overflow: visible;
+      padding-top: 10px;
+    }
+
+    [data-theme="dark"] .lab-day-zone {
+      background: linear-gradient(180deg, var(--sky-night-top) 0%, var(--sky-night-mid) 50%, var(--night-base) 100%);
+    }
+
+    /* Decorative Day Margin Clouds Layer */
+    .lab-ambient-clouds-day {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      overflow: hidden;
     }
 
     .lab-intro-section {
       text-align: center;
       max-width: 840px;
-      margin: 20px auto 60px;
+      margin: 20px auto 50px;
       display: flex;
       flex-direction: column;
       align-items: center;
+      position: relative;
+      z-index: 10;
+      padding: 0 20px;
     }
 
     .lab-eyebrow {
@@ -187,7 +203,7 @@
       box-shadow: 0 4px 12px rgba(8, 48, 72, 0.08);
     }
 
-    :root[data-theme="dark"] .lab-eyebrow {
+    [data-theme="dark"] .lab-eyebrow {
       color: #e2f2fa;
       background: rgba(255, 255, 255, 0.1);
       border-color: rgba(255, 255, 255, 0.16);
@@ -204,7 +220,7 @@
       text-shadow: 0 2px 14px rgba(255, 255, 255, 0.35);
     }
 
-    :root[data-theme="dark"] .lab-title {
+    [data-theme="dark"] .lab-title {
       text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
     }
 
@@ -226,14 +242,20 @@
       color: var(--text-main);
     }
 
-    /* ── Roomy Section Layout (2 Pictures Per Section) ────────────── */
-    .lab-grid-container {
+    .lab-day-sections,
+    .lab-night-sections {
+      position: relative;
+      z-index: 10;
       width: 100%;
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 0 5vw;
+      box-sizing: border-box;
       display: flex;
       flex-direction: column;
-      gap: 0;
     }
 
+    /* ── Roomy Section Layout (2 Pictures Per Section) ────────────── */
     .lab-section {
       min-height: clamp(560px, 78vh, 880px);
       padding: var(--section-padding-y) 0;
@@ -243,35 +265,7 @@
       justify-content: center;
       position: relative;
       box-sizing: border-box;
-    }
-
-    .lab-section-divider {
-      margin-bottom: clamp(30px, 5vh, 50px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .section-cloud-pill {
-      font-family: var(--font-display);
-      font-size: 0.82rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--text-subtle);
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(10px);
-      padding: 6px 18px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.85);
-      box-shadow: 0 6px 18px rgba(8, 48, 72, 0.08);
-      user-select: none;
-    }
-
-    :root[data-theme="dark"] .section-cloud-pill {
-      background: rgba(255, 255, 255, 0.08);
-      border-color: rgba(255, 255, 255, 0.14);
-      color: var(--night-muted);
+      overflow: visible;
     }
 
     .lab-section-row {
@@ -283,6 +277,7 @@
       max-width: 1240px;
       margin: 0 auto;
       box-sizing: border-box;
+      overflow: visible;
     }
 
     .lab-section-row.has-single-card {
@@ -300,9 +295,9 @@
       flex-direction: column;
       transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
       box-sizing: border-box;
+      overflow: visible;
     }
 
-    /* Stagger right card in the pair */
     .lab-card.is-staggered {
       margin-top: var(--card-stagger-offset);
     }
@@ -317,7 +312,6 @@
       border-radius: 28px;
     }
 
-    /* Card Frame Outer Box */
     .card-frame-outer {
       position: relative;
       width: 100%;
@@ -333,9 +327,9 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      overflow: visible;
     }
 
-    /* When AI detected: card outer frame becomes fully transparent so only SVG cloud shows */
     .is-ai-card .card-frame-outer {
       background: transparent;
       border-color: transparent;
@@ -345,7 +339,6 @@
       padding: 0;
     }
 
-    /* Picture Window inside Frame */
     .img-window {
       position: relative;
       z-index: 3;
@@ -372,7 +365,6 @@
       transform: scale(1.035);
     }
 
-    /* Caption Metadata */
     .lab-card-meta {
       display: flex;
       align-items: center;
@@ -396,18 +388,401 @@
       border: 1px solid rgba(255, 255, 255, 0.7);
     }
 
-    :root[data-theme="dark"] .meta-tag {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.15);
-      color: var(--hero-title-color);
-    }
-
     .meta-info {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
       font-weight: 500;
     }
+
+    /* ── 2. CLOUD LINE AT HALFWAY POINT (Wavy Night Transition) ───── */
+    .lab-cloud-line-transition {
+      position: relative;
+      width: 100%;
+      height: clamp(220px, 24vw, 360px);
+      margin-top: 40px;
+      margin-bottom: -2px;
+      overflow: visible;
+      color: var(--night-base, #081c28);
+      z-index: 6;
+      line-height: 0;
+    }
+
+    .cloud-line-glow {
+      position: absolute;
+      top: 10%;
+      left: 0;
+      width: 100%;
+      height: 90%;
+      background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(254, 215, 170, 0.22) 0%, rgba(192, 132, 252, 0.16) 45%, transparent 75%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wave-cloud-svg-wrap {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .wave-cloud-svg-wrap svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .seam-clouds-behind {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    .seam-clouds-front {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 3;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    .seam-cloud {
+      position: absolute;
+      pointer-events: none;
+      user-select: none;
+      opacity: 0.96;
+      will-change: transform;
+    }
+
+    .seam-behind-1 { left: 1%;   bottom: 45px; width: clamp(280px, 26vw, 420px); filter: drop-shadow(0 12px 24px rgba(0,0,0,0.12)); animation: seamFloat1 20s ease-in-out infinite alternate; }
+    .seam-behind-2 { left: 32%;  bottom: 35px; width: clamp(310px, 28vw, 440px); filter: drop-shadow(0 12px 24px rgba(0,0,0,0.12)); animation: seamFloat2 24s ease-in-out infinite alternate; }
+    .seam-behind-3 { left: 60%;  bottom: 40px; width: clamp(290px, 27vw, 430px); filter: drop-shadow(0 12px 24px rgba(0,0,0,0.12)); animation: seamFloat1 22s ease-in-out infinite alternate; }
+    .seam-behind-4 { right: 1%;  bottom: 45px; width: clamp(280px, 25vw, 410px); filter: drop-shadow(0 12px 24px rgba(0,0,0,0.12)); animation: seamFloat2 26s ease-in-out infinite alternate; }
+
+    .seam-front-1 { left: 12%; bottom: -35px; width: clamp(300px, 28vw, 440px); filter: drop-shadow(0 14px 28px rgba(4,18,30,0.45)); animation: seamFloat2 18s ease-in-out infinite alternate; }
+    .seam-front-2 { left: 45%; bottom: -45px; width: clamp(320px, 30vw, 460px); filter: drop-shadow(0 14px 28px rgba(4,18,30,0.45)); animation: seamFloat1 21s ease-in-out infinite alternate; }
+    .seam-front-3 { right: 8%; bottom: -30px; width: clamp(290px, 26vw, 420px); filter: drop-shadow(0 14px 28px rgba(4,18,30,0.45)); animation: seamFloat2 25s ease-in-out infinite alternate; }
+    .seam-night-1 { left: -3%; bottom: -50px; width: clamp(260px, 24vw, 380px); opacity: 0.85; filter: drop-shadow(0 12px 24px rgba(0,0,0,0.5)); animation: seamFloat1 23s ease-in-out infinite alternate; }
+    .seam-night-2 { right: -2%; bottom: -55px; width: clamp(280px, 25vw, 400px); opacity: 0.85; filter: drop-shadow(0 12px 24px rgba(0,0,0,0.5)); animation: seamFloat2 19s ease-in-out infinite alternate; }
+
+    @keyframes seamFloat1 {
+      0%   { transform: translate(0, 0); }
+      100% { transform: translate(14px, -8px); }
+    }
+    @keyframes seamFloat2 {
+      0%   { transform: translate(0, 0); }
+      100% { transform: translate(-12px, 9px); }
+    }
+
+    /* ── 3. NIGHT SKY ZONE (Deep Navy Sky) ────────────────────────── */
+    .lab-night-zone {
+      position: relative;
+      width: 100%;
+      background: linear-gradient(180deg, var(--night-base, #081c28) 0%, #061520 25%, var(--night-deep, #041018) 100%);
+      color: var(--night-text, #f0f8fc);
+      overflow: visible;
+      
+      /* Scoped tokens for Night Side Readability */
+      --text-main: var(--night-text, #f0f8fc);
+      --text-subtle: var(--night-muted, #9ec8db);
+      --card-bg: var(--night-card-bg, rgba(255, 255, 255, 0.08));
+      --card-border: var(--night-card-border, rgba(255, 255, 255, 0.16));
+      --hero-title-color: var(--night-accent, #62e9ff);
+      --card-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+    }
+
+    .lab-night-zone .meta-tag {
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(255, 255, 255, 0.22);
+      color: #62e9ff;
+      text-shadow: 0 0 10px rgba(98, 233, 255, 0.4);
+    }
+
+    .lab-night-zone .meta-info {
+      color: #cde4f0;
+    }
+
+    .lab-night-zone .lab-card:not(.is-ai-card) .card-frame-outer {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1.5px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), 0 0 24px rgba(98, 233, 255, 0.12);
+    }
+
+    /* Twinkling Stars Layer */
+    .lab-night-stars {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+
+    .star {
+      position: absolute;
+      background: #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 0 8px rgba(255, 255, 255, 0.9);
+      animation: starTwinkle infinite ease-in-out;
+    }
+
+    @keyframes starTwinkle {
+      0%, 100% { opacity: 0.25; transform: scale(0.85); }
+      50%      { opacity: 1;    transform: scale(1.3); }
+    }
+
+    /* Decorative Night Margin Clouds Layer */
+    .lab-ambient-clouds-night {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    /* ── Ambient Decorative Clouds (Placement & Parallax Drift) ───── */
+    .ambient-cloud {
+      position: absolute;
+      pointer-events: none;
+      user-select: none;
+      will-change: transform;
+      z-index: 1;
+      transition: opacity 0.4s ease;
+    }
+
+    .ambient-cloud img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .ambient-cloud.ambient-layer-1 {
+      z-index: 0;
+      filter: blur(1.5px) brightness(0.96);
+    }
+
+    .ambient-cloud.ambient-layer-2 {
+      z-index: 1;
+      filter: drop-shadow(0 10px 22px rgba(8, 48, 72, 0.12));
+    }
+
+    .ambient-cloud.ambient-layer-3 {
+      z-index: 2;
+      filter: drop-shadow(0 16px 32px rgba(8, 48, 72, 0.18));
+    }
+
+    .ambient-cloud.is-night-cloud.ambient-layer-2 {
+      filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.5));
+    }
+
+    .ambient-cloud.is-night-cloud.ambient-layer-3 {
+      filter: drop-shadow(0 18px 36px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 20px rgba(98, 233, 255, 0.15));
+    }
+
+    [data-theme="dark"] .ambient-cloud:not(.is-night-cloud) {
+      opacity: 0.35 !important;
+      filter: brightness(0.7) drop-shadow(0 0 25px rgba(70, 130, 200, 0.3));
+    }
+
+    @keyframes cloudDriftLeft {
+      0%   { transform: translate(0, 0); }
+      50%  { transform: translate(34px, -10px); }
+      100% { transform: translate(0, 0); }
+    }
+
+    @keyframes cloudDriftRight {
+      0%   { transform: translate(0, 0); }
+      50%  { transform: translate(-34px, 10px); }
+      100% { transform: translate(0, 0); }
+    }
+
+    /* ── 4. MOON & NIGHT CLOUDS FOOTER AT END OF PAGE ─────────────── */
+    .lab-night-end-footer {
+      position: relative;
+      width: 100%;
+      min-height: clamp(520px, 64vh, 760px);
+      padding-top: 60px;
+      padding-bottom: clamp(100px, 16vh, 200px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      overflow: visible;
+      margin-top: 40px;
+      box-sizing: border-box;
+      z-index: 10;
+    }
+
+    .lab-end-moon {
+      position: relative;
+      width: clamp(200px, 24vw, 320px);
+      height: clamp(200px, 24vw, 320px);
+      margin: 0 auto clamp(60px, 8vh, 100px);
+      z-index: 2;
+      pointer-events: none;
+      will-change: transform, opacity;
+      opacity: 0;
+      transform: translateY(70px) scale(0.92);
+      transition: opacity 1.3s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 1.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .lab-end-moon.is-risen {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .lab-end-moon .moon-halo {
+      position: absolute;
+      top: -25%;
+      left: -25%;
+      width: 150%;
+      height: 150%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 245, 205, 0.6) 0%, rgba(255, 235, 170, 0.32) 38%, rgba(216, 180, 254, 0.2) 55%, transparent 75%);
+      filter: blur(28px);
+      animation: haloPulse 5s ease-in-out infinite alternate;
+    }
+
+    .lab-end-moon .moon-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+      filter: drop-shadow(0 0 35px rgba(255, 245, 195, 0.9)) drop-shadow(0 0 75px rgba(253, 224, 71, 0.45)) drop-shadow(0 0 100px rgba(216, 180, 254, 0.3));
+      transform: rotate(-6deg);
+      animation: moonFloat 8s ease-in-out infinite alternate;
+    }
+
+    @keyframes haloPulse {
+      0%   { transform: scale(0.95); opacity: 0.75; }
+      100% { transform: scale(1.12); opacity: 1; }
+    }
+
+    @keyframes moonFloat {
+      0%   { transform: rotate(-6deg) translateY(0); }
+      100% { transform: rotate(-2deg) translateY(-10px); }
+    }
+
+    .sparkle {
+      position: absolute;
+      color: var(--moon-disk, #fef08a);
+      font-size: 1.2rem;
+      animation: sparkleRotate 4s ease-in-out infinite alternate;
+    }
+    .sparkle-1 { top: -10px; left: 10px;  font-size: 1.4rem; animation-delay: 0.5s; }
+    .sparkle-2 { top: 75px;  left: -20px; font-size: 1.1rem; animation-delay: 1.8s; }
+    .sparkle-3 { top: 95px;  right: 15px; font-size: 1.3rem; animation-delay: 2.7s; }
+    .sparkle-4 { top: 130px; left: 20px;  font-size: 1.15rem; animation-delay: 3.2s; }
+
+    @keyframes sparkleRotate {
+      0%   { transform: scale(0.8) rotate(0deg); opacity: 0.4; }
+      100% { transform: scale(1.2) rotate(45deg); opacity: 1; }
+    }
+
+    /* Pink & Lavender Stars Among Bottom Clouds */
+    .bottom-pastel-stars {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 260px;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .pastel-star {
+      position: absolute;
+      pointer-events: none;
+      user-select: none;
+      display: inline-block;
+      line-height: 1;
+      font-size: 1.15rem;
+      filter: drop-shadow(0 0 10px currentColor);
+      animation: pastelTwinkle 3.5s ease-in-out infinite alternate;
+    }
+
+    .p-star-1, .p-star-4 { color: #fbb6ce; text-shadow: 0 0 14px rgba(251, 182, 206, 0.95); animation-duration: 3.2s; }
+    .p-star-2, .p-star-5 { color: #d8b4fe; text-shadow: 0 0 14px rgba(216, 180, 254, 0.95); font-size: 1.35rem; animation-duration: 4.1s; animation-delay: 1.4s; }
+    .p-star-3, .p-star-6 { color: #fef08a; text-shadow: 0 0 12px rgba(254, 240, 138, 0.9); font-size: 1.05rem; animation-duration: 3.7s; animation-delay: 0.8s; }
+
+    @keyframes pastelTwinkle {
+      0%   { opacity: 0.35; transform: scale(0.85) rotate(0deg); }
+      50%  { opacity: 1;    transform: scale(1.2) rotate(15deg); }
+      100% { opacity: 0.55; transform: scale(0.95) rotate(-10deg); }
+    }
+
+    /* 3-Layer Overlapping Night Clouds Bank */
+    .nc-bottom-row {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      pointer-events: none;
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-end;
+      will-change: transform;
+    }
+
+    .nc-bottom-cloud {
+      flex-shrink: 0;
+      height: auto;
+      pointer-events: none;
+      user-select: none;
+      animation: ncbFloat 14s ease-in-out infinite alternate;
+    }
+
+    @keyframes ncbFloat {
+      0%   { transform: translateY(0); }
+      100% { transform: translateY(-12px); }
+    }
+
+    .nc-row-back {
+      z-index: 1;
+      bottom: 60px;
+      opacity: 0.6;
+      filter: blur(3px) brightness(0.72) saturate(0.92);
+    }
+    .nc-row-back .ncb-1 { width: clamp(340px, 34vw, 560px); margin-left: -8vw; margin-bottom: 25px; }
+    .nc-row-back .ncb-2 { width: clamp(380px, 38vw, 620px); margin-left: -5vw; }
+    .nc-row-back .ncb-3 { width: clamp(360px, 36vw, 600px); margin-left: -4vw; margin-bottom: 30px; }
+    .nc-row-back .ncb-4 { width: clamp(320px, 32vw, 540px); margin-right: -8vw; }
+
+    .nc-row-mid {
+      z-index: 3;
+      bottom: 30px;
+      opacity: 0.82;
+      filter: blur(1px) brightness(0.9) saturate(1.05);
+    }
+    .nc-row-mid .ncm-1 { width: clamp(320px, 32vw, 540px); margin-left: -4vw; }
+    .nc-row-mid .ncm-2 { width: clamp(350px, 35vw, 580px); margin-left: -2vw; margin-bottom: 15px; }
+    .nc-row-mid .ncm-3 { width: clamp(360px, 36vw, 590px); margin-left: -3vw; }
+    .nc-row-mid .ncm-4 { width: clamp(300px, 30vw, 520px); margin-right: -4vw; margin-bottom: 25px; }
+
+    .nc-row-front {
+      z-index: 4;
+      bottom: -20px;
+      opacity: 0.95;
+      filter: brightness(1.05) saturate(1.15) drop-shadow(0 -10px 30px rgba(7, 24, 43, 0.65));
+    }
+    .nc-row-front .ncf-1 { width: clamp(380px, 38vw, 620px); margin-left: -6vw; }
+    .nc-row-front .ncf-2 { width: clamp(350px, 35vw, 580px); margin-left: -3vw; margin-bottom: 10px; }
+    .nc-row-front .ncf-3 { width: clamp(340px, 34vw, 560px); margin-left: -2vw; }
+    .nc-row-front .ncf-4 { width: clamp(360px, 36vw, 580px); margin-right: -6vw; margin-bottom: 15px; }
 
     /* ── Scroll Reveal Animations ─────────────────────────────────── */
     .js-enabled .lab-card.is-hidden {
@@ -436,6 +811,9 @@
         --section-gap-x: 32px;
         --card-stagger-offset: 36px;
       }
+      .ambient-cloud:nth-child(3n) {
+        display: none;
+      }
     }
 
     @media (max-width: 680px) {
@@ -454,9 +832,16 @@
         min-height: auto;
         padding: 50px 0;
       }
+      .ambient-cloud {
+        opacity: 0.35 !important;
+        max-width: 200px !important;
+      }
+      .ambient-cloud:nth-child(2n) {
+        display: none;
+      }
     }
 
-    /* ── Lightbox Dialog (Hidden by Default, Cleaned of Overlays) ─── */
+    /* ── Accessible Lightbox Dialog ───────────────────────────────── */
     .lightbox-dialog {
       margin: auto;
       padding: 0;
@@ -481,7 +866,7 @@
       -webkit-backdrop-filter: blur(12px);
     }
 
-    :root[data-theme="dark"] .lightbox-dialog::backdrop {
+    [data-theme="dark"] .lightbox-dialog::backdrop {
       background: rgba(2, 8, 16, 0.88);
     }
 
@@ -561,13 +946,24 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .js-enabled .lab-card.is-hidden {
+      .ambient-cloud,
+      .nc-bottom-cloud,
+      .moon-img,
+      .moon-halo,
+      .sparkle,
+      .star,
+      .pastel-star,
+      .seam-cloud {
+        animation: none !important;
+        transform: none !important;
+      }
+      .lab-end-moon {
         opacity: 1 !important;
         transform: none !important;
       }
-      .ambient-cloud {
+      .js-enabled .lab-card.is-hidden {
+        opacity: 1 !important;
         transform: none !important;
-        animation: none !important;
       }
     }
   </style>
@@ -588,28 +984,6 @@
   </div>
   <div class="celestial-body celestial-moon">
     <img src="assets/moon.png" alt="" class="celestial-img moon-img" width="190" height="190" loading="eager">
-  </div>
-</div>
-
-<!-- ═══ AMBIENT SCROLL PARALLAX CLOUDS ═══ -->
-<div class="lab-ambient-clouds" aria-hidden="true">
-  <div class="ambient-cloud cloud-tl" data-speed="0.12">
-    <img src="assets/clouds/cloud-new-1.png" alt="" width="440" height="270" loading="lazy">
-  </div>
-  <div class="ambient-cloud cloud-tr" data-speed="0.22">
-    <img src="assets/clouds/cloud-new-1.png" alt="" width="480" height="290" loading="lazy">
-  </div>
-  <div class="ambient-cloud cloud-mid-left" data-speed="0.32">
-    <img src="assets/clouds/cloud-new-1.png" alt="" width="420" height="260" loading="lazy">
-  </div>
-  <div class="ambient-cloud cloud-mid-right" data-speed="0.18">
-    <img src="assets/clouds/cloud-new-1.png" alt="" width="450" height="280" loading="lazy">
-  </div>
-  <div class="ambient-cloud cloud-bottom-left" data-speed="0.25">
-    <img src="assets/clouds/cloud-new-1.png" alt="" width="500" height="300" loading="lazy">
-  </div>
-  <div class="ambient-cloud cloud-bottom-right" data-speed="0.15">
-    <img src="assets/clouds/cloud-new-1.png" alt="" width="460" height="280" loading="lazy">
   </div>
 </div>
 
@@ -673,19 +1047,129 @@
   </div>
 </header>
 
-<!-- ═══ MAIN CONTENT ═══ -->
-<main id="main-content" class="lab-main">
-  <div class="lab-intro-section">
-    <span class="lab-eyebrow">DETECTION & VERIFICATION LAB</span>
-    <h1 class="lab-title">AI image lab</h1>
+<!-- ═══ MAIN PAGE WRAPPER ═══ -->
+<main id="main-content" class="lab-page-wrapper">
+  
+  <!-- Primary Detection Container (single #lab-grid for tests) -->
+  <div class="lab-grid-master" id="lab-grid" aria-label="Picture detection grid">
 
-    <div class="lab-intro-card">
-      <p class="hint">Debug lab: the card list is generated from test_images.txt at browser start. Scroll slowly and watch which images get a white cloud frame.</p>
+    <!-- ── 1. DAY SKY ZONE (First Half of Page) ── -->
+    <div class="lab-day-zone" id="lab-day-zone">
+      <!-- Decorative Day Clouds Container -->
+      <div class="lab-ambient-clouds-day" id="lab-ambient-clouds-day" aria-hidden="true"></div>
+
+      <!-- Intro Section -->
+      <header class="lab-intro-section">
+        <span class="lab-eyebrow">DETECTION &amp; VERIFICATION LAB</span>
+        <h1 class="lab-title">AI image lab</h1>
+
+        <div class="lab-intro-card">
+          <p class="hint">The detector scores each image passively as you scroll. A white cloud frame marks AI-generated pictures with confidence over 50%. Scroll slowly and watch how the page reacts.</p>
+        </div>
+      </header>
+
+      <!-- Day Sections Container -->
+      <div class="lab-day-sections" id="lab-day-sections"></div>
     </div>
-  </div>
 
-  <!-- Primary Detection Cards Container -->
-  <div class="lab-grid-container" id="lab-grid" aria-label="Picture detection grid"></div>
+    <!-- ── 2. FULL-WIDTH CLOUD LINE (Halfway Point Wave Transition) ── -->
+    <div class="lab-cloud-line-transition" id="lab-cloud-line" aria-hidden="true">
+      <div class="cloud-line-glow"></div>
+
+      <!-- Back seam clouds: day clouds peeking over the wave crest into the day sky -->
+      <div class="seam-clouds-behind">
+        <img src="assets/clouds/cloud-day-1.png" alt="" class="seam-cloud seam-behind-1" width="380" height="280" loading="lazy">
+        <img src="assets/clouds/cloud-day-2.png" alt="" class="seam-cloud seam-behind-2" width="410" height="290" loading="lazy">
+        <img src="assets/clouds/cloud-day-3.png" alt="" class="seam-cloud seam-behind-3" width="370" height="270" loading="lazy">
+        <img src="assets/clouds/cloud-day-1.png" alt="" class="seam-cloud seam-behind-4" width="390" height="280" loading="lazy">
+      </div>
+
+      <!-- The Scalloped Wave SVG Edge -->
+      <div class="wave-cloud-svg-wrap">
+        <svg viewBox="0 0 1440 180" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0,180 L0,70
+            C60,95 120,115 180,105
+            C240,95 280,60 360,50
+            C440,40 500,70 560,80
+            C620,90 680,80 720,70
+            C760,60 820,40 900,45
+            C980,50 1020,80 1080,90
+            C1140,100 1200,85 1260,70
+            C1320,55 1380,60 1440,70
+            L1440,180 Z"
+            fill="currentColor"/>
+        </svg>
+      </div>
+
+      <!-- Front seam clouds: day clouds spilling forward + night clouds peeking up -->
+      <div class="seam-clouds-front">
+        <img src="assets/clouds/cloud-day-2.png" alt="" class="seam-cloud seam-front-1" width="370" height="270" loading="lazy">
+        <img src="assets/clouds/cloud-day-1.png" alt="" class="seam-cloud seam-front-2" width="390" height="285" loading="lazy">
+        <img src="assets/clouds/cloud-day-3.png" alt="" class="seam-cloud seam-front-3" width="360" height="260" loading="lazy">
+        <img src="assets/clouds/cloud-night-2.png" alt="" class="seam-cloud seam-night-1" width="380" height="290" loading="lazy">
+        <img src="assets/clouds/cloud-night-3.png" alt="" class="seam-cloud seam-night-2" width="370" height="270" loading="lazy">
+      </div>
+    </div>
+
+    <!-- ── 3. NIGHT SKY ZONE (Second Half of Page) ── -->
+    <div class="lab-night-zone" id="lab-night-zone">
+      <!-- Twinkling stars in night sky -->
+      <div class="lab-night-stars" id="lab-night-stars" aria-hidden="true"></div>
+
+      <!-- Decorative Night Margin Clouds Container -->
+      <div class="lab-ambient-clouds-night" id="lab-ambient-clouds-night" aria-hidden="true"></div>
+
+      <!-- Night Sections Container -->
+      <div class="lab-night-sections" id="lab-night-sections"></div>
+
+      <!-- ── 4. MOON & NIGHT CLOUDS FOOTER ── -->
+      <div class="lab-night-end-footer" id="lab-night-footer" aria-hidden="true">
+        
+        <!-- Glowing Crescent Moon with Radial Halo -->
+        <div class="crescent-moon-wrapper lab-end-moon" id="lab-end-moon">
+          <div class="moon-halo"></div>
+          <img src="assets/moon-end.png" alt="" class="moon-img" width="220" height="220" loading="lazy">
+          <div class="sparkle sparkle-1">✦</div>
+          <div class="sparkle sparkle-2">★</div>
+          <div class="sparkle sparkle-3">✦</div>
+          <div class="sparkle sparkle-4">★</div>
+        </div>
+
+        <!-- Pink & Lavender Pastel Stars Among Bottom Clouds -->
+        <div class="bottom-pastel-stars" aria-hidden="true">
+          <span class="pastel-star p-star-1" style="left: 12%; bottom: 120px;">★</span>
+          <span class="pastel-star p-star-2" style="left: 28%; bottom: 160px;">✦</span>
+          <span class="pastel-star p-star-3" style="left: 45%; bottom: 130px;">★</span>
+          <span class="pastel-star p-star-4" style="left: 62%; bottom: 170px;">✦</span>
+          <span class="pastel-star p-star-5" style="left: 78%; bottom: 140px;">★</span>
+          <span class="pastel-star p-star-6" style="left: 90%; bottom: 115px;">✦</span>
+        </div>
+
+        <!-- 3-Layer Overlapping Night Clouds Bank -->
+        <div class="nc-bottom-row nc-row-back">
+          <img src="assets/clouds/cloud-night-2.png" alt="" class="nc-bottom-cloud ncb-1" width="560" height="400" loading="lazy">
+          <img src="assets/clouds/cloud-night-1.png" alt="" class="nc-bottom-cloud ncb-2" width="620" height="600" loading="lazy">
+          <img src="assets/clouds/cloud-night-3.png" alt="" class="nc-bottom-cloud ncb-3" width="600" height="420" loading="lazy">
+          <img src="assets/clouds/cloud-night-2.png" alt="" class="nc-bottom-cloud ncb-4" width="540" height="380" loading="lazy">
+        </div>
+
+        <div class="nc-bottom-row nc-row-mid">
+          <img src="assets/clouds/cloud-night-3.png" alt="" class="nc-bottom-cloud ncm-1" width="540" height="380" loading="lazy">
+          <img src="assets/clouds/cloud-night-2.png" alt="" class="nc-bottom-cloud ncm-2" width="580" height="420" loading="lazy">
+          <img src="assets/clouds/cloud-night-1.png" alt="" class="nc-bottom-cloud ncm-3" width="590" height="570" loading="lazy">
+          <img src="assets/clouds/cloud-night-3.png" alt="" class="nc-bottom-cloud ncm-4" width="520" height="370" loading="lazy">
+        </div>
+
+        <div class="nc-bottom-row nc-row-front">
+          <img src="assets/clouds/cloud-night-1.png" alt="" class="nc-bottom-cloud ncf-1" width="620" height="600" loading="lazy">
+          <img src="assets/clouds/cloud-night-3.png" alt="" class="nc-bottom-cloud ncf-2" width="580" height="410" loading="lazy">
+          <img src="assets/clouds/cloud-night-2.png" alt="" class="nc-bottom-cloud ncf-3" width="560" height="400" loading="lazy">
+          <img src="assets/clouds/cloud-night-1.png" alt="" class="nc-bottom-cloud ncf-4" width="580" height="560" loading="lazy">
+        </div>
+      </div>
+    </div>
+
+  </div>
 </main>
 
 <!-- ═══ ACCESSIBLE LIGHTBOX MODAL ═══ -->
@@ -714,7 +1198,89 @@
 document.addEventListener('DOMContentLoaded', function () {
   document.documentElement.classList.add('js-enabled');
 
-  // ── 1. Theme Toggle Controller ────────────────────────────────────
+  // ===================================================================
+  // 1. CLOUD CONFIGURATION LISTS (EASILY TWEAKABLE)
+  // ===================================================================
+  const DAY_CLOUDS_CONFIG = [
+    { file: 'assets/clouds/cloud-day-1.png', side: 'left',  topPct: 4,  widthVw: 26, offsetPx: -70, layer: 2, opacity: 0.75, driftDur: 26, driftDelay: 0,   speed: 0.22 },
+    { file: 'assets/clouds/cloud-day-2.png', side: 'right', topPct: 10, widthVw: 28, offsetPx: -80, layer: 3, opacity: 0.85, driftDur: 32, driftDelay: -6,  speed: 0.32 },
+    { file: 'assets/clouds/cloud-day-3.png', side: 'left',  topPct: 22, widthVw: 22, offsetPx: -40, layer: 1, opacity: 0.55, driftDur: 22, driftDelay: -3,  speed: 0.15 },
+    { file: 'assets/clouds/cloud-day-1.png', side: 'right', topPct: 30, widthVw: 25, offsetPx: -60, layer: 2, opacity: 0.70, driftDur: 28, driftDelay: -12, speed: 0.24 },
+    { file: 'assets/clouds/cloud-day-2.png', side: 'left',  topPct: 44, widthVw: 27, offsetPx: -80, layer: 3, opacity: 0.80, driftDur: 36, driftDelay: -8,  speed: 0.34 },
+    { file: 'assets/clouds/cloud-day-3.png', side: 'right', topPct: 54, widthVw: 20, offsetPx: -30, layer: 1, opacity: 0.50, driftDur: 24, driftDelay: -15, speed: 0.14 },
+    { file: 'assets/clouds/cloud-day-1.png', side: 'left',  topPct: 66, widthVw: 29, offsetPx: -90, layer: 3, opacity: 0.85, driftDur: 30, driftDelay: -4,  speed: 0.30 },
+    { file: 'assets/clouds/cloud-day-2.png', side: 'right', topPct: 76, widthVw: 24, offsetPx: -50, layer: 2, opacity: 0.72, driftDur: 34, driftDelay: -18, speed: 0.22 },
+    { file: 'assets/clouds/cloud-day-3.png', side: 'left',  topPct: 86, widthVw: 21, offsetPx: -35, layer: 1, opacity: 0.55, driftDur: 25, driftDelay: -7,  speed: 0.16 },
+    { file: 'assets/clouds/cloud-day-1.png', side: 'right', topPct: 92, widthVw: 26, offsetPx: -70, layer: 2, opacity: 0.75, driftDur: 29, driftDelay: -10, speed: 0.26 }
+  ];
+
+  const NIGHT_CLOUDS_CONFIG = [
+    { file: 'assets/clouds/cloud-night-1.png', side: 'left',  topPct: 6,  widthVw: 27, offsetPx: -75, layer: 2, opacity: 0.70, driftDur: 28, driftDelay: -2,  speed: 0.22 },
+    { file: 'assets/clouds/cloud-night-2.png', side: 'right', topPct: 16, widthVw: 29, offsetPx: -85, layer: 3, opacity: 0.80, driftDur: 34, driftDelay: -9,  speed: 0.32 },
+    { file: 'assets/clouds/cloud-night-3.png', side: 'left',  topPct: 30, widthVw: 22, offsetPx: -40, layer: 1, opacity: 0.50, driftDur: 24, driftDelay: -5,  speed: 0.14 },
+    { file: 'assets/clouds/cloud-night-1.png', side: 'right', topPct: 42, widthVw: 26, offsetPx: -65, layer: 2, opacity: 0.68, driftDur: 30, driftDelay: -14, speed: 0.24 },
+    { file: 'assets/clouds/cloud-night-2.png', side: 'left',  topPct: 56, widthVw: 28, offsetPx: -80, layer: 3, opacity: 0.82, driftDur: 36, driftDelay: -7,  speed: 0.35 },
+    { file: 'assets/clouds/cloud-night-3.png', side: 'right', topPct: 68, widthVw: 21, offsetPx: -35, layer: 1, opacity: 0.52, driftDur: 22, driftDelay: -16, speed: 0.15 },
+    { file: 'assets/clouds/cloud-night-1.png', side: 'left',  topPct: 80, widthVw: 26, offsetPx: -60, layer: 2, opacity: 0.72, driftDur: 32, driftDelay: -11, speed: 0.25 },
+    { file: 'assets/clouds/cloud-night-2.png', side: 'right', topPct: 90, widthVw: 30, offsetPx: -90, layer: 3, opacity: 0.85, driftDur: 35, driftDelay: -4,  speed: 0.33 }
+  ];
+
+  function renderConfigClouds(container, configList, isNight = false) {
+    if (!container) return;
+    configList.forEach((cfg) => {
+      const cloudDiv = document.createElement('div');
+      cloudDiv.className = `ambient-cloud ambient-layer-${cfg.layer} ${isNight ? 'is-night-cloud' : ''}`;
+      cloudDiv.dataset.speed = String(cfg.speed);
+      cloudDiv.dataset.driftDir = cfg.side;
+      cloudDiv.style.top = `${cfg.topPct}%`;
+      if (cfg.side === 'left') {
+        cloudDiv.style.left = `${cfg.offsetPx}px`;
+      } else {
+        cloudDiv.style.right = `${cfg.offsetPx}px`;
+      }
+      cloudDiv.style.width = `clamp(220px, ${cfg.widthVw}vw, 540px)`;
+      cloudDiv.style.opacity = String(cfg.opacity);
+      cloudDiv.style.animation = `${cfg.side === 'left' ? 'cloudDriftLeft' : 'cloudDriftRight'} ${cfg.driftDur}s ease-in-out infinite alternate`;
+      cloudDiv.style.animationDelay = `${cfg.driftDelay}s`;
+
+      const img = document.createElement('img');
+      img.src = cfg.file;
+      img.alt = '';
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      img.width = 440;
+      img.height = 300;
+      cloudDiv.appendChild(img);
+      container.appendChild(cloudDiv);
+    });
+  }
+
+  renderConfigClouds(document.getElementById('lab-ambient-clouds-day'), DAY_CLOUDS_CONFIG, false);
+  renderConfigClouds(document.getElementById('lab-ambient-clouds-night'), NIGHT_CLOUDS_CONFIG, true);
+
+  // ===================================================================
+  // 2. TWINKLING STARS IN NIGHT SKY
+  // ===================================================================
+  const starsContainer = document.getElementById('lab-night-stars');
+  if (starsContainer) {
+    const starCount = 75;
+    for (let i = 0; i < starCount; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+      star.style.left = `${(Math.random() * 100).toFixed(2)}%`;
+      star.style.top = `${(Math.random() * 100).toFixed(2)}%`;
+      const size = (Math.random() * 2.8 + 1).toFixed(1);
+      star.style.width = `${size}px`;
+      star.style.height = `${size}px`;
+      star.style.animationDelay = `${(Math.random() * 4).toFixed(2)}s`;
+      star.style.animationDuration = `${(Math.random() * 3 + 2).toFixed(2)}s`;
+      starsContainer.appendChild(star);
+    }
+  }
+
+  // ===================================================================
+  // 3. THEME TOGGLE CONTROLLER
+  // ===================================================================
   const themeBtn = document.getElementById('theme');
   if (themeBtn) {
     const isDark = document.documentElement.dataset.theme === 'dark';
@@ -733,9 +1299,13 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // ── 2. Scroll Progress Bar & Parallax Clouds ──────────────────────
+  // ===================================================================
+  // 4. SCROLL PROGRESS & TRANSITION CONTROLLER
+  // ===================================================================
   const progressFill = document.getElementById('scroll-progress-fill');
-  const ambientClouds = document.querySelectorAll('.ambient-cloud');
+  const cloudLine = document.getElementById('lab-cloud-line');
+  const headerEl = document.querySelector('.lab-header');
+  const moonEl = document.getElementById('lab-end-moon');
 
   function onScroll() {
     const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
@@ -744,19 +1314,45 @@ document.addEventListener('DOMContentLoaded', function () {
       progressFill.style.width = pct + '%';
     }
 
-    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      const scrollY = window.scrollY;
-      ambientClouds.forEach(cloud => {
-        const speed = parseFloat(cloud.dataset.speed || '0.2');
-        cloud.style.transform = `translateY(${scrollY * speed}px)`;
-      });
+    if (cloudLine && starsContainer) {
+      const rect = cloudLine.getBoundingClientRect();
+      const winH = window.innerHeight;
+      if (rect.top < winH) {
+        const progress = Math.min(1, Math.max(0, (winH - rect.top) / (winH * 0.8)));
+        starsContainer.style.opacity = String(progress);
+      } else {
+        starsContainer.style.opacity = '0';
+      }
+
+      if (headerEl) {
+        if (rect.top <= 70) {
+          headerEl.classList.add('is-night-nav');
+        } else {
+          headerEl.classList.remove('is-night-nav');
+        }
+      }
     }
   }
 
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
-  // ── 3. Deterministic Continuous SVG Cloud Outline Generator ──────
+  // Moon Rise IntersectionObserver
+  if (moonEl) {
+    const moonObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          moonEl.classList.add('is-risen');
+          moonObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    moonObserver.observe(moonEl);
+  }
+
+  // ===================================================================
+  // 5. DETERMINISTIC CONTINUOUS SVG CLOUD OUTLINE GENERATOR
+  // ===================================================================
   function makePRNG(seed) {
     let s = (seed * 9301 + 49297) % 233280;
     return function () {
@@ -822,7 +1418,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
       const tx = dx / dist;
       const ty = dy / dist;
-      // Normal vector pointing outward for clockwise perimeter
       const nx = ty;
       const ny = -tx;
 
@@ -862,7 +1457,9 @@ document.addEventListener('DOMContentLoaded', function () {
     `;
   }
 
-  // ── 4. Lightbox Modal Controller ──────────────────────────────────
+  // ===================================================================
+  // 6. LIGHTBOX MODAL CONTROLLER
+  // ===================================================================
   const dialog = document.getElementById('lightbox-dialog');
   const closeBtn = document.getElementById('lightbox-close');
   const lbImg = document.getElementById('lightbox-img');
@@ -884,7 +1481,6 @@ document.addEventListener('DOMContentLoaded', function () {
       const score = card.dataset.aiScore || '';
       lbBadge.textContent = score ? `AI GENERATED · ${score}` : 'AI GENERATED';
 
-      // Redraw lightbox SVG cloud
       requestAnimationFrame(() => {
         const rect = lbImg.getBoundingClientRect();
         const w = rect.width || 480;
@@ -920,8 +1516,11 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
-  // ── 5. Build 2-Picture Sections & Cards ───────────────────────────
-  const gridContainer = document.getElementById('lab-grid');
+  // ===================================================================
+  // 7. BUILD 2-PICTURE SECTIONS: DAY ZONE & NIGHT ZONE (NO ZONE LABELS)
+  // ===================================================================
+  const daySectionsContainer = document.getElementById('lab-day-sections');
+  const nightSectionsContainer = document.getElementById('lab-night-sections');
   const urls = window.LAB_URLS || [];
 
   if (!urls.length) {
@@ -929,11 +1528,11 @@ document.addEventListener('DOMContentLoaded', function () {
     empty.className = 'lab-intro-card';
     empty.style.margin = '40px auto';
     empty.innerHTML = '<p class="hint">No test images yet — add URLs to test_images.txt and restart the browser.</p>';
-    gridContainer.replaceWith(empty);
+    daySectionsContainer.appendChild(empty);
     return;
   }
 
-  // Setup Scroll Reveal Observer
+  // Reveal on scroll observer
   const revealObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -944,7 +1543,10 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }, { threshold: 0.18, rootMargin: '0px 0px -40px 0px' });
 
-  // Group into pairs: exactly 2 cards per section
+  // Calculate dynamic midpoint so transition splits day and night accurately
+  const totalSections = Math.ceil(urls.length / 2);
+  const daySectionCount = Math.floor(totalSections / 2); // e.g. for 7 sections: 3 day, 4 night
+
   for (let i = 0; i < urls.length; i += 2) {
     const sectionIndex = Math.floor(i / 2) + 1;
     const isSingle = (i + 1 >= urls.length);
@@ -952,12 +1554,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const section = document.createElement('section');
     section.className = 'lab-section';
     section.dataset.section = String(sectionIndex);
-
-    // Section cloud divider tag
-    const divider = document.createElement('div');
-    divider.className = 'lab-section-divider';
-    divider.innerHTML = `<span class="section-cloud-pill">Zone ${sectionIndex}</span>`;
-    section.appendChild(divider);
 
     const row = document.createElement('div');
     row.className = `lab-section-row ${isSingle ? 'has-single-card' : ''}`;
@@ -975,7 +1571,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     section.appendChild(row);
-    gridContainer.appendChild(section);
+
+    // Distribute into Day Zone or Night Zone based on computed midpoint
+    if (sectionIndex <= daySectionCount) {
+      daySectionsContainer.appendChild(section);
+    } else {
+      nightSectionsContainer.appendChild(section);
+    }
   }
 
   function makeCard(url, index, isStaggered) {
@@ -993,17 +1595,14 @@ document.addEventListener('DOMContentLoaded', function () {
       file = parsed.pathname.split('/').filter(Boolean).pop() || '';
     } catch (e) {}
 
-    // Outer Frame Box
     const frameOuter = document.createElement('div');
     frameOuter.className = 'card-frame-outer';
 
-    // SVG Cloud Frame element
     const cloudSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     cloudSvg.setAttribute('class', 'cloud-frame-svg');
     cloudSvg.setAttribute('aria-hidden', 'true');
     cloudSvg.setAttribute('focusable', 'false');
 
-    // Picture Window
     const imgWindow = document.createElement('div');
     imgWindow.className = 'img-window';
 
@@ -1014,7 +1613,6 @@ document.addEventListener('DOMContentLoaded', function () {
     img.alt = 'Test image ' + index;
     imgWindow.appendChild(img);
 
-    // AI Badge
     const badge = document.createElement('div');
     badge.className = 'ai-cloud-badge';
     badge.setAttribute('role', 'status');
@@ -1024,7 +1622,6 @@ document.addEventListener('DOMContentLoaded', function () {
     frameOuter.appendChild(imgWindow);
     frameOuter.appendChild(badge);
 
-    // Metadata Caption
     const meta = document.createElement('figcaption');
     meta.className = 'lab-card-meta';
     meta.innerHTML = `
@@ -1035,7 +1632,6 @@ document.addEventListener('DOMContentLoaded', function () {
     card.appendChild(frameOuter);
     card.appendChild(meta);
 
-    // Initial shape generation
     const seed = index * 137 + 19;
     function updateFrameShape() {
       const w = imgWindow.offsetWidth || 440;
@@ -1043,7 +1639,6 @@ document.addEventListener('DOMContentLoaded', function () {
       renderCloudSVG(cloudSvg, w, h, seed);
     }
 
-    // ResizeObserver keeps cloud bumps proportionate
     if (window.ResizeObserver) {
       const ro = new ResizeObserver(() => updateFrameShape());
       ro.observe(imgWindow);
@@ -1051,7 +1646,6 @@ document.addEventListener('DOMContentLoaded', function () {
       updateFrameShape();
     }
 
-    // React to AI detection
     card.addEventListener('ai-detected', (e) => {
       card.classList.add('is-ai-card');
       const score = e.detail && e.detail.score;
@@ -1062,7 +1656,6 @@ document.addEventListener('DOMContentLoaded', function () {
       updateFrameShape();
     });
 
-    // Keyboard & Click interactions
     card.addEventListener('click', () => openLightbox(url, index, host, file, card));
     card.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
@@ -1071,7 +1664,6 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
 
-    // Reveal immediately if focused via keyboard tabbing
     card.addEventListener('focus', () => {
       card.classList.remove('is-hidden');
       card.classList.add('is-revealed');
