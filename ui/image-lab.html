@@ -1,58 +1,1777 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>AI image lab</title><link rel="stylesheet" href="theme.css"><style>
-.lab-title { font-size:clamp(28px,4vw,40px); margin-bottom:12px; }
-.lab-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:24px; margin-top:32px; }
-.lab-card { min-height:220px; margin:0; border-top:3px solid var(--line); padding:16px 0; }
-.lab-full { grid-column:1 / -1; }
-.lab-card img { display:block; width:100%; min-height:220px; object-fit:contain; background:#111; }
-.lab-card figcaption { margin-top:10px; color:var(--muted); font-size:14px; }
-@media(max-width:600px) { .lab-grid { grid-template-columns:1fr; } }
-</style></head>
-<body><header><a href="home.html">Home</a></header><main>
-<h1 class="lab-title">AI image lab — debug page for the AI image checker</h1>
-<p class="hint">Debug lab: the card list is generated from test_images.txt at browser start. Scroll slowly and watch which images get a red AI banner.</p>
-<section class="lab-grid" id="lab-grid"></section>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI image lab</title>
+  
+  <!-- Modern Display & Body Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="ai_mark.css">
+
+  <script>
+    (function() {
+      try {
+        const saved = localStorage.getItem('nod-theme');
+        if (saved === 'dark' || (!saved && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.dataset.theme = 'dark';
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <style>
+    /* ===================================================================
+       TWEAKABLE VARIABLES (COLORS, SPACING, SIZING, MOTION, WAVE)
+       =================================================================== */
+    :root {
+      /* Card Sizing */
+      --card-min-width: 380px;
+      --card-max-width: 520px;
+      --card-aspect-ratio: 4 / 3;
+      --card-max-height: clamp(340px, 36vh, 440px);
+      
+      /* Layout & Spacing */
+      --section-gap-x: clamp(48px, 6vw, 84px);
+      --section-padding-y: clamp(70px, 14vh, 140px);
+      --card-stagger-offset: clamp(40px, 5vh, 70px);
+      
+      /* Animation Timings */
+      --reveal-duration: 0.85s;
+      --stagger-delay: 160ms;
+      --breathe-duration: 7.5s;
+      --parallax-speed-slow: 0.15;
+      --parallax-speed-fast: 0.35;
+      
+      /* Cloud Frame Tokens */
+      --frame-pad-top: 26px;
+      --frame-pad-sides: 24px;
+      --frame-pad-bottom: 34px;
+      --frame-bump-scale: 1;
+      --frame-shadow: drop-shadow(0 16px 36px rgba(8, 48, 72, 0.18)) drop-shadow(0 4px 12px rgba(8, 48, 72, 0.08));
+      --frame-glow: drop-shadow(0 0 25px rgba(220, 240, 255, 0.55)) drop-shadow(0 0 50px rgba(98, 233, 255, 0.32));
+
+      /* Wave Transition Tokens */
+      --wave-height: clamp(180px, 20vw, 280px);
+      --wave-glow-opacity: 0.85;
+      --wave-fill: var(--night-base, #081c28);
+    }
+
+    [data-theme="dark"] {
+      --wave-fill: var(--night-base, #040d13);
+      --wave-glow-opacity: 0.35;
+    }
+
+    /* ── Single Document Scroller (html & body default visible) ──── */
+    html {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      overflow-x: visible;
+      overflow-y: visible;
+      scrollbar-gutter: stable;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      background: var(--sky-top, #24cae8);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      overflow-x: clip;
+      overflow-y: visible;
+      transition: color 0.4s ease;
+    }
+
+    [data-theme="dark"] body {
+      background: var(--night-deep, #041018);
+    }
+
+    /* ── Slim Scroll Progress Indicator ───────────────────────────── */
+    .scroll-progress-track {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.2);
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    .scroll-progress-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #ffffff, #62e9ff, #ffffff);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+      transition: width 0.1s linear;
+    }
+
+    /* ── Celestial Sun: Scrolls Away with Day Sky (Not Fixed in Night) ── */
+    .celestial-container {
+      position: absolute !important;
+      top: clamp(-55px, -4.5vw, -20px);
+      left: clamp(-55px, -4.5vw, -20px);
+      width: clamp(140px, 16vw, 210px);
+      height: clamp(140px, 16vw, 210px);
+      pointer-events: none;
+      z-index: 2;
+      user-select: none;
+    }
+
+    /* ── Sticky Cloud Header & Nav ────────────────────────────────── */
+    .lab-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 16px 5vw;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: transform 0.3s ease, background 0.4s ease;
+    }
+
+    .lab-header.is-night-nav {
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .lab-header.is-night-nav .nav-cloud-text {
+      color: #081c28;
+    }
+
+    .lab-header-inner {
+      max-width: 1360px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .lab-nav-links {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    /* ── MASTER GRID & WRAPPER (Single #lab-grid for Smoke Tests) ─── */
+    .lab-page-wrapper {
+      position: relative;
+      width: 100%;
+      overflow-x: clip;
+      overflow-y: visible;
+    }
+
+    .lab-grid-master {
+      position: relative;
+      width: 100%;
+      overflow: visible;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── 1. DAY SKY ZONE (Extends seamlessly down behind wave) ────── */
+    .lab-day-zone {
+      position: relative;
+      width: 100%;
+      background: linear-gradient(180deg, 
+        var(--sky-top) 0%, 
+        var(--sky-base) 40%, 
+        var(--sky-bottom) 70%, 
+        #65d5ed 84%,
+        #92e4f6 93%,
+        #bdf0fa 100%
+      );
+      background-repeat: no-repeat;
+      color: var(--text-main);
+      transition: background 0.4s ease;
+      overflow: visible;
+      padding-top: 10px;
+      padding-bottom: clamp(140px, 16vw, 220px); /* Day sky extends down behind wave */
+    }
+
+    [data-theme="dark"] .lab-day-zone {
+      background: linear-gradient(180deg, 
+        var(--sky-night-top) 0%, 
+        var(--sky-night-mid) 55%, 
+        var(--night-base) 100%
+      );
+    }
+
+    /* Decorative Day Margin Clouds Layer - OVERFLOW VISIBLE to prevent slicing clouds! */
+    .lab-ambient-clouds-day {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      overflow: visible;
+    }
+
+    .lab-intro-section {
+      text-align: center;
+      max-width: 840px;
+      margin: 20px auto 50px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 10;
+      padding: 0 20px;
+    }
+
+    .lab-eyebrow {
+      display: inline-block;
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #082032;
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(8px);
+      padding: 6px 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      margin-bottom: 16px;
+      box-shadow: 0 4px 12px rgba(8, 48, 72, 0.08);
+    }
+
+    [data-theme="dark"] .lab-eyebrow {
+      color: #e2f2fa;
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.16);
+    }
+
+    .lab-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.4rem, 4.6vw, 3.8rem);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      color: var(--hero-title-color);
+      margin: 0 0 20px;
+      text-shadow: 0 2px 14px rgba(255, 255, 255, 0.35);
+    }
+
+    [data-theme="dark"] .lab-title {
+      text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
+    }
+
+    .lab-intro-card {
+      background: var(--card-bg);
+      border: 1.5px solid var(--card-border);
+      border-radius: 24px;
+      padding: 18px 28px;
+      box-shadow: var(--card-shadow);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      max-width: 720px;
+    }
+
+    .lab-intro-card .hint {
+      margin: 0;
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--text-main);
+    }
+
+    .lab-day-sections,
+    .lab-night-sections {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 0 5vw;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Roomy Section Layout (2 Pictures Per Section) ────────────── */
+    .lab-section {
+      min-height: clamp(560px, 78vh, 880px);
+      padding: var(--section-padding-y) 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      box-sizing: border-box;
+      overflow: visible;
+    }
+
+    .lab-section-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: var(--section-gap-x);
+      width: 100%;
+      max-width: 1240px;
+      margin: 0 auto;
+      box-sizing: border-box;
+      overflow: visible;
+    }
+
+    .lab-section-row.has-single-card {
+      justify-content: center;
+    }
+
+    /* ── Picture Card ─────────────────────────────────────────────── */
+    .lab-card {
+      position: relative;
+      width: clamp(var(--card-min-width), 44vw, var(--card-max-width));
+      margin: 0;
+      outline: none;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      box-sizing: border-box;
+      overflow: visible;
+    }
+
+    .lab-card.is-staggered {
+      margin-top: var(--card-stagger-offset);
+    }
+
+    .lab-card:hover {
+      transform: translateY(-6px);
+    }
+
+    .lab-card:focus-visible {
+      outline: 3px solid var(--focus-ring, #082032);
+      outline-offset: 8px;
+      border-radius: 28px;
+    }
+
+    .card-frame-outer {
+      position: relative;
+      width: 100%;
+      border-radius: 26px;
+      padding: 12px;
+      background: var(--card-bg, rgba(255, 255, 255, 0.65));
+      border: 1.5px solid var(--card-border, rgba(255, 255, 255, 0.75));
+      box-shadow: 0 12px 32px rgba(8, 48, 72, 0.08);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: visible;
+    }
+
+    .is-ai-card .card-frame-outer {
+      background: transparent;
+      border-color: transparent;
+      box-shadow: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      padding: 0;
+    }
+
+    .img-window {
+      position: relative;
+      z-index: 3;
+      width: 100%;
+      aspect-ratio: var(--card-aspect-ratio);
+      max-height: var(--card-max-height);
+      overflow: hidden;
+      border-radius: 18px;
+      background: rgba(140, 180, 210, 0.25);
+      box-shadow: inset 0 0 0 1.5px rgba(180, 215, 235, 0.4), 0 4px 12px rgba(8, 48, 72, 0.12);
+      transition: transform 0.35s ease, box-shadow 0.35s ease;
+      box-sizing: border-box;
+    }
+
+    .img-window img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.45s ease;
+    }
+
+    .lab-card:hover .img-window img {
+      transform: scale(1.035);
+    }
+
+    .lab-card-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 18px;
+      padding: 0 8px;
+      font-size: 0.88rem;
+      color: var(--text-subtle);
+    }
+
+    .meta-tag {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 0.84rem;
+      color: var(--hero-title-color);
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(6px);
+      padding: 3px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+    }
+
+    .meta-info {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 500;
+    }
+
+    /* ── 2. FULL-WIDTH CLOUD LINE (The Single Wavy Boundary) ───────── */
+    .lab-cloud-line-transition {
+      position: relative;
+      width: 104%;
+      margin-left: -2%; /* 2% overscan on both sides so no edge seams exist */
+      height: var(--wave-height);
+      margin-top: calc(-1 * var(--wave-height) + 2px); /* Pulls wave up OVER the extended day sky */
+      margin-bottom: -3px; /* Overlaps 3px into night section to prevent sub-pixel hairline gaps */
+      overflow: visible;
+      z-index: 6;
+      line-height: 0;
+      pointer-events: none;
+    }
+
+    .wave-cloud-svg-wrap {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    .wave-cloud-svg-wrap svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .wave-night-body {
+      fill: var(--wave-fill);
+    }
+
+    .wave-glow-stroke-wide,
+    .wave-glow-stroke-tight {
+      transition: opacity 0.4s ease;
+    }
+
+    [data-theme="dark"] .wave-glow-stroke-wide {
+      opacity: 0.2 !important;
+    }
+    [data-theme="dark"] .wave-glow-stroke-tight {
+      opacity: 0.35 !important;
+    }
+
+    .seam-clouds-behind {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    .seam-clouds-front {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 3;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    .seam-cloud {
+      position: absolute;
+      pointer-events: none;
+      user-select: none;
+      opacity: 0.96;
+      will-change: transform;
+    }
+
+    .seam-behind-1 { left: 1%;   bottom: 45px; width: clamp(280px, 26vw, 420px); filter: drop-shadow(0 12px 24px rgba(0,0,0,0.12)); animation: seamFloat1 20s ease-in-out infinite alternate; }
+    .seam-behind-2 { left: 32%;  bottom: 35px; width: clamp(310px, 28vw, 440px); filter: drop-shadow(0 12px 24px rgba(0,0,0,0.12)); animation: seamFloat2 24s ease-in-out infinite alternate; }
+    .seam-behind-3 { left: 60%;  bottom: 40px; width: clamp(290px, 27vw, 430px); filter: drop-shadow(0 12px 24px rgba(0,0,0,0.12)); animation: seamFloat1 22s ease-in-out infinite alternate; }
+    .seam-behind-4 { right: 1%;  bottom: 45px; width: clamp(280px, 25vw, 410px); filter: drop-shadow(0 12px 24px rgba(0,0,0,0.12)); animation: seamFloat2 26s ease-in-out infinite alternate; }
+
+    .seam-front-1 { left: 12%; bottom: -35px; width: clamp(300px, 28vw, 440px); filter: drop-shadow(0 14px 28px rgba(4,18,30,0.45)); animation: seamFloat2 18s ease-in-out infinite alternate; }
+    .seam-front-2 { left: 45%; bottom: -45px; width: clamp(320px, 30vw, 460px); filter: drop-shadow(0 14px 28px rgba(4,18,30,0.45)); animation: seamFloat1 21s ease-in-out infinite alternate; }
+    .seam-front-3 { right: 8%; bottom: -30px; width: clamp(290px, 26vw, 420px); filter: drop-shadow(0 14px 28px rgba(4,18,30,0.45)); animation: seamFloat2 25s ease-in-out infinite alternate; }
+    .seam-night-1 { left: -3%; bottom: -50px; width: clamp(260px, 24vw, 380px); opacity: 0.85; filter: drop-shadow(0 12px 24px rgba(0,0,0,0.5)); animation: seamFloat1 23s ease-in-out infinite alternate; }
+    .seam-night-2 { right: -2%; bottom: -55px; width: clamp(280px, 25vw, 400px); opacity: 0.85; filter: drop-shadow(0 12px 24px rgba(0,0,0,0.5)); animation: seamFloat2 19s ease-in-out infinite alternate; }
+
+    @keyframes seamFloat1 {
+      0%   { transform: translate(0, 0); }
+      100% { transform: translate(14px, -8px); }
+    }
+    @keyframes seamFloat2 {
+      0%   { transform: translate(0, 0); }
+      100% { transform: translate(-12px, 9px); }
+    }
+
+    /* ── 3. NIGHT SKY ZONE (Seamless continuation of wave base) ───── */
+    .lab-night-zone {
+      position: relative;
+      width: 100%;
+      background: linear-gradient(180deg, 
+        var(--wave-fill) 0%, 
+        #061520 22%, 
+        var(--night-deep, #041018) 100%
+      );
+      color: var(--night-text, #f0f8fc);
+      overflow: visible;
+      
+      /* Scoped tokens for Night Side Readability */
+      --text-main: var(--night-text, #f0f8fc);
+      --text-subtle: var(--night-muted, #9ec8db);
+      --card-bg: var(--night-card-bg, rgba(255, 255, 255, 0.08));
+      --card-border: var(--night-card-border, rgba(255, 255, 255, 0.16));
+      --hero-title-color: var(--night-accent, #62e9ff);
+      --card-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+    }
+
+    .lab-night-zone .meta-tag {
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(255, 255, 255, 0.22);
+      color: #62e9ff;
+      text-shadow: 0 0 10px rgba(98, 233, 255, 0.4);
+    }
+
+    .lab-night-zone .meta-info {
+      color: #cde4f0;
+    }
+
+    .lab-night-zone .lab-card:not(.is-ai-card) .card-frame-outer {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1.5px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), 0 0 24px rgba(98, 233, 255, 0.12);
+    }
+
+    /* Twinkling Stars Layer */
+    .lab-night-stars {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+
+    .star {
+      position: absolute;
+      background: #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 0 8px rgba(255, 255, 255, 0.9);
+      animation: starTwinkle infinite ease-in-out;
+    }
+
+    @keyframes starTwinkle {
+      0%, 100% { opacity: 0.25; transform: scale(0.85); }
+      50%      { opacity: 1;    transform: scale(1.3); }
+    }
+
+    /* Decorative Night Margin Clouds Layer - OVERFLOW VISIBLE */
+    .lab-ambient-clouds-night {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      overflow: visible;
+    }
+
+    /* ── Ambient Decorative Clouds (Placement & Parallax Drift) ───── */
+    .ambient-cloud {
+      position: absolute;
+      pointer-events: none;
+      user-select: none;
+      will-change: transform;
+      z-index: 1;
+      transition: opacity 0.4s ease;
+    }
+
+    .ambient-cloud img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .ambient-cloud.ambient-layer-1 {
+      z-index: 0;
+      filter: blur(1.5px) brightness(0.96);
+    }
+
+    .ambient-cloud.ambient-layer-2 {
+      z-index: 1;
+      filter: drop-shadow(0 10px 22px rgba(8, 48, 72, 0.12));
+    }
+
+    .ambient-cloud.ambient-layer-3 {
+      z-index: 2;
+      filter: drop-shadow(0 16px 32px rgba(8, 48, 72, 0.18));
+    }
+
+    .ambient-cloud.is-night-cloud.ambient-layer-2 {
+      filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.5));
+    }
+
+    .ambient-cloud.is-night-cloud.ambient-layer-3 {
+      filter: drop-shadow(0 18px 36px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 20px rgba(98, 233, 255, 0.15));
+    }
+
+    [data-theme="dark"] .ambient-cloud:not(.is-night-cloud) {
+      opacity: 0.35 !important;
+      filter: brightness(0.7) drop-shadow(0 0 25px rgba(70, 130, 200, 0.3));
+    }
+
+    @keyframes cloudDriftLeft {
+      0%   { transform: translate(0, 0); }
+      50%  { transform: translate(34px, -10px); }
+      100% { transform: translate(0, 0); }
+    }
+
+    @keyframes cloudDriftRight {
+      0%   { transform: translate(0, 0); }
+      50%  { transform: translate(-34px, 10px); }
+      100% { transform: translate(0, 0); }
+    }
+
+    /* ── 4. MOON & NIGHT CLOUDS FOOTER AT END OF PAGE ─────────────── */
+    .lab-night-end-footer {
+      position: relative;
+      width: 100%;
+      min-height: clamp(520px, 64vh, 760px);
+      padding-top: 60px;
+      padding-bottom: clamp(100px, 16vh, 200px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      overflow: visible;
+      margin-top: 40px;
+      box-sizing: border-box;
+      z-index: 10;
+    }
+
+    .lab-end-moon {
+      position: relative;
+      width: clamp(200px, 24vw, 320px);
+      height: clamp(200px, 24vw, 320px);
+      margin: 0 auto clamp(60px, 8vh, 100px);
+      z-index: 2;
+      pointer-events: none;
+      will-change: transform, opacity;
+      opacity: 0;
+      transform: translateY(70px) scale(0.92);
+      transition: opacity 1.3s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 1.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .lab-end-moon.is-risen {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .lab-end-moon .moon-halo {
+      position: absolute;
+      top: -25%;
+      left: -25%;
+      width: 150%;
+      height: 150%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 245, 205, 0.6) 0%, rgba(255, 235, 170, 0.32) 38%, rgba(216, 180, 254, 0.2) 55%, transparent 75%);
+      filter: blur(28px);
+      animation: haloPulse 5s ease-in-out infinite alternate;
+    }
+
+    .lab-end-moon .moon-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+      filter: drop-shadow(0 0 35px rgba(255, 245, 195, 0.9)) drop-shadow(0 0 75px rgba(253, 224, 71, 0.45)) drop-shadow(0 0 100px rgba(216, 180, 254, 0.3));
+      transform: rotate(-6deg);
+      animation: moonFloat 8s ease-in-out infinite alternate;
+    }
+
+    @keyframes haloPulse {
+      0%   { transform: scale(0.95); opacity: 0.75; }
+      100% { transform: scale(1.12); opacity: 1; }
+    }
+
+    @keyframes moonFloat {
+      0%   { transform: rotate(-6deg) translateY(0); }
+      100% { transform: rotate(-2deg) translateY(-10px); }
+    }
+
+    .sparkle {
+      position: absolute;
+      color: var(--moon-disk, #fef08a);
+      font-size: 1.2rem;
+      animation: sparkleRotate 4s ease-in-out infinite alternate;
+    }
+    .sparkle-1 { top: -10px; left: 10px;  font-size: 1.4rem; animation-delay: 0.5s; }
+    .sparkle-2 { top: 75px;  left: -20px; font-size: 1.1rem; animation-delay: 1.8s; }
+    .sparkle-3 { top: 95px;  right: 15px; font-size: 1.3rem; animation-delay: 2.7s; }
+    .sparkle-4 { top: 130px; left: 20px;  font-size: 1.15rem; animation-delay: 3.2s; }
+
+    @keyframes sparkleRotate {
+      0%   { transform: scale(0.8) rotate(0deg); opacity: 0.4; }
+      100% { transform: scale(1.2) rotate(45deg); opacity: 1; }
+    }
+
+    /* Pink & Lavender Stars Among Bottom Clouds */
+    .bottom-pastel-stars {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 260px;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .pastel-star {
+      position: absolute;
+      pointer-events: none;
+      user-select: none;
+      display: inline-block;
+      line-height: 1;
+      font-size: 1.15rem;
+      filter: drop-shadow(0 0 10px currentColor);
+      animation: pastelTwinkle 3.5s ease-in-out infinite alternate;
+    }
+
+    .p-star-1, .p-star-4 { color: #fbb6ce; text-shadow: 0 0 14px rgba(251, 182, 206, 0.95); animation-duration: 3.2s; }
+    .p-star-2, .p-star-5 { color: #d8b4fe; text-shadow: 0 0 14px rgba(216, 180, 254, 0.95); font-size: 1.35rem; animation-duration: 4.1s; animation-delay: 1.4s; }
+    .p-star-3, .p-star-6 { color: #fef08a; text-shadow: 0 0 12px rgba(254, 240, 138, 0.9); font-size: 1.05rem; animation-duration: 3.7s; animation-delay: 0.8s; }
+
+    @keyframes pastelTwinkle {
+      0%   { opacity: 0.35; transform: scale(0.85) rotate(0deg); }
+      50%  { opacity: 1;    transform: scale(1.2) rotate(15deg); }
+      100% { opacity: 0.55; transform: scale(0.95) rotate(-10deg); }
+    }
+
+    /* 3-Layer Overlapping Night Clouds Bank */
+    .nc-bottom-row {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      pointer-events: none;
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-end;
+      will-change: transform;
+    }
+
+    .nc-bottom-cloud {
+      flex-shrink: 0;
+      height: auto;
+      pointer-events: none;
+      user-select: none;
+      animation: ncbFloat 14s ease-in-out infinite alternate;
+    }
+
+    @keyframes ncbFloat {
+      0%   { transform: translateY(0); }
+      100% { transform: translateY(-12px); }
+    }
+
+    .nc-row-back {
+      z-index: 1;
+      bottom: 60px;
+      opacity: 0.6;
+      filter: blur(3px) brightness(0.72) saturate(0.92);
+    }
+    .nc-row-back .ncb-1 { width: clamp(340px, 34vw, 560px); margin-left: -8vw; margin-bottom: 25px; }
+    .nc-row-back .ncb-2 { width: clamp(380px, 38vw, 620px); margin-left: -5vw; }
+    .nc-row-back .ncb-3 { width: clamp(360px, 36vw, 600px); margin-left: -4vw; margin-bottom: 30px; }
+    .nc-row-back .ncb-4 { width: clamp(320px, 32vw, 540px); margin-right: -8vw; }
+
+    .nc-row-mid {
+      z-index: 3;
+      bottom: 30px;
+      opacity: 0.82;
+      filter: blur(1px) brightness(0.9) saturate(1.05);
+    }
+    .nc-row-mid .ncm-1 { width: clamp(320px, 32vw, 540px); margin-left: -4vw; }
+    .nc-row-mid .ncm-2 { width: clamp(350px, 35vw, 580px); margin-left: -2vw; margin-bottom: 15px; }
+    .nc-row-mid .ncm-3 { width: clamp(360px, 36vw, 590px); margin-left: -3vw; }
+    .nc-row-mid .ncm-4 { width: clamp(300px, 30vw, 520px); margin-right: -4vw; margin-bottom: 25px; }
+
+    .nc-row-front {
+      z-index: 4;
+      bottom: -20px;
+      opacity: 0.95;
+      filter: brightness(1.05) saturate(1.15) drop-shadow(0 -10px 30px rgba(7, 24, 43, 0.65));
+    }
+    .nc-row-front .ncf-1 { width: clamp(380px, 38vw, 620px); margin-left: -6vw; }
+    .nc-row-front .ncf-2 { width: clamp(350px, 35vw, 580px); margin-left: -3vw; margin-bottom: 10px; }
+    .nc-row-front .ncf-3 { width: clamp(340px, 34vw, 560px); margin-left: -2vw; }
+    .nc-row-front .ncf-4 { width: clamp(360px, 36vw, 580px); margin-right: -6vw; margin-bottom: 15px; }
+
+    /* ── Scroll Reveal Animations ─────────────────────────────────── */
+    .js-enabled .lab-card.is-hidden {
+      opacity: 0;
+      transform: translateY(50px) rotate(var(--entry-rot, 1.5deg));
+      pointer-events: none;
+    }
+
+    .js-enabled .lab-card.is-revealed {
+      opacity: 1;
+      transform: translateY(0) rotate(0deg);
+      transition: opacity var(--reveal-duration) cubic-bezier(0.16, 1, 0.3, 1),
+                  transform var(--reveal-duration) cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: auto;
+    }
+
+    .js-enabled .lab-card.is-staggered.is-revealed {
+      transition-delay: var(--stagger-delay);
+    }
+
+    /* ── Responsive Adaptations ───────────────────────────────────── */
+    @media (max-width: 960px) {
+      :root {
+        --card-min-width: 320px;
+        --card-max-width: 440px;
+        --section-gap-x: 32px;
+        --card-stagger-offset: 36px;
+      }
+      .ambient-cloud:nth-child(3n) {
+        display: none;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .lab-section-row {
+        flex-direction: column;
+        align-items: center;
+        gap: 48px;
+      }
+      .lab-card {
+        width: min(92vw, 440px);
+      }
+      .lab-card.is-staggered {
+        margin-top: 0;
+      }
+      .lab-section {
+        min-height: auto;
+        padding: 50px 0;
+      }
+      .ambient-cloud {
+        opacity: 0.35 !important;
+        max-width: 200px !important;
+      }
+      .ambient-cloud:nth-child(2n) {
+        display: none;
+      }
+    }
+
+    /* ── Accessible Lightbox Dialog ───────────────────────────────── */
+    .lightbox-dialog {
+      margin: auto;
+      padding: 0;
+      border: none;
+      background: transparent;
+      max-width: 95vw;
+      max-height: 95vh;
+      overflow: visible;
+      outline: none;
+      display: none;
+    }
+
+    .lightbox-dialog[open] {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .lightbox-dialog::backdrop {
+      background: rgba(8, 28, 45, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    [data-theme="dark"] .lightbox-dialog::backdrop {
+      background: rgba(2, 8, 16, 0.88);
+    }
+
+    .lightbox-content {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px;
+    }
+
+    .lightbox-close-btn {
+      align-self: flex-end;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 12px;
+      background: rgba(255, 255, 255, 0.95);
+      color: #081c28;
+      border: 1.5px solid rgba(0, 0, 0, 0.08);
+      border-radius: 999px;
+      padding: 8px 20px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+      transition: all 0.2s ease;
+    }
+
+    .lightbox-close-btn:hover {
+      background: #ffffff;
+      transform: scale(1.05);
+    }
+
+    .lightbox-close-btn:focus-visible {
+      outline: 3px solid #ffffff;
+      outline-offset: 3px;
+    }
+
+    .lightbox-media-wrap {
+      position: relative;
+      background: var(--card-bg);
+      border-radius: 26px;
+      padding: 14px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
+      max-width: min(88vw, 880px);
+      max-height: 72vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+
+    .lightbox-media-wrap.is-ai {
+      background: transparent;
+      box-shadow: none;
+      padding: 0;
+    }
+
+    .lightbox-media-wrap img {
+      display: block;
+      max-width: 100%;
+      max-height: calc(72vh - 44px);
+      object-fit: contain;
+      border-radius: 16px;
+      z-index: 3;
+      position: relative;
+    }
+
+    .lightbox-caption {
+      margin-top: 16px;
+      color: #ffffff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+      text-align: center;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .ambient-cloud,
+      .nc-bottom-cloud,
+      .moon-img,
+      .moon-halo,
+      .sparkle,
+      .star,
+      .pastel-star,
+      .seam-cloud,
+      .wave-night-body {
+        animation: none !important;
+        transform: none !important;
+      }
+      .lab-end-moon {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+      .js-enabled .lab-card.is-hidden {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<!-- ═══ SLIM SCROLL PROGRESS TRACK ═══ -->
+<div class="scroll-progress-track" aria-hidden="true">
+  <div class="scroll-progress-fill" id="scroll-progress-fill"></div>
+</div>
+
+<!-- ═══ CELESTIAL SUN & MOON (TOP-LEFT CORNER) ═══ -->
+<div class="celestial-container" aria-hidden="true">
+  <div class="celestial-body celestial-sun">
+    <img src="assets/sun.png" alt="" class="celestial-img sun-img" width="190" height="190" loading="eager">
+  </div>
+  <div class="celestial-body celestial-moon">
+    <img src="assets/moon.png" alt="" class="celestial-img moon-img" width="190" height="190" loading="eager">
+  </div>
+</div>
+
+<!-- ═══ STICKY CLOUD NAVBAR ═══ -->
+<header class="lab-header" role="banner">
+  <div class="lab-header-inner">
+    <nav class="lab-nav-links" aria-label="Page navigation">
+      <!-- Return Home Cloud Button -->
+      <a href="home.html" class="nav-cloud-link">
+        <span class="nav-cloud-bg" aria-hidden="true">
+          <svg class="nav-cloud-svg" viewBox="0 0 160 52" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+            <defs>
+              <linearGradient id="gradNavHome" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="var(--nav-cloud-fill-top)"/>
+                <stop offset="55%" stop-color="var(--nav-cloud-fill-mid)"/>
+                <stop offset="100%" stop-color="var(--nav-cloud-fill-bottom)"/>
+              </linearGradient>
+            </defs>
+            <path class="nav-cloud-path" fill="url(#gradNavHome)" d="M 20 22 C 8 10, 4 32, 4 36 C 4 45, 12 48, 22 47 C 55 49, 105 49, 138 47 C 150 47, 156 38, 156 32 C 156 22, 148 14, 138 18 C 128 8, 108 5, 92 12 C 78 3, 52 4, 40 12 C 30 8, 24 14, 20 22 Z" />
+          </svg>
+        </span>
+        <span class="nav-cloud-text">Home</span>
+      </a>
+
+      <!-- Practice Tools Cloud Button -->
+      <a href="practice.html" class="nav-cloud-link">
+        <span class="nav-cloud-bg" aria-hidden="true">
+          <svg class="nav-cloud-svg" viewBox="0 0 160 52" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+            <defs>
+              <linearGradient id="gradNavPractice" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="var(--nav-cloud-fill-top)"/>
+                <stop offset="55%" stop-color="var(--nav-cloud-fill-mid)"/>
+                <stop offset="100%" stop-color="var(--nav-cloud-fill-bottom)"/>
+              </linearGradient>
+            </defs>
+            <path class="nav-cloud-path" fill="url(#gradNavPractice)" d="M 20 25 C 6 14, 4 34, 4 37 C 4 45, 14 48, 24 47 C 60 49, 100 48, 136 47 C 148 47, 156 40, 156 33 C 156 24, 146 16, 136 20 C 124 6, 98 4, 84 12 C 70 5, 48 7, 38 15 C 28 12, 22 18, 20 25 Z" />
+          </svg>
+        </span>
+        <span class="nav-cloud-text">Practice</span>
+      </a>
+    </nav>
+
+    <!-- Theme Toggle Cloud Button -->
+    <div class="header-actions">
+      <button id="theme" type="button" class="nav-cloud-link nav-theme-cloud theme-toggle-btn" aria-pressed="false" aria-label="Toggle dark and light color theme">
+        <span class="nav-cloud-bg" aria-hidden="true">
+          <svg class="nav-cloud-svg" viewBox="0 0 160 52" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+            <defs>
+              <linearGradient id="gradNavThemeLab" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="var(--nav-cloud-fill-top)"/>
+                <stop offset="55%" stop-color="var(--nav-cloud-fill-mid)"/>
+                <stop offset="100%" stop-color="var(--nav-cloud-fill-bottom)"/>
+              </linearGradient>
+            </defs>
+            <path class="nav-cloud-path" fill="url(#gradNavThemeLab)" d="M 20 25 C 6 14, 4 34, 4 37 C 4 45, 14 48, 24 47 C 60 49, 100 48, 136 47 C 148 47, 156 40, 156 33 C 156 24, 146 16, 136 20 C 124 6, 98 4, 84 12 C 70 5, 48 7, 38 15 C 28 12, 22 18, 20 25 Z" />
+          </svg>
+        </span>
+        <span class="nav-cloud-text">Dark theme</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ MAIN PAGE WRAPPER ═══ -->
+<main id="main-content" class="lab-page-wrapper">
+  
+  <!-- Primary Detection Container (single #lab-grid for tests) -->
+  <div class="lab-grid-master" id="lab-grid" aria-label="Picture detection grid">
+
+    <!-- ── 1. DAY SKY ZONE (First Half of Page) ── -->
+    <div class="lab-day-zone" id="lab-day-zone">
+      <!-- Decorative Day Clouds Container (overflow: visible prevents clipping) -->
+      <div class="lab-ambient-clouds-day" id="lab-ambient-clouds-day" aria-hidden="true"></div>
+
+      <!-- Intro Section -->
+      <header class="lab-intro-section">
+        <span class="lab-eyebrow">DETECTION &amp; VERIFICATION LAB</span>
+        <h1 class="lab-title">AI image lab</h1>
+
+        <div class="lab-intro-card">
+          <p class="hint">The detector scores each image passively as you scroll. A white cloud frame marks AI-generated pictures with confidence over 50%. Scroll slowly and watch how the page reacts.</p>
+        </div>
+      </header>
+
+      <!-- Day Sections Container (Sections 1..3) -->
+      <div class="lab-day-sections" id="lab-day-sections"></div>
+    </div>
+
+    <!-- ── 2. FULL-WIDTH CLOUD LINE (The Single Wavy Boundary with Zero Straight Lines) ── -->
+    <div class="lab-cloud-line-transition" id="lab-cloud-line" aria-hidden="true">
+
+      <!-- Back seam clouds: day clouds peeking over the wave crest into the day sky -->
+      <div class="seam-clouds-behind">
+        <img src="assets/clouds/cloud-day-1.png" alt="" class="seam-cloud seam-behind-1" width="380" height="280" loading="lazy">
+        <img src="assets/clouds/cloud-day-2.png" alt="" class="seam-cloud seam-behind-2" width="410" height="290" loading="lazy">
+        <img src="assets/clouds/cloud-day-3.png" alt="" class="seam-cloud seam-behind-3" width="370" height="270" loading="lazy">
+        <img src="assets/clouds/cloud-day-1.png" alt="" class="seam-cloud seam-behind-4" width="390" height="280" loading="lazy">
+      </div>
+
+      <!-- The Scalloped Wave SVG Edge with integrated twilight glow adhering to the curve -->
+      <div class="wave-cloud-svg-wrap">
+        <svg viewBox="0 0 1440 180" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <!-- Twilight Wave Curve Glow Filter -->
+            <filter id="waveGlowFilter" x="-10%" y="-50%" width="120%" height="200%">
+              <feGaussianBlur stdDeviation="14" result="blur" />
+            </filter>
+            <linearGradient id="twilightGlowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="rgba(254, 215, 170, 0.55)" />
+              <stop offset="25%" stop-color="rgba(244, 114, 182, 0.45)" />
+              <stop offset="60%" stop-color="rgba(192, 132, 252, 0.5)" />
+              <stop offset="85%" stop-color="rgba(147, 197, 253, 0.4)" />
+              <stop offset="100%" stop-color="rgba(254, 215, 170, 0.5)" />
+            </linearGradient>
+          </defs>
+
+          <!-- 1. Soft blurred twilight glow stroke adhering precisely to the wave curve -->
+          <path class="wave-glow-stroke-wide" d="M-20,70
+            C60,95 120,115 180,105
+            C240,95 280,60 360,50
+            C440,40 500,70 560,80
+            C620,90 680,80 720,70
+            C760,60 820,40 900,45
+            C980,50 1020,80 1080,90
+            C1140,100 1200,85 1260,70
+            C1320,55 1380,60 1460,70"
+            fill="none"
+            stroke="url(#twilightGlowGrad)"
+            stroke-width="50"
+            filter="url(#waveGlowFilter)"
+            opacity="0.5" />
+
+          <path class="wave-glow-stroke-tight" d="M-20,70
+            C60,95 120,115 180,105
+            C240,95 280,60 360,50
+            C440,40 500,70 560,80
+            C620,90 680,80 720,70
+            C760,60 820,40 900,45
+            C980,50 1020,80 1080,90
+            C1140,100 1200,85 1260,70
+            C1320,55 1380,60 1460,70"
+            fill="none"
+            stroke="url(#twilightGlowGrad)"
+            stroke-width="24"
+            filter="url(#waveGlowFilter)"
+            opacity="0.8" />
+
+          <!-- 2. Solid Navy Wave Shape (The single true boundary between day and night) -->
+          <path class="wave-night-body" d="M-20,182 L-20,70
+            C60,95 120,115 180,105
+            C240,95 280,60 360,50
+            C440,40 500,70 560,80
+            C620,90 680,80 720,70
+            C760,60 820,40 900,45
+            C980,50 1020,80 1080,90
+            C1140,100 1200,85 1260,70
+            C1320,55 1380,60 1460,70
+            L1460,182 Z"
+            fill="var(--night-base, #081c28)" />
+        </svg>
+      </div>
+
+      <!-- Front seam clouds: day clouds spilling forward + night clouds peeking up -->
+      <div class="seam-clouds-front">
+        <img src="assets/clouds/cloud-day-2.png" alt="" class="seam-cloud seam-front-1" width="370" height="270" loading="lazy">
+        <img src="assets/clouds/cloud-day-1.png" alt="" class="seam-cloud seam-front-2" width="390" height="285" loading="lazy">
+        <img src="assets/clouds/cloud-day-3.png" alt="" class="seam-cloud seam-front-3" width="360" height="260" loading="lazy">
+        <img src="assets/clouds/cloud-night-2.png" alt="" class="seam-cloud seam-night-1" width="380" height="290" loading="lazy">
+        <img src="assets/clouds/cloud-night-3.png" alt="" class="seam-cloud seam-night-2" width="370" height="270" loading="lazy">
+      </div>
+    </div>
+
+    <!-- ── 3. NIGHT SKY ZONE (Second Half of Page) ── -->
+    <div class="lab-night-zone" id="lab-night-zone">
+      <!-- Twinkling stars in night sky -->
+      <div class="lab-night-stars" id="lab-night-stars" aria-hidden="true"></div>
+
+      <!-- Decorative Night Margin Clouds Container (overflow: visible) -->
+      <div class="lab-ambient-clouds-night" id="lab-ambient-clouds-night" aria-hidden="true"></div>
+
+      <!-- Night Sections Container (Sections 4..7) -->
+      <div class="lab-night-sections" id="lab-night-sections"></div>
+
+      <!-- ── 4. MOON & NIGHT CLOUDS FOOTER ── -->
+      <div class="lab-night-end-footer" id="lab-night-footer" aria-hidden="true">
+        
+        <!-- Glowing Crescent Moon with Radial Halo -->
+        <div class="crescent-moon-wrapper lab-end-moon" id="lab-end-moon">
+          <div class="moon-halo"></div>
+          <img src="assets/moon-end.png" alt="" class="moon-img" width="220" height="220" loading="lazy">
+          <div class="sparkle sparkle-1">✦</div>
+          <div class="sparkle sparkle-2">★</div>
+          <div class="sparkle sparkle-3">✦</div>
+          <div class="sparkle sparkle-4">★</div>
+        </div>
+
+        <!-- Pink & Lavender Pastel Stars Among Bottom Clouds -->
+        <div class="bottom-pastel-stars" aria-hidden="true">
+          <span class="pastel-star p-star-1" style="left: 12%; bottom: 120px;">★</span>
+          <span class="pastel-star p-star-2" style="left: 28%; bottom: 160px;">✦</span>
+          <span class="pastel-star p-star-3" style="left: 45%; bottom: 130px;">★</span>
+          <span class="pastel-star p-star-4" style="left: 62%; bottom: 170px;">✦</span>
+          <span class="pastel-star p-star-5" style="left: 78%; bottom: 140px;">★</span>
+          <span class="pastel-star p-star-6" style="left: 90%; bottom: 115px;">✦</span>
+        </div>
+
+        <!-- 3-Layer Overlapping Night Clouds Bank -->
+        <div class="nc-bottom-row nc-row-back">
+          <img src="assets/clouds/cloud-night-2.png" alt="" class="nc-bottom-cloud ncb-1" width="560" height="400" loading="lazy">
+          <img src="assets/clouds/cloud-night-1.png" alt="" class="nc-bottom-cloud ncb-2" width="620" height="600" loading="lazy">
+          <img src="assets/clouds/cloud-night-3.png" alt="" class="nc-bottom-cloud ncb-3" width="600" height="420" loading="lazy">
+          <img src="assets/clouds/cloud-night-2.png" alt="" class="nc-bottom-cloud ncb-4" width="540" height="380" loading="lazy">
+        </div>
+
+        <div class="nc-bottom-row nc-row-mid">
+          <img src="assets/clouds/cloud-night-3.png" alt="" class="nc-bottom-cloud ncm-1" width="540" height="380" loading="lazy">
+          <img src="assets/clouds/cloud-night-2.png" alt="" class="nc-bottom-cloud ncm-2" width="580" height="420" loading="lazy">
+          <img src="assets/clouds/cloud-night-1.png" alt="" class="nc-bottom-cloud ncm-3" width="590" height="570" loading="lazy">
+          <img src="assets/clouds/cloud-night-3.png" alt="" class="nc-bottom-cloud ncm-4" width="520" height="370" loading="lazy">
+        </div>
+
+        <div class="nc-bottom-row nc-row-front">
+          <img src="assets/clouds/cloud-night-1.png" alt="" class="nc-bottom-cloud ncf-1" width="620" height="600" loading="lazy">
+          <img src="assets/clouds/cloud-night-3.png" alt="" class="nc-bottom-cloud ncf-2" width="580" height="410" loading="lazy">
+          <img src="assets/clouds/cloud-night-2.png" alt="" class="nc-bottom-cloud ncf-3" width="560" height="400" loading="lazy">
+          <img src="assets/clouds/cloud-night-1.png" alt="" class="nc-bottom-cloud ncf-4" width="580" height="560" loading="lazy">
+        </div>
+      </div>
+    </div>
+
+  </div>
 </main>
+
+<!-- ═══ ACCESSIBLE LIGHTBOX MODAL ═══ -->
+<dialog id="lightbox-dialog" class="lightbox-dialog" aria-modal="true" aria-labelledby="lightbox-caption">
+  <div class="lightbox-content">
+    <button type="button" class="lightbox-close-btn" id="lightbox-close" aria-label="Close enlarged picture view">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+      <span>Close</span>
+    </button>
+    
+    <div class="lightbox-media-wrap" id="lightbox-media-wrap">
+      <svg class="cloud-frame-svg" id="lightbox-cloud-svg" aria-hidden="true" focusable="false"></svg>
+      <img id="lightbox-img" src="" alt="Enlarged view" data-no-ai-scan="true">
+      <div class="ai-cloud-badge" id="lightbox-badge" role="status">AI GENERATED</div>
+    </div>
+    
+    <div class="lightbox-caption" id="lightbox-caption"></div>
+  </div>
+</dialog>
+
 <script src="../artifacts/lab-urls.js" defer></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  var grid = document.getElementById('lab-grid');
-  var urls = window.LAB_URLS || [];
+  document.documentElement.classList.add('js-enabled');
+
+  // ===================================================================
+  // 1. CLOUD CONFIGURATION LISTS (EASILY TWEAKABLE)
+  // ===================================================================
+  const DAY_CLOUDS_CONFIG = [
+    { file: 'assets/clouds/cloud-day-1.png', side: 'left',  topPct: 4,  widthVw: 26, offsetPx: -70, layer: 2, opacity: 0.75, driftDur: 26, driftDelay: 0,   speed: 0.22 },
+    { file: 'assets/clouds/cloud-day-2.png', side: 'right', topPct: 10, widthVw: 28, offsetPx: -80, layer: 3, opacity: 0.85, driftDur: 32, driftDelay: -6,  speed: 0.32 },
+    { file: 'assets/clouds/cloud-day-3.png', side: 'left',  topPct: 22, widthVw: 22, offsetPx: -40, layer: 1, opacity: 0.55, driftDur: 22, driftDelay: -3,  speed: 0.15 },
+    { file: 'assets/clouds/cloud-day-1.png', side: 'right', topPct: 30, widthVw: 25, offsetPx: -60, layer: 2, opacity: 0.70, driftDur: 28, driftDelay: -12, speed: 0.24 },
+    { file: 'assets/clouds/cloud-day-2.png', side: 'left',  topPct: 44, widthVw: 27, offsetPx: -80, layer: 3, opacity: 0.80, driftDur: 36, driftDelay: -8,  speed: 0.34 },
+    { file: 'assets/clouds/cloud-day-3.png', side: 'right', topPct: 54, widthVw: 20, offsetPx: -30, layer: 1, opacity: 0.50, driftDur: 24, driftDelay: -15, speed: 0.14 },
+    { file: 'assets/clouds/cloud-day-1.png', side: 'left',  topPct: 66, widthVw: 29, offsetPx: -90, layer: 3, opacity: 0.85, driftDur: 30, driftDelay: -4,  speed: 0.30 },
+    { file: 'assets/clouds/cloud-day-2.png', side: 'right', topPct: 76, widthVw: 24, offsetPx: -50, layer: 2, opacity: 0.72, driftDur: 34, driftDelay: -18, speed: 0.22 },
+    { file: 'assets/clouds/cloud-day-3.png', side: 'left',  topPct: 86, widthVw: 21, offsetPx: -35, layer: 1, opacity: 0.55, driftDur: 25, driftDelay: -7,  speed: 0.16 },
+    { file: 'assets/clouds/cloud-day-1.png', side: 'right', topPct: 91, widthVw: 26, offsetPx: -65, layer: 2, opacity: 0.75, driftDur: 29, driftDelay: -10, speed: 0.26 }
+  ];
+
+  const NIGHT_CLOUDS_CONFIG = [
+    { file: 'assets/clouds/cloud-night-1.png', side: 'left',  topPct: 6,  widthVw: 27, offsetPx: -75, layer: 2, opacity: 0.70, driftDur: 28, driftDelay: -2,  speed: 0.22 },
+    { file: 'assets/clouds/cloud-night-2.png', side: 'right', topPct: 16, widthVw: 29, offsetPx: -85, layer: 3, opacity: 0.80, driftDur: 34, driftDelay: -9,  speed: 0.32 },
+    { file: 'assets/clouds/cloud-night-3.png', side: 'left',  topPct: 30, widthVw: 22, offsetPx: -40, layer: 1, opacity: 0.50, driftDur: 24, driftDelay: -5,  speed: 0.14 },
+    { file: 'assets/clouds/cloud-night-1.png', side: 'right', topPct: 42, widthVw: 26, offsetPx: -65, layer: 2, opacity: 0.68, driftDur: 30, driftDelay: -14, speed: 0.24 },
+    { file: 'assets/clouds/cloud-night-2.png', side: 'left',  topPct: 56, widthVw: 28, offsetPx: -80, layer: 3, opacity: 0.82, driftDur: 36, driftDelay: -7,  speed: 0.35 },
+    { file: 'assets/clouds/cloud-night-3.png', side: 'right', topPct: 68, widthVw: 21, offsetPx: -35, layer: 1, opacity: 0.52, driftDur: 22, driftDelay: -16, speed: 0.15 },
+    { file: 'assets/clouds/cloud-night-1.png', side: 'left',  topPct: 80, widthVw: 26, offsetPx: -60, layer: 2, opacity: 0.72, driftDur: 32, driftDelay: -11, speed: 0.25 },
+    { file: 'assets/clouds/cloud-night-2.png', side: 'right', topPct: 90, widthVw: 30, offsetPx: -90, layer: 3, opacity: 0.85, driftDur: 35, driftDelay: -4,  speed: 0.33 }
+  ];
+
+  function renderConfigClouds(container, configList, isNight = false) {
+    if (!container) return;
+    configList.forEach((cfg) => {
+      const cloudDiv = document.createElement('div');
+      cloudDiv.className = `ambient-cloud ambient-layer-${cfg.layer} ${isNight ? 'is-night-cloud' : ''}`;
+      cloudDiv.dataset.speed = String(cfg.speed);
+      cloudDiv.dataset.driftDir = cfg.side;
+      cloudDiv.style.top = `${cfg.topPct}%`;
+      if (cfg.side === 'left') {
+        cloudDiv.style.left = `${cfg.offsetPx}px`;
+      } else {
+        cloudDiv.style.right = `${cfg.offsetPx}px`;
+      }
+      cloudDiv.style.width = `clamp(220px, ${cfg.widthVw}vw, 540px)`;
+      cloudDiv.style.opacity = String(cfg.opacity);
+      cloudDiv.style.animation = `${cfg.side === 'left' ? 'cloudDriftLeft' : 'cloudDriftRight'} ${cfg.driftDur}s ease-in-out infinite alternate`;
+      cloudDiv.style.animationDelay = `${cfg.driftDelay}s`;
+
+      const img = document.createElement('img');
+      img.src = cfg.file;
+      img.alt = '';
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      img.width = 440;
+      img.height = 300;
+      cloudDiv.appendChild(img);
+      container.appendChild(cloudDiv);
+    });
+  }
+
+  renderConfigClouds(document.getElementById('lab-ambient-clouds-day'), DAY_CLOUDS_CONFIG, false);
+  renderConfigClouds(document.getElementById('lab-ambient-clouds-night'), NIGHT_CLOUDS_CONFIG, true);
+
+  // ===================================================================
+  // 2. TWINKLING STARS IN NIGHT SKY
+  // ===================================================================
+  const starsContainer = document.getElementById('lab-night-stars');
+  if (starsContainer) {
+    const starCount = 75;
+    for (let i = 0; i < starCount; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+      star.style.left = `${(Math.random() * 100).toFixed(2)}%`;
+      star.style.top = `${(Math.random() * 100).toFixed(2)}%`;
+      const size = (Math.random() * 2.8 + 1).toFixed(1);
+      star.style.width = `${size}px`;
+      star.style.height = `${size}px`;
+      star.style.animationDelay = `${(Math.random() * 4).toFixed(2)}s`;
+      star.style.animationDuration = `${(Math.random() * 3 + 2).toFixed(2)}s`;
+      starsContainer.appendChild(star);
+    }
+  }
+
+  // ===================================================================
+  // 3. THEME TOGGLE CONTROLLER
+  // ===================================================================
+  const themeBtn = document.getElementById('theme');
+  if (themeBtn) {
+    const isDark = document.documentElement.dataset.theme === 'dark';
+    themeBtn.setAttribute('aria-pressed', String(isDark));
+    const txt = themeBtn.querySelector('.nav-cloud-text');
+    if (txt) txt.textContent = isDark ? 'Light theme' : 'Dark theme';
+
+    themeBtn.addEventListener('click', function () {
+      const nextDark = document.documentElement.dataset.theme !== 'dark';
+      document.documentElement.dataset.theme = nextDark ? 'dark' : 'light';
+      try {
+        localStorage.setItem('nod-theme', nextDark ? 'dark' : 'light');
+      } catch (e) {}
+      themeBtn.setAttribute('aria-pressed', String(nextDark));
+      if (txt) txt.textContent = nextDark ? 'Light theme' : 'Dark theme';
+    });
+  }
+
+  // ===================================================================
+  // 4. SCROLL PROGRESS & TRANSITION CONTROLLER (LINKED TO WAVE MIDPOINT)
+  // ===================================================================
+  const progressFill = document.getElementById('scroll-progress-fill');
+  const cloudLine = document.getElementById('lab-cloud-line');
+  const headerEl = document.querySelector('.lab-header');
+  const moonEl = document.getElementById('lab-end-moon');
+
+  function onScroll() {
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    if (maxScroll > 0 && progressFill) {
+      const pct = Math.min(100, Math.max(0, (window.scrollY / maxScroll) * 100));
+      progressFill.style.width = pct + '%';
+    }
+
+    if (cloudLine && starsContainer) {
+      const rect = cloudLine.getBoundingClientRect();
+      const waveMid = rect.top + rect.height * 0.5;
+      const winH = window.innerHeight;
+
+      // Stars fade in gracefully as the wave curves pass through the viewport
+      if (waveMid < winH) {
+        const progress = Math.min(1, Math.max(0, (winH - waveMid) / (winH * 0.6)));
+        starsContainer.style.opacity = String(progress);
+      } else {
+        starsContainer.style.opacity = '0';
+      }
+
+      // Sticky navbar switches to night aesthetic when the wave reaches top header area
+      if (headerEl) {
+        if (rect.top + rect.height * 0.3 <= 50) {
+          headerEl.classList.add('is-night-nav');
+        } else {
+          headerEl.classList.remove('is-night-nav');
+        }
+      }
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  // Moon Rise IntersectionObserver
+  if (moonEl) {
+    const moonObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          moonEl.classList.add('is-risen');
+          moonObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    moonObserver.observe(moonEl);
+  }
+
+  // ===================================================================
+  // 5. DETERMINISTIC CONTINUOUS SVG CLOUD OUTLINE GENERATOR
+  // ===================================================================
+  function makePRNG(seed) {
+    let s = (seed * 9301 + 49297) % 233280;
+    return function () {
+      s = (s * 9301 + 49297) % 233280;
+      return s / 233280;
+    };
+  }
+
+  function generateCloudPath(w, h, seed, isBack) {
+    const rand = makePRNG(seed);
+    const padT = 26 + (isBack ? 5 : 0);
+    const padB = 34 + (isBack ? 5 : 0);
+    const padS = 24 + (isBack ? 5 : 0);
+
+    const fw = w + padS * 2;
+    const fh = h + padT + padB;
+
+    const x0 = padS * 0.72;
+    const y0 = padT * 0.72;
+    const x1 = fw - padS * 0.72;
+    const y1 = fh - padB * 0.72;
+
+    const nTop = 4;
+    const nRight = 3;
+    const nBottom = 4;
+    const nLeft = 3;
+
+    const points = [];
+
+    // Top edge (left -> right)
+    for (let i = 0; i < nTop; i++) {
+      const frac = i / nTop;
+      points.push({ x: x0 + (x1 - x0) * frac, y: y0, bump: 16 + rand() * 10 });
+    }
+    // Right edge (top -> bottom)
+    for (let i = 0; i < nRight; i++) {
+      const frac = i / nRight;
+      points.push({ x: x1, y: y0 + (y1 - y0) * frac, bump: 10 + rand() * 7 });
+    }
+    // Bottom edge (right -> left)
+    for (let i = 0; i < nBottom; i++) {
+      const frac = i / nBottom;
+      points.push({ x: x1 - (x1 - x0) * frac, y: y1, bump: 14 + rand() * 8 });
+    }
+    // Left edge (bottom -> top)
+    for (let i = 0; i < nLeft; i++) {
+      const frac = i / nLeft;
+      points.push({ x: x0, y: y1 - (y1 - y0) * frac, bump: 10 + rand() * 7 });
+    }
+
+    const segments = [];
+    const n = points.length;
+    segments.push(`M ${points[0].x.toFixed(1)} ${points[0].y.toFixed(1)}`);
+
+    for (let i = 0; i < n; i++) {
+      const p1 = points[i];
+      const p2 = points[(i + 1) % n];
+
+      const dx = p2.x - p1.x;
+      const dy = p2.y - p1.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist < 0.001) continue;
+
+      const tx = dx / dist;
+      const ty = dy / dist;
+      const nx = ty;
+      const ny = -tx;
+
+      const hBump = (p1.bump + p2.bump) * 0.5 * (isBack ? 1.15 : 1.0);
+
+      const c1x = p1.x + tx * (dist * 0.28) + nx * hBump;
+      const c1y = p1.y + ty * (dist * 0.28) + ny * hBump;
+      const c2x = p2.x - tx * (dist * 0.28) + nx * hBump;
+      const c2y = p2.y - ty * (dist * 0.28) + ny * hBump;
+
+      segments.push(`C ${c1x.toFixed(1)} ${c1y.toFixed(1)}, ${c2x.toFixed(1)} ${c2y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`);
+    }
+
+    segments.push('Z');
+    return { path: segments.join(' '), fw, fh, padS, padT };
+  }
+
+  function renderCloudSVG(svgEl, w, h, seed) {
+    const front = generateCloudPath(w, h, seed, false);
+    const back = generateCloudPath(w, h, seed + 107, true);
+
+    svgEl.setAttribute('viewBox', `0 0 ${front.fw.toFixed(1)} ${front.fh.toFixed(1)}`);
+    svgEl.innerHTML = `
+      <defs>
+        <linearGradient id="cGradFront-${seed}" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#ffffff"/>
+          <stop offset="68%" stop-color="#f5faff"/>
+          <stop offset="100%" stop-color="#e3f1fb"/>
+        </linearGradient>
+        <linearGradient id="cGradBack-${seed}" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="rgba(255, 255, 255, 0.9)"/>
+          <stop offset="100%" stop-color="rgba(215, 238, 252, 0.6)"/>
+        </linearGradient>
+      </defs>
+      <path class="cloud-layer-back" d="${back.path}" fill="url(#cGradBack-${seed})" />
+      <path class="cloud-layer-front" d="${front.path}" fill="url(#cGradFront-${seed})" />
+    `;
+  }
+
+  // ===================================================================
+  // 6. LIGHTBOX MODAL CONTROLLER
+  // ===================================================================
+  const dialog = document.getElementById('lightbox-dialog');
+  const closeBtn = document.getElementById('lightbox-close');
+  const lbImg = document.getElementById('lightbox-img');
+  const lbWrap = document.getElementById('lightbox-media-wrap');
+  const lbCaption = document.getElementById('lightbox-caption');
+  const lbBadge = document.getElementById('lightbox-badge');
+  const lbCloudSvg = document.getElementById('lightbox-cloud-svg');
+  let lastActiveElement = null;
+
+  function openLightbox(url, index, host, file, card) {
+    lastActiveElement = card;
+    lbImg.src = url;
+    lbImg.alt = 'Enlarged test image ' + index;
+    lbCaption.textContent = '#' + index + ' — ' + host + ' — ' + file;
+
+    const isAi = card.classList.contains('is-ai-card');
+    if (isAi) {
+      lbWrap.classList.add('is-ai');
+      const score = card.dataset.aiScore || '';
+      lbBadge.textContent = score ? `AI GENERATED · ${score}` : 'AI GENERATED';
+
+      requestAnimationFrame(() => {
+        const rect = lbImg.getBoundingClientRect();
+        const w = rect.width || 480;
+        const h = rect.height || 360;
+        renderCloudSVG(lbCloudSvg, w, h, index * 83 + 17);
+      });
+    } else {
+      lbWrap.classList.remove('is-ai');
+    }
+
+    dialog.style.display = 'flex';
+    dialog.showModal();
+    closeBtn.focus();
+  }
+
+  function closeLightbox() {
+    dialog.close();
+    dialog.style.display = 'none';
+    lbImg.removeAttribute('src');
+    if (lastActiveElement && typeof lastActiveElement.focus === 'function') {
+      lastActiveElement.focus();
+    }
+  }
+
+  closeBtn.addEventListener('click', closeLightbox);
+  dialog.addEventListener('click', function (e) {
+    if (e.target === dialog) closeLightbox();
+  });
+  dialog.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closeLightbox();
+    }
+  });
+
+  // ===================================================================
+  // 7. BUILD 2-PICTURE SECTIONS: DAY ZONE & NIGHT ZONE (NO ZONE LABELS)
+  // ===================================================================
+  const daySectionsContainer = document.getElementById('lab-day-sections');
+  const nightSectionsContainer = document.getElementById('lab-night-sections');
+  const urls = window.LAB_URLS || [];
+
   if (!urls.length) {
-    var empty = document.createElement('p');
-    empty.className = 'hint';
-    empty.textContent = 'No test images yet — add URLs to test_images.txt and restart the browser.';
-    grid.replaceWith(empty);
+    const empty = document.createElement('div');
+    empty.className = 'lab-intro-card';
+    empty.style.margin = '40px auto';
+    empty.innerHTML = '<p class="hint">No test images yet — add URLs to test_images.txt and restart the browser.</p>';
+    daySectionsContainer.appendChild(empty);
     return;
   }
-  var cursor = 0, step = 0;
-  while (cursor < urls.length) {
-    var full = step % 2 === 1;
-    var take = full ? 1 : 2;
-    for (var i = 0; i < take && cursor < urls.length; i++, cursor++) {
-      grid.append(makeCard(urls[cursor], cursor + 1, full));
+
+  // Reveal on scroll observer
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.remove('is-hidden');
+        entry.target.classList.add('is-revealed');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.18, rootMargin: '0px 0px -40px 0px' });
+
+  // Calculate dynamic midpoint so transition splits day and night accurately
+  const totalSections = Math.ceil(urls.length / 2);
+  const daySectionCount = Math.floor(totalSections / 2); // e.g. for 7 sections: 3 day, 4 night
+
+  for (let i = 0; i < urls.length; i += 2) {
+    const sectionIndex = Math.floor(i / 2) + 1;
+    const isSingle = (i + 1 >= urls.length);
+
+    const section = document.createElement('section');
+    section.className = 'lab-section';
+    section.dataset.section = String(sectionIndex);
+
+    const row = document.createElement('div');
+    row.className = `lab-section-row ${isSingle ? 'has-single-card' : ''}`;
+
+    // Card 1 (Left card: drifts slightly from left)
+    const card1 = makeCard(urls[i], i + 1, false);
+    card1.style.setProperty('--entry-rot', '-1.5deg');
+    row.appendChild(card1);
+
+    // Card 2 (Right card: staggered lower, drifts slightly from right)
+    if (!isSingle) {
+      const card2 = makeCard(urls[i + 1], i + 2, true);
+      card2.style.setProperty('--entry-rot', '1.5deg');
+      row.appendChild(card2);
     }
-    step++;
+
+    section.appendChild(row);
+
+    // Distribute into Day Zone or Night Zone based on computed midpoint
+    if (sectionIndex <= daySectionCount) {
+      daySectionsContainer.appendChild(section);
+    } else {
+      nightSectionsContainer.appendChild(section);
+    }
+  }
+
+  function makeCard(url, index, isStaggered) {
+    const card = document.createElement('figure');
+    card.className = `lab-card ${isStaggered ? 'is-staggered' : ''} is-hidden`;
+    card.tabIndex = 0;
+    card.setAttribute('role', 'button');
+    card.setAttribute('aria-haspopup', 'dialog');
+    card.setAttribute('aria-label', `Test image ${index}. Click or press Enter to view enlarged.`);
+
+    let host = '', file = '';
+    try {
+      const parsed = new URL(url);
+      host = parsed.hostname;
+      file = parsed.pathname.split('/').filter(Boolean).pop() || '';
+    } catch (e) {}
+
+    const frameOuter = document.createElement('div');
+    frameOuter.className = 'card-frame-outer';
+
+    const cloudSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    cloudSvg.setAttribute('class', 'cloud-frame-svg');
+    cloudSvg.setAttribute('aria-hidden', 'true');
+    cloudSvg.setAttribute('focusable', 'false');
+
+    const imgWindow = document.createElement('div');
+    imgWindow.className = 'img-window';
+
+    const img = document.createElement('img');
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    img.src = url;
+    img.alt = 'Test image ' + index;
+    imgWindow.appendChild(img);
+
+    const badge = document.createElement('div');
+    badge.className = 'ai-cloud-badge';
+    badge.setAttribute('role', 'status');
+    badge.textContent = 'AI GENERATED';
+
+    frameOuter.appendChild(cloudSvg);
+    frameOuter.appendChild(imgWindow);
+    frameOuter.appendChild(badge);
+
+    const meta = document.createElement('figcaption');
+    meta.className = 'lab-card-meta';
+    meta.innerHTML = `
+      <span class="meta-tag">#${index}</span>
+      <span class="meta-info">${host} ${file ? '· ' + file : ''}</span>
+    `;
+
+    card.appendChild(frameOuter);
+    card.appendChild(meta);
+
+    const seed = index * 137 + 19;
+    function updateFrameShape() {
+      const w = imgWindow.offsetWidth || 440;
+      const h = imgWindow.offsetHeight || 330;
+      renderCloudSVG(cloudSvg, w, h, seed);
+    }
+
+    if (window.ResizeObserver) {
+      const ro = new ResizeObserver(() => updateFrameShape());
+      ro.observe(imgWindow);
+    } else {
+      updateFrameShape();
+    }
+
+    card.addEventListener('ai-detected', (e) => {
+      card.classList.add('is-ai-card');
+      const score = e.detail && e.detail.score;
+      if (score) {
+        badge.textContent = `AI GENERATED · ${score}`;
+        badge.setAttribute('aria-label', `Detected as AI Generated with confidence score ${score}`);
+      }
+      updateFrameShape();
+    });
+
+    card.addEventListener('click', () => openLightbox(url, index, host, file, card));
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openLightbox(url, index, host, file, card);
+      }
+    });
+
+    card.addEventListener('focus', () => {
+      card.classList.remove('is-hidden');
+      card.classList.add('is-revealed');
+    });
+
+    revealObserver.observe(card);
+    return card;
   }
 });
-function makeCard(url, index, full) {
-  var figure = document.createElement('figure');
-  figure.className = full ? 'lab-card lab-full' : 'lab-card';
-  var img = document.createElement('img');
-  img.loading = 'lazy';
-  img.src = url;
-  img.alt = 'Test image ' + index;
-  img.style.cssText = 'width:100%; min-height:220px; object-fit:contain; background:#111';
-  var caption = document.createElement('figcaption');
-  var host = '', file = '';
-  try {
-    var parsed = new URL(url);
-    host = parsed.hostname;
-    file = parsed.pathname.split('/').filter(Boolean).pop() || '';
-  } catch (error) {}
-  caption.textContent = '#' + index + ' — ' + host + ' — ' + file;
-  figure.append(img, caption);
-  return figure;
-}
 </script>
-</body></html>
+</body>
+</html>

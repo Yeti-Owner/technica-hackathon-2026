@@ -41,6 +41,7 @@ trace.zip
 # Local secrets (keep shareable examples)
 .env
 .env.*
+env
 !.env.example
 !.env.sample
 

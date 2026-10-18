@@ -17,7 +17,7 @@ async def main():
 
         # The redesigned home's closing button opens the AI image lab.
         await b.click_link("Try Practice Tools")
-        await expect(b.page.get_by_role("heading", name="AI image lab — debug page for the AI image checker")).to_be_visible()
+        await expect(b.page.get_by_role("heading", name="AI image lab", exact=True)).to_be_visible()
         await expect(b.page.locator("#lab-grid")).to_have_count(1)
         await expect(b.page.get_by_role("link", name="Home", exact=True)).to_be_visible()
         await expect(b.page.locator("#lab-grid figure")).to_have_count(13)
