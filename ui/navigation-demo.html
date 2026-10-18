@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Try the controls — Nod</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="navigation-demo.css">
+  <script>
+    try {
+      const saved = localStorage.getItem('nod-theme');
+      if (saved === 'dark' || (!saved && matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.dataset.theme = 'dark';
+      }
+    } catch (_) {}
+  </script>
+  <script src="navigation-demo.js" defer></script>
+</head>
+<body class="navigation-demo">
+<a href="#demo-main" class="skip-link">Skip to the demo</a>
+<div class="celestial-container" aria-hidden="true">
+  <div class="celestial-body celestial-sun">
+    <img src="assets/sun.png" alt="" class="celestial-img sun-img" width="190" height="190" loading="eager">
+  </div>
+  <div class="celestial-body celestial-moon">
+    <img src="assets/moon.png" alt="" class="celestial-img moon-img" width="190" height="190" loading="eager">
+  </div>
+</div>
+<header class="site-header demo-header">
+  <div class="header-inner">
+    <nav class="header-nav" aria-label="Page navigation"><a href="home.html" class="nav-cloud-link">
+        <span class="nav-cloud-bg" aria-hidden="true">
+          <svg class="nav-cloud-svg" viewBox="0 0 160 52" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+            <defs>
+              <linearGradient id="gradNavHome" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="var(--nav-cloud-fill-top)"/>
+                <stop offset="55%" stop-color="var(--nav-cloud-fill-mid)"/>
+                <stop offset="100%" stop-color="var(--nav-cloud-fill-bottom)"/>
+              </linearGradient>
+            </defs>
+            <path class="nav-cloud-path" fill="url(#gradNavHome)" d="M 20 22 C 8 10, 4 32, 4 36 C 4 45, 12 48, 22 47 C 55 49, 105 49, 138 47 C 150 47, 156 38, 156 32 C 156 22, 148 14, 138 18 C 128 8, 108 5, 92 12 C 78 3, 52 4, 40 12 C 30 8, 24 14, 20 22 Z" />
+          </svg>
+        </span>
+        <span class="nav-cloud-text">Home</span>
+      </a> <a href="image-lab.html" class="nav-cloud-link">
+        <span class="nav-cloud-bg" aria-hidden="true">
+          <svg class="nav-cloud-svg" viewBox="0 0 160 52" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+            <defs>
+              <linearGradient id="gradNavLab" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="var(--nav-cloud-fill-top)"/>
+                <stop offset="55%" stop-color="var(--nav-cloud-fill-mid)"/>
+                <stop offset="100%" stop-color="var(--nav-cloud-fill-bottom)"/>
+              </linearGradient>
+            </defs>
+            <path class="nav-cloud-path" fill="url(#gradNavLab)" d="M 20 22 C 8 10, 4 32, 4 36 C 4 45, 12 48, 22 47 C 55 49, 105 49, 138 47 C 150 47, 156 38, 156 32 C 156 22, 148 14, 138 18 C 128 8, 108 5, 92 12 C 78 3, 52 4, 40 12 C 30 8, 24 14, 20 22 Z" />
+          </svg>
+        </span>
+        <span class="nav-cloud-text">Image lab</span>
+      </a></nav>
+    <div class="header-actions"><button id="theme" type="button" class="nav-cloud-link nav-theme-cloud theme-toggle-btn" aria-pressed="false" aria-label="Toggle dark and light color theme">
+        <span class="nav-cloud-bg" aria-hidden="true">
+          <svg class="nav-cloud-svg" viewBox="0 0 160 52" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+            <defs>
+              <linearGradient id="gradNavThemeLab" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="var(--nav-cloud-fill-top)"/>
+                <stop offset="55%" stop-color="var(--nav-cloud-fill-mid)"/>
+                <stop offset="100%" stop-color="var(--nav-cloud-fill-bottom)"/>
+              </linearGradient>
+            </defs>
+            <path class="nav-cloud-path" fill="url(#gradNavThemeLab)" d="M 20 25 C 6 14, 4 34, 4 37 C 4 45, 14 48, 24 47 C 60 49, 100 48, 136 47 C 148 47, 156 40, 156 33 C 156 24, 146 16, 136 20 C 124 6, 98 4, 84 12 C 70 5, 48 7, 38 15 C 28 12, 22 18, 20 25 Z" />
+          </svg>
+        </span>
+        <span class="nav-cloud-text">Dark theme</span>
+      </button></div>
+  </div>
+</header>
+<div class="demo-sky" aria-hidden="true">
+  <img class="demo-cloud demo-cloud-left" src="assets/clouds/cloud-day-1.png" alt="" width="2000" height="2000">
+  <img class="demo-cloud demo-cloud-right" src="assets/clouds/cloud-day-2.png" alt="" width="2000" height="2000">
+  <img class="demo-cloud demo-cloud-bottom" src="assets/clouds/cloud-new-1.png" alt="" width="2000" height="2000">
+</div>
+<main id="demo-main" class="demo-main" tabindex="-1">
+  <div class="demo-intro">
+    <h1 class="statement-heading">Look. Move. Click.</h1>
+    <p class="statement-body">A little space to try hands-free browsing.</p>
+    <p class="demo-instructions">With camera control on, turn your head right to move forward or left to go back. You can also use <kbd>Tab</kbd> and <kbd>Shift</kbd> + <kbd>Tab</kbd>. The outline shows where you are.</p>
+  </div>
+  <section class="demo-targets" aria-label="Try these three controls">
+    <article class="demo-card" id="click-card">
+      <div class="demo-art" aria-hidden="true"><span class="demo-spark">✦</span></div>
+      <button class="demo-action" id="click-demo" type="button" aria-describedby="click-help">Click me</button>
+      <p id="click-help">Activate the button and watch it light up.</p>
+      <p class="demo-result" id="click-result">Ready when you are.</p>
+    </article>
+    <article class="demo-card" id="open-card">
+      <div class="demo-art" aria-hidden="true"><span class="demo-envelope">✉</span></div>
+      <a class="demo-action demo-link" id="open-demo" href="#demo-surprise" aria-expanded="false" aria-controls="demo-surprise" aria-describedby="open-help">Open me</a>
+      <p id="open-help">Try a link. Your surprise opens right here.</p>
+      <div class="demo-result" id="demo-surprise" hidden>You found a little sunshine. ☀</div>
+    </article>
+    <article class="demo-card" id="right-card">
+      <div class="demo-art" aria-hidden="true"><span class="demo-bubbles">☁</span></div>
+      <button class="demo-action" id="right-demo" type="button" aria-describedby="right-help">Right click me</button>
+      <p id="right-help">Try a right click, or use <kbd>Shift</kbd> + <kbd>F10</kbd> while focused.</p>
+      <p class="demo-result" id="right-result">Something extra is waiting.</p>
+    </article>
+  </section>
+  <div class="demo-feedback">
+    <p id="demo-status" role="status" aria-live="polite" aria-atomic="true">Choose a control to get started.</p>
+    <button type="button" class="demo-reset" id="reset-demo">Start again</button>
+  </div>
+  <p class="demo-note">These three controls stay on this page. Home and Image lab above take you back.</p>
+  <noscript><p class="demo-note">Enable JavaScript to see the controls respond.</p></noscript>
+</main>
+</body>
+</html>
