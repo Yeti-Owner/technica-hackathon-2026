@@ -31,7 +31,7 @@ Camera frames are processed locally by MediaPipe; nothing is uploaded.
 - `ai on` / `ai off` / `ai status` / `ai concurrency 1-3`: control the checker.
 - Flagged images get a red banner/outline in the page.
 - `ai-check.json` tunes thresholds and limits.
-- The home page's "AI image lab" bookmark opens a debug page listing the images from `test_images.txt`.
+- The redesigned home (Tomas's website 2.0: sun/moon/clouds theme, cloud nav, founders section, GSAP/Lenis animations loaded from CDNs — internet needed for full effect, degrades gracefully offline) has a "Try Practice Tools" button that opens the AI image lab, a debug page listing the images from `test_images.txt`.
 
 Data flow: image bytes (or URLs) are POSTed to the configured server with the `X-API-Key` header.
 
@@ -51,7 +51,11 @@ The local voice/humming stack is present but disabled by design: `VoiceControl.s
 - `browserkit/voice.py`, `browserkit/voice_control.py`, `ui/voice.js`: voice/humming stack (currently disabled).
 - `ui/ai_scan.js`, `ui/ai_mark.css`: in-page AI scan and marking.
 - `ui/image-lab.html`: debug lab; its card list is generated from `test_images.txt` at browser start.
-- Other `ui/` files: home, practice page, themes, bookmarks, and shared page styling.
+- `ui/home.html`, `ui/home.js`, `ui/theme.css`: redesigned home (website 2.0) — sun/moon/clouds theme, cloud nav, founders section, GSAP/Lenis animations from CDNs.
+- `ui/assets/`, `Images for ui/`: home-page images (sun, moon, clouds, logos, team photos).
+- `scratch/`: Tomas's dev harness (preview/verify scripts and screenshots).
+- `CLAUDEwebdesign copy.md`, `Founders Descriptions.md`, `website description.md`: design and notes docs.
+- Other `ui/` files: practice page (reachable by direct URL only), bookmarks, and shared page styling.
 
 ## Collaboration notes
 

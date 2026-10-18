@@ -4,6 +4,7 @@ from pathlib import Path
 
 from playwright.async_api import expect
 from browserkit import BrowserController
+from browserkit.controller import ROOT
 
 
 async def main():
@@ -13,10 +14,16 @@ async def main():
         await expect(b.page.locator("html")).to_have_attribute("data-theme", "dark")
         Path("artifacts").mkdir(exist_ok=True)
         await b.page.screenshot(path="artifacts/home.png")
-        try:
-            await b.click_link("Practice page Try links, focus, scrolling and images")
-        except Exception:
-            await b.click_link("Try Practice Tools")
+
+        # The redesigned home's closing button opens the AI image lab.
+        await b.click_link("Try Practice Tools")
+        await expect(b.page.get_by_role("heading", name="AI image lab — debug page for the AI image checker")).to_be_visible()
+        await expect(b.page.locator("#lab-grid")).to_have_count(1)
+        await expect(b.page.get_by_role("link", name="Home", exact=True)).to_be_visible()
+        await expect(b.page.locator("#lab-grid figure")).to_have_count(13)
+
+        # The practice page is UI-orphaned but still reachable by direct URL.
+        await b.goto((ROOT / "ui/practice.html").as_uri())
         await expect(b.page.get_by_role("heading", name="Try the controls.")).to_be_visible()
         assert await b.page.locator("#browser-starter-style").count() == 1
         await b.page.get_by_role("link", name="Home", exact=True).focus()
@@ -43,7 +50,7 @@ async def main():
         await popup.goto((Path(__file__).resolve().parent / "ui/home.html").as_uri())
         assert b.page == popup
         await expect(popup.locator("#browser-starter-style")).to_have_count(1)
-    print("PASS: home, theme, navigation, focus, activation, images, scroll, reading, reload and new-tab injection")
+    print("PASS: home, theme, practice-tools -> image lab link, focus, images, scroll, reading, reload and new-tab injection")
 
 
 if __name__ == "__main__":
