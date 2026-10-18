@@ -94,13 +94,13 @@ class BrowserController:
                 element = handle.as_element()
                 if element is None:
                     return False
-                await element.click(button=button, trial=True, timeout=400)
+                await element.click(button=button, trial=True, timeout=800)
                 if not await element.evaluate("""(el, key) => {
                     const s = window.__voiceFocus?.();
                     return el.isConnected && s?.active && s.key === key && s.element === el;
                 }""", key):
                     return False
-                await element.click(button=button, timeout=250)
+                await element.click(button=button, timeout=500)
                 return True
             finally:
                 await handle.dispose()

@@ -226,9 +226,9 @@ class VowelDetector:
 
 class ClickDetector:
     """Conservative one-shot gestures. No scrolling hold/fade can authorize a click."""
-    HOLD = .54
-    QUIET = .30
-    MAX_GAP = .18
+    HOLD = .45
+    QUIET = .24
+    MAX_GAP = .24
 
     def __init__(self, detector=None):
         self.detector = detector or VowelDetector()
@@ -270,7 +270,7 @@ class ClickDetector:
         self.last_update = now
         self.detector.update(samples, rate, now)
         rms, vector, clarity, shape = self.detector.observation
-        quiet = rms < max(.00045, self.detector.noise*1.35) and clarity < .35
+        quiet = rms < .00018 or (rms < max(.00045, self.detector.noise*1.35) and clarity < .50)
         if quiet:
             if self.quiet_since is None:
                 self.quiet_since = now
@@ -284,7 +284,7 @@ class ClickDetector:
         if not self.armed:
             return 0
         label, distances = self.detector.classify(vector) if vector is not None else (0, {})
-        clear = (label != 0 and clarity >= .65 and rms > max(.00035, self.detector.noise*1.8)
+        clear = (label != 0 and clarity >= .60 and rms > max(.00022, self.detector.noise*1.4)
                  and distances[label] < 2.0 and distances[-label]-distances[label] > .40
                  and self.has_harmonics(samples, rate))
         if not self.candidate:
@@ -296,7 +296,7 @@ class ClickDetector:
                 # Allow a short attack, but never skip a clearly different vowel.
                 if self.onset is None:
                     self.onset = now
-                if now-self.onset <= .21:
+                if now-self.onset <= .30:
                     self.reason = 'Waiting for a clear vowel'
                     return 0
                 self.reset()  # Do not start midway through a spoken phrase.
@@ -307,8 +307,8 @@ class ClickDetector:
             self.good_time = 0.
             self.reference, self.shape = vector.copy(), shape.copy()
         stable = (clear and label == self.candidate
-                  and np.max(np.abs(vector-self.reference)) < .35
-                  and float(np.dot(shape, self.shape)) > .85)
+                  and np.max(np.abs(vector-self.reference)) < .50
+                  and float(np.dot(shape, self.shape)) > .75)
         # A single LPC estimate can jump to the other vowel. Only a sustained
         # change cancels immediately; ambiguous frames never count toward a click.
         self.opposite_time = self.opposite_time + dt if clear and label == -self.candidate else 0.
@@ -321,7 +321,7 @@ class ClickDetector:
             self.reason = 'Interrupted sound; pause and try again'
             return 0
         if (stable and now-self.started >= self.HOLD
-                and self.good_time >= max(self.HOLD*.80, (now-self.started)*.70)):
+                and self.good_time >= max(self.HOLD*.75, (now-self.started)*.65)):
             action = self.candidate
             # Learn only after a completed gesture, within the existing bounds.
             # The scrolling learner waited longer than a click takes to confirm.

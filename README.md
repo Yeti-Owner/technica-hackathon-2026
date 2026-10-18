@@ -37,7 +37,7 @@ Data flow: image bytes (or URLs) are POSTed to the configured server with the `X
 
 ## Voice clicks
 
-Head left/right (or Tab/Shift+Tab) selects an element. After a brief quiet pause, hold **ooo** steadily for about **0.6 seconds** to left-click it, or **aaa** to right-click it. Each utterance produces at most one click; pause for at least 0.3 seconds before another. Detection gaps up to 0.18 seconds preserve progress but do not count toward confirmation. Focus changes, missing audio, and sustained changing sounds cancel confirmation. Right click opens the element's context menu; it does not choose a menu action.
+Head left/right (or Tab/Shift+Tab) selects an element. After a brief quiet pause, hold **ooo** steadily for about **half a second** to left-click it, or **aaa** to right-click it. Each utterance produces at most one click; pause for at least 0.3 seconds before another. Detection gaps up to 0.24 seconds preserve progress but do not count toward confirmation. Focus changes, missing audio, and sustained changing sounds cancel unfinished confirmation. Completed detections print either a click-sent message or a reason for skipping. Right click opens the element's context menu; it does not choose a menu action.
 
 `mic on/off/status`, `mic list`, `mic use NUMBER`, `mic default`, and `mic reset` control input and preferences. Startup checks the default microphone. No voice overlay or voice scrolling is enabled. Detection rejects brief syllables and requires stable, clear vowels above background noise, but prolonged vowels in speech or speaker playback can still trigger it; this is not a speech-intent classifier.
 
@@ -78,6 +78,7 @@ Run using the project's environment (Windows shown; use `.venv/bin/python` on ma
 ```sh
 .venv/Scripts/python.exe -m unittest test_voice -v
 .venv/Scripts/python.exe -m unittest test_voice_click -v
+.venv/Scripts/python.exe -m unittest test_voice_dispatch -v
 .venv/Scripts/python.exe -m unittest test_ai_check -v
 .venv/Scripts/python.exe smoke_test.py
 .venv/Scripts/python.exe smoke_ai.py

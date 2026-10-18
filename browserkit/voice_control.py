@@ -37,7 +37,7 @@ class VoiceControl:
             self.enabled = True
             self.message = 'Listening: ooo left-click / aaa right-click'
             print(f'Microphone checked: {self.device_label}.')
-            print('Focus an item with your head or Tab. Pause, then hold ooo or aaa steadily for about 0.6 seconds. One click per sound; pause between clicks.')
+            print('Focus an item with your head or Tab. Pause, then hold ooo or aaa steadily for about half a second. One click per sound; pause between clicks.')
         except Exception as error:
             self.message = 'Mic unavailable'
             print(f'Microphone unavailable: {error}. Check your input, then use mic on.')
@@ -53,9 +53,33 @@ class VoiceControl:
     def status(self):
         return f'{self.message} · {self.device_label or "No microphone open"} · {self.gesture.reason}'
 
-    def _cancel(self):
+    def _cancel(self, reason='voice controls paused or reset', preserve_pending=False):
         self.gesture.cancel()
-        self.candidate_target = self.pending = None
+        self.candidate_target = None
+        if not preserve_pending:
+            if self.pending:
+                print(f'Voice click skipped: {reason}.', flush=True)
+            self.pending = None
+
+    async def _dispatch_pending(self, target):
+        if not self.pending:
+            return
+        stamp, action, intended = self.pending
+        self.pending = None  # Consume before dispatch: never retry a click.
+        if not self.enabled or target != intended:
+            print('Voice click skipped: focus changed or microphone paused.', flush=True)
+            return
+        if time.monotonic()-stamp > .75:
+            print('Voice click skipped: browser response took too long.', flush=True)
+            return
+        try:
+            clicked = await self.browser.click_focused(target, 'left' if action == 1 else 'right')
+            if clicked:
+                print('Voice left click sent' if action == 1 else 'Voice right click sent', flush=True)
+            else:
+                print('Voice click skipped: selected item or browser lost focus.', flush=True)
+        except Error:
+            print('Voice click skipped: selected item moved, is covered, or is unavailable.', flush=True)
 
     def pause(self):
         self.enabled = False
@@ -105,18 +129,9 @@ class VoiceControl:
                 except (Error, asyncio.TimeoutError):
                     target = None
                 if target != self.target or target is None:
-                    self._cancel()
+                    self._cancel('focus changed or no clickable item is selected')
                 self.target = target
-                if self.pending:
-                    stamp, action, intended = self.pending
-                    self.pending = None  # Consume before dispatch: never retry a click.
-                    if self.enabled and target == intended and time.monotonic()-stamp < .2:
-                        try:
-                            clicked = await self.browser.click_focused(target, 'left' if action == 1 else 'right')
-                            if clicked:
-                                print('Voice left click' if action == 1 else 'Voice right click')
-                        except Error:
-                            pass  # Navigation, lost focus, disabled/covered target: cancel.
+                await self._dispatch_pending(target)
                 if time.monotonic()-last_save > 30:
                     self._save()
                     last_save = time.monotonic()
@@ -142,7 +157,7 @@ class VoiceControl:
                         except queue.Empty:
                             break
                         if now-stamp > .15 or overflow or stamp-self.last_audio > .12:
-                            self._cancel()
+                            self._cancel(preserve_pending=True)
                             self.window = np.zeros(0, dtype=np.float32)
                         self.last_audio = stamp
                         if now-stamp > .15 or overflow:
@@ -158,10 +173,14 @@ class VoiceControl:
                             self.candidate_target = self.target
                         if action and self.target and self.candidate_target == self.target:
                             self.pending = (stamp, action, self.candidate_target)
+                        elif action:
+                            print('Voice click skipped: focus an item with Tab or head controls first.', flush=True)
                         if not self.target:
                             self._cancel()
                     if now-self.last_audio > .12:
-                        self._cancel()
+                        # An audio gap cancels an unfinished sound, not a click
+                        # already confirmed and waiting for browser validation.
+                        self._cancel(preserve_pending=True)
                 await asyncio.sleep(.01)
         except Exception as error:
             self.pause()

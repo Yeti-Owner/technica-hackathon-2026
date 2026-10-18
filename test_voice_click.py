@@ -118,6 +118,14 @@ class ClickTests(unittest.TestCase):
             self.assertEqual(self.feed(block, .06), [])
             self.assertEqual(self.feed(self.silence, .12), [])
 
+    def test_soft_breathy_vowels_confirm_without_perfect_periodicity(self):
+        for formants, action in [([350, 850, 2500], 1), ([800, 1300, 2600], -1)]:
+            self.gate = ClickDetector()
+            self.feed(self.silence, .5)
+            block = vowel(formants)*.012
+            with patch.object(self.gate.detector, 'features', return_value=(np.log(formants[:2]), .62, 140)):
+                self.assertEqual(self.feed(block, .6), [action])
+
 
 if __name__ == '__main__':
     unittest.main()
