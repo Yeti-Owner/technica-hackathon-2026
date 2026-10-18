@@ -30,6 +30,7 @@
   }
 
   function qualifies(img) {
+    if (img.closest('dialog') || img.closest('.lightbox-media-wrap') || img.hasAttribute('data-no-ai-scan')) return false;
     const {w, h, rect} = box(img);
     if (w < cfg.minSize || h < cfg.minSize) return false;
     const margin = Math.ceil(cfg.prefetchScreens * innerHeight);
@@ -192,6 +193,10 @@
     img.dataset.aiVerdict = String(score);
     img.classList.add('ai-detected-img');
 
+    if (img.closest('dialog') || img.closest('.lightbox-media-wrap') || img.hasAttribute('data-no-ai-scan')) {
+      return;
+    }
+
     // If inside a picture lab card or custom component:
     const card = img.closest('.lab-card');
     if (card) {
@@ -202,6 +207,7 @@
         badge.textContent = `AI GENERATED · ${score}`;
         badge.setAttribute('aria-label', `Detected as AI Generated with confidence score ${score}`);
       }
+      card.dispatchEvent(new CustomEvent('ai-detected', { bubbles: true, detail: { score } }));
       return;
     }
 

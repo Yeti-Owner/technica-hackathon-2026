@@ -1,28 +1,126 @@
 /* ===================================================================
-   Nod — White Cloud AI-Generated Image Marks
-   Replaces harsh red debug outlines with a soft, puffy white cloud
-   frame and high-contrast bold black label.
+   Nod — AI-Generated Image Cloud Framing System
+   Continuous SVG cloud silhouette with organic bumps, dimensional
+   watercolor shading, breathing motion, and high-contrast black badge.
    =================================================================== */
 
 :root {
-  --ai-frame-bg: #ffffff;
-  --ai-frame-shadow: 0 14px 28px rgba(14, 52, 85, 0.16);
+  --frame-thickness: 24px;
+  --bump-size: 16px;
+  --frame-fill-top: #ffffff;
+  --frame-fill-bottom: #e4f2fb;
+  --frame-shadow: drop-shadow(0 16px 36px rgba(8, 48, 72, 0.18)) drop-shadow(0 4px 12px rgba(8, 48, 72, 0.08));
+  --frame-glow: drop-shadow(0 0 25px rgba(220, 240, 255, 0.55)) drop-shadow(0 0 50px rgba(98, 233, 255, 0.32));
   --ai-badge-bg: #ffffff;
   --ai-badge-color: #0a0a0a;
-  --ai-badge-font-size: 0.82rem;
-  --ai-float-distance: 3px;
-  --ai-float-duration: 5s;
+  --ai-badge-font-size: 0.84rem;
+  --ai-float-distance: 4px;
+  --ai-float-duration: 6s;
 }
 
-/* Subtle image-level indicator */
+/* Subtle image-level styling */
 .ai-detected-img {
-  border-radius: 14px;
+  border-radius: 16px;
 }
 
-/* Generic floating frame overlay (for images on ordinary web pages) */
+/* ── Continuous SVG Cloud Frame Container ───────────────────────── */
+.cloud-frame-svg {
+  position: absolute;
+  inset: -28px;
+  width: calc(100% + 56px);
+  height: calc(100% + 56px);
+  pointer-events: none;
+  z-index: 1;
+  display: none;
+  overflow: visible;
+}
+
+.is-ai-card .cloud-frame-svg,
+.is-ai .cloud-frame-svg {
+  display: block;
+  filter: var(--frame-shadow);
+  transform-origin: center center;
+  animation: framePuff 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+             frameBreathe 7.5s ease-in-out infinite alternate 0.7s;
+}
+
+:root[data-theme="dark"] .is-ai-card .cloud-frame-svg,
+:root[data-theme="dark"] .is-ai .cloud-frame-svg {
+  filter: var(--frame-glow);
+}
+
+/* Depth Layers */
+.cloud-layer-back {
+  opacity: 0.48;
+  transform: translate(2px, 4px);
+  transition: d 0.25s ease;
+}
+
+.cloud-layer-front {
+  opacity: 1;
+  transition: d 0.25s ease;
+}
+
+/* ── Motion: Puff-in and Subtle Breathing ───────────────────────── */
+@keyframes framePuff {
+  0% { transform: scale(0.92); opacity: 0; }
+  60% { transform: scale(1.025); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes frameBreathe {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.015); }
+}
+
+@keyframes badgePop {
+  0% { transform: translateX(-50%) scale(0.6); opacity: 0; }
+  70% { transform: translateX(-50%) scale(1.08); opacity: 1; }
+  100% { transform: translateX(-50%) scale(1); opacity: 1; }
+}
+
+/* ── High-Contrast Black Label Cloud Badge ──────────────────────── */
+.ai-cloud-badge {
+  display: none;
+  position: absolute;
+  bottom: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--ai-badge-bg, #ffffff);
+  color: var(--ai-badge-color, #0a0a0a);
+  font-family: var(--font-display, 'Space Grotesk', sans-serif);
+  font-size: var(--ai-badge-font-size, 0.84rem);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(8, 48, 72, 0.12);
+  box-shadow: 0 6px 18px rgba(8, 48, 72, 0.16);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.is-ai-card .ai-cloud-badge,
+.is-ai .ai-cloud-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  animation: badgePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.25s both;
+}
+
+:root[data-theme="dark"] .ai-cloud-badge {
+  background: #ffffff;
+  color: #06131c;
+  border-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(220, 240, 255, 0.4);
+}
+
+/* ── Generic Overlays (for ordinary third-party pages) ──────────── */
 .ai-cloud-frame-overlay {
   position: absolute;
-  background: var(--ai-frame-bg, #ffffff);
+  background: #ffffff;
   border-radius: 26px;
   filter: drop-shadow(0 14px 28px rgba(14, 52, 85, 0.18));
   z-index: 2147482998;
@@ -34,83 +132,13 @@
   filter: drop-shadow(0 8px 30px rgba(255, 255, 255, 0.25)) drop-shadow(0 14px 28px rgba(0, 0, 0, 0.5));
 }
 
-/* Cloud bumps hidden by default on all cards */
-.cloud-bumps-container {
-  display: none;
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* Only show cloud bumps when AI detected */
-.is-ai-card .cloud-bumps-container,
-.is-ai .cloud-bumps-container,
-.ai-cloud-frame-overlay .cloud-bumps-container {
-  display: block;
-}
-
-/* Bump circles merging with white frame */
-.cloud-bumps-container .bump,
-.ai-cloud-frame-overlay .bump {
-  position: absolute;
-  background: var(--ai-frame-bg, #ffffff);
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-/* Top bumps (larger & puffy, overlapping top edge) */
-.bump-top-1 { width: 44px; height: 38px; top: -14px; left: 16%; }
-.bump-top-2 { width: 62px; height: 50px; top: -20px; left: 42%; }
-.bump-top-3 { width: 48px; height: 42px; top: -15px; left: 72%; }
-
-/* Bottom bumps (larger & varied, overlapping bottom edge) */
-.bump-bottom-1 { width: 50px; height: 42px; bottom: -15px; left: 18%; }
-.bump-bottom-2 { width: 66px; height: 52px; bottom: -20px; left: 46%; }
-.bump-bottom-3 { width: 46px; height: 40px; bottom: -14px; left: 74%; }
-
-/* Side bumps (gentler) */
-.bump-left-1 { width: 34px; height: 46px; left: -12px; top: 38%; }
-.bump-right-1 { width: 34px; height: 46px; right: -12px; top: 38%; }
-
-/* High-contrast Black Label Badge on White Cloud */
-.ai-cloud-badge {
-  display: none;
-  position: absolute;
-  bottom: -12px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--ai-badge-bg, #ffffff);
-  color: var(--ai-badge-color, #0a0a0a);
-  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  font-size: var(--ai-badge-font-size, 0.82rem);
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 6px 14px;
-  border-radius: 999px;
-  border: 1.5px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
-  white-space: nowrap;
-  pointer-events: none;
-  z-index: 5;
-}
-
-/* Only display badge when image is AI detected */
-.is-ai-card .ai-cloud-badge,
-.is-ai .ai-cloud-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
 .ai-cloud-badge-overlay {
   position: absolute;
   display: inline-flex;
-  background: var(--ai-badge-bg, #ffffff);
-  color: var(--ai-badge-color, #0a0a0a);
-  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  font-size: var(--ai-badge-font-size, 0.82rem);
+  background: #ffffff;
+  color: #0a0a0a;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 0.82rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -121,4 +149,14 @@
   white-space: nowrap;
   pointer-events: none;
   z-index: 2147483000;
+}
+
+/* ── Reduced Motion Guard ───────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .is-ai-card .cloud-frame-svg,
+  .is-ai .cloud-frame-svg,
+  .is-ai-card .ai-cloud-badge,
+  .is-ai .ai-cloud-badge {
+    animation: none !important;
+  }
 }

@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AI Image Lab · Nod</title>
+  <title>AI image lab</title>
   
-  <!-- Modern Google Fonts -->
+  <!-- Modern Display & Body Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="theme.css">
   <link rel="stylesheet" href="ai_mark.css">
@@ -26,41 +26,71 @@
 
   <style>
     /* ===================================================================
-       TWEAKABLE LAB PAGE VARIABLES
+       TWEAKABLE VARIABLES (COLORS, SPACING, SIZING, MOTION)
        =================================================================== */
     :root {
-      --lab-card-min-width: 240px;
-      --lab-card-aspect-ratio: 4 / 3;
-      --lab-card-max-height: 280px;
-      --lab-grid-gap: clamp(24px, 2.5vw, 32px);
+      /* Card Sizing */
+      --card-min-width: 380px;
+      --card-max-width: 520px;
+      --card-aspect-ratio: 4 / 3;
+      --card-max-height: clamp(340px, 36vh, 440px);
       
-      --ai-frame-thickness: 18px;
-      --ai-frame-bump-scale: 1;
-      --ai-frame-bg: #ffffff;
-      --ai-frame-shadow: 0 14px 28px rgba(14, 52, 85, 0.16);
+      /* Layout & Spacing */
+      --section-gap-x: clamp(48px, 6vw, 84px);
+      --section-padding-y: clamp(70px, 14vh, 140px);
+      --card-stagger-offset: clamp(40px, 5vh, 70px);
       
-      --ai-badge-bg: #ffffff;
-      --ai-badge-color: #0a0a0a;
-      --ai-badge-font-size: 0.8rem;
+      /* Animation Timings */
+      --reveal-duration: 0.85s;
+      --stagger-delay: 160ms;
+      --breathe-duration: 7.5s;
+      --parallax-speed-slow: 0.15;
+      --parallax-speed-fast: 0.35;
       
-      --ai-float-distance: 3px;
-      --ai-float-duration: 5s;
+      /* Cloud Frame Tokens */
+      --frame-pad-top: 26px;
+      --frame-pad-sides: 24px;
+      --frame-pad-bottom: 34px;
+      --frame-bump-scale: 1;
+      --frame-shadow: drop-shadow(0 16px 36px rgba(8, 48, 72, 0.18)) drop-shadow(0 4px 12px rgba(8, 48, 72, 0.08));
+      --frame-glow: drop-shadow(0 0 25px rgba(220, 240, 255, 0.55)) drop-shadow(0 0 50px rgba(98, 233, 255, 0.32));
     }
 
-    body {
+    /* ── Full-Page Fixed Sky Blue Background (Light & Dark) ─────────── */
+    html, body {
+      margin: 0;
+      padding: 0;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      overflow-x: hidden;
-      background: var(--bg-hero);
+      background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-base) 45%, var(--sky-bottom) 100%);
+      background-attachment: fixed;
       color: var(--text-main);
       font-family: var(--font-body);
+      overflow-x: hidden;
       transition: background 0.4s ease, color 0.4s ease;
     }
 
-    /* ── Ambient Decorative Clouds (Aria-Hidden, Behind Content) ── */
-    .lab-sky-clouds {
+    /* ── Slim Scroll Progress Indicator ───────────────────────────── */
+    .scroll-progress-track {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.2);
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    .scroll-progress-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #ffffff, #62e9ff, #ffffff);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+      transition: width 0.1s linear;
+    }
+
+    /* ── Ambient Decorative Margin Clouds ─────────────────────────── */
+    .lab-ambient-clouds {
       position: fixed;
       inset: 0;
       pointer-events: none;
@@ -68,56 +98,33 @@
       overflow: hidden;
     }
 
-    .lab-cloud {
+    .ambient-cloud {
       position: absolute;
-      opacity: 0.72;
-      filter: blur(0.5px);
-      transition: opacity 0.4s ease, transform 0.4s ease;
+      opacity: 0.65;
+      will-change: transform;
+      user-select: none;
+      transition: opacity 0.4s ease;
     }
 
-    .lab-cloud img {
+    .ambient-cloud img {
       display: block;
       width: 100%;
       height: auto;
-      user-select: none;
     }
 
-    .lab-cloud-tl {
-      top: -40px;
-      left: -60px;
-      width: clamp(260px, 28vw, 420px);
-      animation: ambientDrift 22s ease-in-out infinite alternate;
+    .cloud-tl { top: -30px; left: -60px; width: clamp(280px, 30vw, 440px); }
+    .cloud-tr { top: 60px; right: -80px; width: clamp(300px, 32vw, 480px); }
+    .cloud-mid-left { top: 40vh; left: -100px; width: clamp(260px, 28vw, 420px); opacity: 0.55; }
+    .cloud-mid-right { top: 75vh; right: -90px; width: clamp(280px, 30vw, 450px); opacity: 0.5; }
+    .cloud-bottom-left { top: 120vh; left: -70px; width: clamp(320px, 34vw, 500px); opacity: 0.6; }
+    .cloud-bottom-right { top: 160vh; right: -80px; width: clamp(300px, 32vw, 460px); opacity: 0.55; }
+
+    :root[data-theme="dark"] .ambient-cloud {
+      opacity: 0.3;
+      filter: brightness(0.65) contrast(1.2) drop-shadow(0 0 35px rgba(70, 130, 200, 0.25));
     }
 
-    .lab-cloud-tr {
-      top: 40px;
-      right: -80px;
-      width: clamp(280px, 32vw, 460px);
-      animation: ambientDrift 26s ease-in-out infinite alternate-reverse;
-    }
-
-    .lab-cloud-br {
-      bottom: -60px;
-      right: -50px;
-      width: clamp(300px, 35vw, 500px);
-      opacity: 0.6;
-    }
-
-    :root[data-theme="dark"] .lab-cloud {
-      opacity: 0.35;
-      filter: brightness(0.65) contrast(1.2) drop-shadow(0 0 40px rgba(70, 130, 200, 0.2));
-    }
-
-    @keyframes ambientDrift {
-      0% { transform: translate(0, 0); }
-      100% { transform: translate(16px, 12px); }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .lab-cloud { animation: none !important; }
-    }
-
-    /* ── Lab Header & Nav ─────────────────────────────────────────── */
+    /* ── Sticky Cloud Header & Nav ────────────────────────────────── */
     .lab-header {
       position: sticky;
       top: 0;
@@ -125,6 +132,7 @@
       padding: 16px 5vw;
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
+      transition: transform 0.3s ease;
     }
 
     .lab-header-inner {
@@ -147,140 +155,209 @@
       position: relative;
       z-index: 10;
       flex-grow: 1;
-      padding: 30px 5vw 80px;
+      padding: 20px 5vw 120px;
       max-width: 1360px;
       margin: 0 auto;
       width: 100%;
+      box-sizing: border-box;
     }
 
-    .lab-intro {
-      margin-bottom: 40px;
+    .lab-intro-section {
+      text-align: center;
+      max-width: 840px;
+      margin: 20px auto 60px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     .lab-eyebrow {
       display: inline-block;
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       font-weight: 800;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 10px;
+      color: #082032;
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(8px);
+      padding: 6px 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      margin-bottom: 16px;
+      box-shadow: 0 4px 12px rgba(8, 48, 72, 0.08);
+    }
+
+    :root[data-theme="dark"] .lab-eyebrow {
+      color: #e2f2fa;
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.16);
     }
 
     .lab-title {
       font-family: var(--font-display);
-      font-size: clamp(2rem, 3.8vw, 3.2rem);
+      font-size: clamp(2.4rem, 4.6vw, 3.8rem);
       font-weight: 700;
-      line-height: 1.15;
-      letter-spacing: -0.025em;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
       color: var(--hero-title-color);
-      margin: 0 0 16px;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: baseline;
-      gap: 12px;
+      margin: 0 0 20px;
+      text-shadow: 0 2px 14px rgba(255, 255, 255, 0.35);
     }
 
-    .lab-title-sub {
-      font-size: clamp(0.95rem, 1.4vw, 1.15rem);
-      font-weight: 500;
-      color: var(--text-subtle);
-      font-family: var(--font-body);
-      letter-spacing: normal;
+    :root[data-theme="dark"] .lab-title {
+      text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
     }
 
-    /* Styled soft debug intro line */
     .lab-intro-card {
       background: var(--card-bg);
       border: 1.5px solid var(--card-border);
-      border-radius: 20px;
-      padding: 18px 24px;
+      border-radius: 24px;
+      padding: 18px 28px;
       box-shadow: var(--card-shadow);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
-      max-width: 820px;
+      max-width: 720px;
     }
 
     .lab-intro-card .hint {
       margin: 0;
-      font-size: 0.96rem;
+      font-size: 1rem;
       line-height: 1.6;
       color: var(--text-main);
     }
 
-    /* ── Responsive Picture Grid ──────────────────────────────────── */
-    .lab-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: var(--lab-grid-gap);
-      margin-top: 36px;
+    /* ── Roomy Section Layout (2 Pictures Per Section) ────────────── */
+    .lab-grid-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
     }
 
-    @media (max-width: 1199px) {
-      .lab-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-      }
+    .lab-section {
+      min-height: clamp(560px, 78vh, 880px);
+      padding: var(--section-padding-y) 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      box-sizing: border-box;
     }
 
-    @media (max-width: 899px) {
-      .lab-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
+    .lab-section-divider {
+      margin-bottom: clamp(30px, 5vh, 50px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    @media (max-width: 599px) {
-      .lab-grid {
-        grid-template-columns: minmax(0, 1fr);
-      }
+    .section-cloud-pill {
+      font-family: var(--font-display);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-subtle);
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      padding: 6px 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      box-shadow: 0 6px 18px rgba(8, 48, 72, 0.08);
+      user-select: none;
+    }
+
+    :root[data-theme="dark"] .section-cloud-pill {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.14);
+      color: var(--night-muted);
+    }
+
+    .lab-section-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: var(--section-gap-x);
+      width: 100%;
+      max-width: 1240px;
+      margin: 0 auto;
+      box-sizing: border-box;
+    }
+
+    .lab-section-row.has-single-card {
+      justify-content: center;
     }
 
     /* ── Picture Card ─────────────────────────────────────────────── */
     .lab-card {
-      min-width: 0;
-      width: 100%;
-      box-sizing: border-box;
-      margin: 0;
       position: relative;
+      width: clamp(var(--card-min-width), 44vw, var(--card-max-width));
+      margin: 0;
+      outline: none;
       cursor: pointer;
       display: flex;
       flex-direction: column;
-      outline: none;
-      transition: transform 0.25s ease;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      box-sizing: border-box;
+    }
+
+    /* Stagger right card in the pair */
+    .lab-card.is-staggered {
+      margin-top: var(--card-stagger-offset);
     }
 
     .lab-card:hover {
-      transform: translateY(-4px);
+      transform: translateY(-6px);
     }
 
     .lab-card:focus-visible {
-      outline: 3px solid var(--focus-ring, #081c28);
-      outline-offset: 6px;
-      border-radius: 24px;
+      outline: 3px solid var(--focus-ring, #082032);
+      outline-offset: 8px;
+      border-radius: 28px;
     }
 
-    /* Non-AI Card: clean, thin soft frame */
-    .cloud-frame-wrap {
+    /* Card Frame Outer Box */
+    .card-frame-outer {
       position: relative;
-      background: var(--card-bg, rgba(255, 255, 255, 0.75));
-      border: 1.5px solid var(--card-border, rgba(255, 255, 255, 0.9));
-      border-radius: 22px;
-      padding: 10px;
-      box-shadow: 0 8px 22px rgba(14, 52, 85, 0.08);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      transition: all 0.3s ease;
+      width: 100%;
+      border-radius: 26px;
+      padding: 12px;
+      background: var(--card-bg, rgba(255, 255, 255, 0.65));
+      border: 1.5px solid var(--card-border, rgba(255, 255, 255, 0.75));
+      box-shadow: 0 12px 32px rgba(8, 48, 72, 0.08);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    /* Image Window */
+    /* When AI detected: card outer frame becomes fully transparent so only SVG cloud shows */
+    .is-ai-card .card-frame-outer {
+      background: transparent;
+      border-color: transparent;
+      box-shadow: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      padding: 0;
+    }
+
+    /* Picture Window inside Frame */
     .img-window {
       position: relative;
-      z-index: 2;
+      z-index: 3;
       width: 100%;
-      aspect-ratio: var(--lab-card-aspect-ratio);
-      max-height: var(--lab-card-max-height);
+      aspect-ratio: var(--card-aspect-ratio);
+      max-height: var(--card-max-height);
       overflow: hidden;
-      border-radius: 14px;
+      border-radius: 18px;
       background: rgba(140, 180, 210, 0.25);
+      box-shadow: inset 0 0 0 1.5px rgba(180, 215, 235, 0.4), 0 4px 12px rgba(8, 48, 72, 0.12);
+      transition: transform 0.35s ease, box-shadow 0.35s ease;
+      box-sizing: border-box;
     }
 
     .img-window img {
@@ -288,80 +365,98 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: transform 0.35s ease;
+      transition: transform 0.45s ease;
     }
 
     .lab-card:hover .img-window img {
-      transform: scale(1.03);
+      transform: scale(1.035);
     }
 
-    /* Card Metadata Caption */
+    /* Caption Metadata */
     .lab-card-meta {
       display: flex;
       align-items: center;
-      gap: 8px;
-      margin-top: 10px;
-      padding: 0 4px;
-      font-size: 0.8rem;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 18px;
+      padding: 0 8px;
+      font-size: 0.88rem;
       color: var(--text-subtle);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
-    .meta-idx {
+    .meta-tag {
+      font-family: var(--font-display);
       font-weight: 800;
+      font-size: 0.84rem;
       color: var(--hero-title-color);
-      background: rgba(0, 0, 0, 0.06);
-      padding: 2px 7px;
-      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(6px);
+      padding: 3px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.7);
     }
 
-    :root[data-theme="dark"] .meta-idx {
+    :root[data-theme="dark"] .meta-tag {
       background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.15);
+      color: var(--hero-title-color);
     }
 
-    .meta-host {
-      font-weight: 600;
-      color: var(--text-main);
-    }
-
-    .meta-file {
-      opacity: 0.75;
+    .meta-info {
       overflow: hidden;
       text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 500;
     }
 
-    /* ===================================================================
-       AI-DETECTED WHITE CLOUD FRAME & BLACK BADGE
-       =================================================================== */
-    .is-ai-card .cloud-frame-wrap {
-      background: var(--ai-frame-bg, #ffffff);
-      border: none;
-      padding: var(--ai-frame-thickness, 18px);
-      border-radius: 28px;
-      filter: var(--ai-frame-shadow);
-      animation: aiCardFloat var(--ai-float-duration, 5s) ease-in-out infinite alternate;
-      animation-delay: var(--float-delay, 0s);
+    /* ── Scroll Reveal Animations ─────────────────────────────────── */
+    .js-enabled .lab-card.is-hidden {
+      opacity: 0;
+      transform: translateY(50px) rotate(var(--entry-rot, 1.5deg));
+      pointer-events: none;
     }
 
-    :root[data-theme="dark"] .is-ai-card .cloud-frame-wrap {
-      filter: drop-shadow(0 8px 30px rgba(255, 255, 255, 0.22)) drop-shadow(0 14px 28px rgba(0, 0, 0, 0.5));
+    .js-enabled .lab-card.is-revealed {
+      opacity: 1;
+      transform: translateY(0) rotate(0deg);
+      transition: opacity var(--reveal-duration) cubic-bezier(0.16, 1, 0.3, 1),
+                  transform var(--reveal-duration) cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: auto;
     }
 
-
-    @keyframes aiCardFloat {
-      0% { transform: translateY(0); }
-      100% { transform: translateY(calc(-1 * var(--ai-float-distance, 3px))); }
+    .js-enabled .lab-card.is-staggered.is-revealed {
+      transition-delay: var(--stagger-delay);
     }
 
-    @media (prefers-reduced-motion: reduce) {
-      .is-ai-card .cloud-frame-wrap {
-        animation: none !important;
+    /* ── Responsive Adaptations ───────────────────────────────────── */
+    @media (max-width: 960px) {
+      :root {
+        --card-min-width: 320px;
+        --card-max-width: 440px;
+        --section-gap-x: 32px;
+        --card-stagger-offset: 36px;
       }
     }
 
-    /* ── Lightbox Modal (Full-Size Enlarged View) ────────────────── */
+    @media (max-width: 680px) {
+      .lab-section-row {
+        flex-direction: column;
+        align-items: center;
+        gap: 48px;
+      }
+      .lab-card {
+        width: min(92vw, 440px);
+      }
+      .lab-card.is-staggered {
+        margin-top: 0;
+      }
+      .lab-section {
+        min-height: auto;
+        padding: 50px 0;
+      }
+    }
+
+    /* ── Lightbox Dialog (Hidden by Default, Cleaned of Overlays) ─── */
     .lightbox-dialog {
       margin: auto;
       padding: 0;
@@ -371,16 +466,23 @@
       max-height: 95vh;
       overflow: visible;
       outline: none;
+      display: none;
+    }
+
+    .lightbox-dialog[open] {
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .lightbox-dialog::backdrop {
-      background: rgba(8, 28, 45, 0.72);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      background: rgba(8, 28, 45, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
 
     :root[data-theme="dark"] .lightbox-dialog::backdrop {
-      background: rgba(2, 8, 16, 0.85);
+      background: rgba(2, 8, 16, 0.88);
     }
 
     .lightbox-content {
@@ -397,21 +499,21 @@
       align-items: center;
       gap: 6px;
       margin-bottom: 12px;
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.95);
       color: #081c28;
       border: 1.5px solid rgba(0, 0, 0, 0.08);
       border-radius: 999px;
-      padding: 8px 18px;
-      font-size: 0.9rem;
+      padding: 8px 20px;
+      font-size: 0.92rem;
       font-weight: 700;
       cursor: pointer;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
       transition: all 0.2s ease;
     }
 
     .lightbox-close-btn:hover {
       background: #ffffff;
-      transform: scale(1.04);
+      transform: scale(1.05);
     }
 
     .lightbox-close-btn:focus-visible {
@@ -422,24 +524,21 @@
     .lightbox-media-wrap {
       position: relative;
       background: var(--card-bg);
-      border-radius: 24px;
-      padding: 12px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
-      max-width: min(88vw, 860px);
+      border-radius: 26px;
+      padding: 14px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
+      max-width: min(88vw, 880px);
       max-height: 72vh;
       display: flex;
       align-items: center;
       justify-content: center;
+      box-sizing: border-box;
     }
 
     .lightbox-media-wrap.is-ai {
-      background: #ffffff;
-      padding: 22px;
-      filter: drop-shadow(0 20px 50px rgba(14, 52, 85, 0.25));
-    }
-
-    :root[data-theme="dark"] .lightbox-media-wrap.is-ai {
-      filter: drop-shadow(0 10px 40px rgba(255, 255, 255, 0.3)) drop-shadow(0 24px 60px rgba(0, 0, 0, 0.7));
+      background: transparent;
+      box-shadow: none;
+      padding: 0;
     }
 
     .lightbox-media-wrap img {
@@ -447,26 +546,40 @@
       max-width: 100%;
       max-height: calc(72vh - 44px);
       object-fit: contain;
-      border-radius: 14px;
+      border-radius: 16px;
+      z-index: 3;
+      position: relative;
     }
 
     .lightbox-caption {
-      margin-top: 14px;
+      margin-top: 16px;
       color: #ffffff;
-      font-size: 0.92rem;
+      font-size: 0.95rem;
       font-weight: 600;
-      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
       text-align: center;
     }
 
-    .lightbox-media-wrap.is-ai .ai-cloud-badge {
-      display: inline-flex;
+    @media (prefers-reduced-motion: reduce) {
+      .js-enabled .lab-card.is-hidden {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+      .ambient-cloud {
+        transform: none !important;
+        animation: none !important;
+      }
     }
   </style>
 </head>
 <body>
 
 <a href="#main-content" class="skip-link">Skip to main content</a>
+
+<!-- ═══ SLIM SCROLL PROGRESS TRACK ═══ -->
+<div class="scroll-progress-track" aria-hidden="true">
+  <div class="scroll-progress-fill" id="scroll-progress-fill"></div>
+</div>
 
 <!-- ═══ CELESTIAL SUN & MOON (TOP-LEFT CORNER) ═══ -->
 <div class="celestial-container" aria-hidden="true">
@@ -478,16 +591,25 @@
   </div>
 </div>
 
-<!-- ═══ AMBIENT SKY CLOUDS ═══ -->
-<div class="lab-sky-clouds" aria-hidden="true">
-  <div class="lab-cloud lab-cloud-tl">
+<!-- ═══ AMBIENT SCROLL PARALLAX CLOUDS ═══ -->
+<div class="lab-ambient-clouds" aria-hidden="true">
+  <div class="ambient-cloud cloud-tl" data-speed="0.12">
+    <img src="assets/clouds/cloud-new-1.png" alt="" width="440" height="270" loading="lazy">
+  </div>
+  <div class="ambient-cloud cloud-tr" data-speed="0.22">
+    <img src="assets/clouds/cloud-new-1.png" alt="" width="480" height="290" loading="lazy">
+  </div>
+  <div class="ambient-cloud cloud-mid-left" data-speed="0.32">
     <img src="assets/clouds/cloud-new-1.png" alt="" width="420" height="260" loading="lazy">
   </div>
-  <div class="lab-cloud lab-cloud-tr">
-    <img src="assets/clouds/cloud-new-1.png" alt="" width="460" height="280" loading="lazy">
+  <div class="ambient-cloud cloud-mid-right" data-speed="0.18">
+    <img src="assets/clouds/cloud-new-1.png" alt="" width="450" height="280" loading="lazy">
   </div>
-  <div class="lab-cloud lab-cloud-br">
+  <div class="ambient-cloud cloud-bottom-left" data-speed="0.25">
     <img src="assets/clouds/cloud-new-1.png" alt="" width="500" height="300" loading="lazy">
+  </div>
+  <div class="ambient-cloud cloud-bottom-right" data-speed="0.15">
+    <img src="assets/clouds/cloud-new-1.png" alt="" width="460" height="280" loading="lazy">
   </div>
 </div>
 
@@ -553,16 +675,17 @@
 
 <!-- ═══ MAIN CONTENT ═══ -->
 <main id="main-content" class="lab-main">
-  <div class="lab-intro">
-    <span class="lab-eyebrow">Detection & Verification Lab</span>
-    <h1 class="lab-title">AI image lab — debug page for the AI image checker</h1>
+  <div class="lab-intro-section">
+    <span class="lab-eyebrow">DETECTION & VERIFICATION LAB</span>
+    <h1 class="lab-title">AI image lab</h1>
 
     <div class="lab-intro-card">
       <p class="hint">Debug lab: the card list is generated from test_images.txt at browser start. Scroll slowly and watch which images get a white cloud frame.</p>
     </div>
   </div>
 
-  <section class="lab-grid" id="lab-grid" aria-label="Picture detection grid"></section>
+  <!-- Primary Detection Cards Container -->
+  <div class="lab-grid-container" id="lab-grid" aria-label="Picture detection grid"></div>
 </main>
 
 <!-- ═══ ACCESSIBLE LIGHTBOX MODAL ═══ -->
@@ -575,20 +698,13 @@
       </svg>
       <span>Close</span>
     </button>
+    
     <div class="lightbox-media-wrap" id="lightbox-media-wrap">
-      <div class="cloud-bumps-container" id="lightbox-bumps" aria-hidden="true">
-        <span class="bump bump-top-1"></span>
-        <span class="bump bump-top-2"></span>
-        <span class="bump bump-top-3"></span>
-        <span class="bump bump-bottom-1"></span>
-        <span class="bump bump-bottom-2"></span>
-        <span class="bump bump-bottom-3"></span>
-        <span class="bump bump-left-1"></span>
-        <span class="bump bump-right-1"></span>
-      </div>
-      <img id="lightbox-img" src="" alt="Enlarged view">
+      <svg class="cloud-frame-svg" id="lightbox-cloud-svg" aria-hidden="true" focusable="false"></svg>
+      <img id="lightbox-img" src="" alt="Enlarged view" data-no-ai-scan="true">
       <div class="ai-cloud-badge" id="lightbox-badge" role="status">AI GENERATED</div>
     </div>
+    
     <div class="lightbox-caption" id="lightbox-caption"></div>
   </div>
 </dialog>
@@ -596,7 +712,9 @@
 <script src="../artifacts/lab-urls.js" defer></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  // 1. Theme Toggle Controller
+  document.documentElement.classList.add('js-enabled');
+
+  // ── 1. Theme Toggle Controller ────────────────────────────────────
   const themeBtn = document.getElementById('theme');
   if (themeBtn) {
     const isDark = document.documentElement.dataset.theme === 'dark';
@@ -615,13 +733,143 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // 2. Lightbox Controller
+  // ── 2. Scroll Progress Bar & Parallax Clouds ──────────────────────
+  const progressFill = document.getElementById('scroll-progress-fill');
+  const ambientClouds = document.querySelectorAll('.ambient-cloud');
+
+  function onScroll() {
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    if (maxScroll > 0 && progressFill) {
+      const pct = Math.min(100, Math.max(0, (window.scrollY / maxScroll) * 100));
+      progressFill.style.width = pct + '%';
+    }
+
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const scrollY = window.scrollY;
+      ambientClouds.forEach(cloud => {
+        const speed = parseFloat(cloud.dataset.speed || '0.2');
+        cloud.style.transform = `translateY(${scrollY * speed}px)`;
+      });
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  // ── 3. Deterministic Continuous SVG Cloud Outline Generator ──────
+  function makePRNG(seed) {
+    let s = (seed * 9301 + 49297) % 233280;
+    return function () {
+      s = (s * 9301 + 49297) % 233280;
+      return s / 233280;
+    };
+  }
+
+  function generateCloudPath(w, h, seed, isBack) {
+    const rand = makePRNG(seed);
+    const padT = 26 + (isBack ? 5 : 0);
+    const padB = 34 + (isBack ? 5 : 0);
+    const padS = 24 + (isBack ? 5 : 0);
+
+    const fw = w + padS * 2;
+    const fh = h + padT + padB;
+
+    const x0 = padS * 0.72;
+    const y0 = padT * 0.72;
+    const x1 = fw - padS * 0.72;
+    const y1 = fh - padB * 0.72;
+
+    const nTop = 4;
+    const nRight = 3;
+    const nBottom = 4;
+    const nLeft = 3;
+
+    const points = [];
+
+    // Top edge (left -> right)
+    for (let i = 0; i < nTop; i++) {
+      const frac = i / nTop;
+      points.push({ x: x0 + (x1 - x0) * frac, y: y0, bump: 16 + rand() * 10 });
+    }
+    // Right edge (top -> bottom)
+    for (let i = 0; i < nRight; i++) {
+      const frac = i / nRight;
+      points.push({ x: x1, y: y0 + (y1 - y0) * frac, bump: 10 + rand() * 7 });
+    }
+    // Bottom edge (right -> left)
+    for (let i = 0; i < nBottom; i++) {
+      const frac = i / nBottom;
+      points.push({ x: x1 - (x1 - x0) * frac, y: y1, bump: 14 + rand() * 8 });
+    }
+    // Left edge (bottom -> top)
+    for (let i = 0; i < nLeft; i++) {
+      const frac = i / nLeft;
+      points.push({ x: x0, y: y1 - (y1 - y0) * frac, bump: 10 + rand() * 7 });
+    }
+
+    const segments = [];
+    const n = points.length;
+    segments.push(`M ${points[0].x.toFixed(1)} ${points[0].y.toFixed(1)}`);
+
+    for (let i = 0; i < n; i++) {
+      const p1 = points[i];
+      const p2 = points[(i + 1) % n];
+
+      const dx = p2.x - p1.x;
+      const dy = p2.y - p1.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist < 0.001) continue;
+
+      const tx = dx / dist;
+      const ty = dy / dist;
+      // Normal vector pointing outward for clockwise perimeter
+      const nx = ty;
+      const ny = -tx;
+
+      const hBump = (p1.bump + p2.bump) * 0.5 * (isBack ? 1.15 : 1.0);
+
+      const c1x = p1.x + tx * (dist * 0.28) + nx * hBump;
+      const c1y = p1.y + ty * (dist * 0.28) + ny * hBump;
+      const c2x = p2.x - tx * (dist * 0.28) + nx * hBump;
+      const c2y = p2.y - ty * (dist * 0.28) + ny * hBump;
+
+      segments.push(`C ${c1x.toFixed(1)} ${c1y.toFixed(1)}, ${c2x.toFixed(1)} ${c2y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`);
+    }
+
+    segments.push('Z');
+    return { path: segments.join(' '), fw, fh, padS, padT };
+  }
+
+  function renderCloudSVG(svgEl, w, h, seed) {
+    const front = generateCloudPath(w, h, seed, false);
+    const back = generateCloudPath(w, h, seed + 107, true);
+
+    svgEl.setAttribute('viewBox', `0 0 ${front.fw.toFixed(1)} ${front.fh.toFixed(1)}`);
+    svgEl.innerHTML = `
+      <defs>
+        <linearGradient id="cGradFront-${seed}" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#ffffff"/>
+          <stop offset="68%" stop-color="#f5faff"/>
+          <stop offset="100%" stop-color="#e3f1fb"/>
+        </linearGradient>
+        <linearGradient id="cGradBack-${seed}" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="rgba(255, 255, 255, 0.9)"/>
+          <stop offset="100%" stop-color="rgba(215, 238, 252, 0.6)"/>
+        </linearGradient>
+      </defs>
+      <path class="cloud-layer-back" d="${back.path}" fill="url(#cGradBack-${seed})" />
+      <path class="cloud-layer-front" d="${front.path}" fill="url(#cGradFront-${seed})" />
+    `;
+  }
+
+  // ── 4. Lightbox Modal Controller ──────────────────────────────────
   const dialog = document.getElementById('lightbox-dialog');
   const closeBtn = document.getElementById('lightbox-close');
   const lbImg = document.getElementById('lightbox-img');
   const lbWrap = document.getElementById('lightbox-media-wrap');
   const lbCaption = document.getElementById('lightbox-caption');
   const lbBadge = document.getElementById('lightbox-badge');
+  const lbCloudSvg = document.getElementById('lightbox-cloud-svg');
   let lastActiveElement = null;
 
   function openLightbox(url, index, host, file, card) {
@@ -629,24 +877,33 @@ document.addEventListener('DOMContentLoaded', function () {
     lbImg.src = url;
     lbImg.alt = 'Enlarged test image ' + index;
     lbCaption.textContent = '#' + index + ' — ' + host + ' — ' + file;
-    
-    // Propagate AI verdict state to lightbox
+
     const isAi = card.classList.contains('is-ai-card');
     if (isAi) {
       lbWrap.classList.add('is-ai');
       const score = card.dataset.aiScore || '';
       lbBadge.textContent = score ? `AI GENERATED · ${score}` : 'AI GENERATED';
+
+      // Redraw lightbox SVG cloud
+      requestAnimationFrame(() => {
+        const rect = lbImg.getBoundingClientRect();
+        const w = rect.width || 480;
+        const h = rect.height || 360;
+        renderCloudSVG(lbCloudSvg, w, h, index * 83 + 17);
+      });
     } else {
       lbWrap.classList.remove('is-ai');
     }
 
+    dialog.style.display = 'flex';
     dialog.showModal();
     closeBtn.focus();
   }
 
   function closeLightbox() {
     dialog.close();
-    lbImg.src = '';
+    dialog.style.display = 'none';
+    lbImg.removeAttribute('src');
     if (lastActiveElement && typeof lastActiveElement.focus === 'function') {
       lastActiveElement.focus();
     }
@@ -663,24 +920,67 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
-  // 3. Grid Generation
-  const grid = document.getElementById('lab-grid');
+  // ── 5. Build 2-Picture Sections & Cards ───────────────────────────
+  const gridContainer = document.getElementById('lab-grid');
   const urls = window.LAB_URLS || [];
+
   if (!urls.length) {
     const empty = document.createElement('div');
     empty.className = 'lab-intro-card';
+    empty.style.margin = '40px auto';
     empty.innerHTML = '<p class="hint">No test images yet — add URLs to test_images.txt and restart the browser.</p>';
-    grid.replaceWith(empty);
+    gridContainer.replaceWith(empty);
     return;
   }
 
-  urls.forEach(function (url, i) {
-    grid.append(makeCard(url, i + 1));
-  });
+  // Setup Scroll Reveal Observer
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.remove('is-hidden');
+        entry.target.classList.add('is-revealed');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.18, rootMargin: '0px 0px -40px 0px' });
 
-  function makeCard(url, index) {
+  // Group into pairs: exactly 2 cards per section
+  for (let i = 0; i < urls.length; i += 2) {
+    const sectionIndex = Math.floor(i / 2) + 1;
+    const isSingle = (i + 1 >= urls.length);
+
+    const section = document.createElement('section');
+    section.className = 'lab-section';
+    section.dataset.section = String(sectionIndex);
+
+    // Section cloud divider tag
+    const divider = document.createElement('div');
+    divider.className = 'lab-section-divider';
+    divider.innerHTML = `<span class="section-cloud-pill">Zone ${sectionIndex}</span>`;
+    section.appendChild(divider);
+
+    const row = document.createElement('div');
+    row.className = `lab-section-row ${isSingle ? 'has-single-card' : ''}`;
+
+    // Card 1 (Left card: drifts slightly from left)
+    const card1 = makeCard(urls[i], i + 1, false);
+    card1.style.setProperty('--entry-rot', '-1.5deg');
+    row.appendChild(card1);
+
+    // Card 2 (Right card: staggered lower, drifts slightly from right)
+    if (!isSingle) {
+      const card2 = makeCard(urls[i + 1], i + 2, true);
+      card2.style.setProperty('--entry-rot', '1.5deg');
+      row.appendChild(card2);
+    }
+
+    section.appendChild(row);
+    gridContainer.appendChild(section);
+  }
+
+  function makeCard(url, index, isStaggered) {
     const card = document.createElement('figure');
-    card.className = 'lab-card';
+    card.className = `lab-card ${isStaggered ? 'is-staggered' : ''} is-hidden`;
     card.tabIndex = 0;
     card.setAttribute('role', 'button');
     card.setAttribute('aria-haspopup', 'dialog');
@@ -693,26 +993,17 @@ document.addEventListener('DOMContentLoaded', function () {
       file = parsed.pathname.split('/').filter(Boolean).pop() || '';
     } catch (e) {}
 
-    // Cloud Frame Wrapper
-    const frameWrap = document.createElement('div');
-    frameWrap.className = 'cloud-frame-wrap';
+    // Outer Frame Box
+    const frameOuter = document.createElement('div');
+    frameOuter.className = 'card-frame-outer';
 
-    // Decorative Cloud Bumps (aria-hidden)
-    const bumps = document.createElement('div');
-    bumps.className = 'cloud-bumps-container';
-    bumps.setAttribute('aria-hidden', 'true');
-    bumps.innerHTML = `
-      <span class="bump bump-top-1"></span>
-      <span class="bump bump-top-2"></span>
-      <span class="bump bump-top-3"></span>
-      <span class="bump bump-bottom-1"></span>
-      <span class="bump bump-bottom-2"></span>
-      <span class="bump bump-bottom-3"></span>
-      <span class="bump bump-left-1"></span>
-      <span class="bump bump-right-1"></span>
-    `;
+    // SVG Cloud Frame element
+    const cloudSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    cloudSvg.setAttribute('class', 'cloud-frame-svg');
+    cloudSvg.setAttribute('aria-hidden', 'true');
+    cloudSvg.setAttribute('focusable', 'false');
 
-    // Image window
+    // Picture Window
     const imgWindow = document.createElement('div');
     imgWindow.className = 'img-window';
 
@@ -729,33 +1020,64 @@ document.addEventListener('DOMContentLoaded', function () {
     badge.setAttribute('role', 'status');
     badge.textContent = 'AI GENERATED';
 
-    frameWrap.appendChild(bumps);
-    frameWrap.appendChild(imgWindow);
-    frameWrap.appendChild(badge);
+    frameOuter.appendChild(cloudSvg);
+    frameOuter.appendChild(imgWindow);
+    frameOuter.appendChild(badge);
 
-    // Metadata caption
+    // Metadata Caption
     const meta = document.createElement('figcaption');
     meta.className = 'lab-card-meta';
-    meta.innerHTML = `<span class="meta-idx">#${index}</span> <span class="meta-host">${host}</span> <span class="meta-file">${file}</span>`;
+    meta.innerHTML = `
+      <span class="meta-tag">#${index}</span>
+      <span class="meta-info">${host} ${file ? '· ' + file : ''}</span>
+    `;
 
-    card.appendChild(frameWrap);
+    card.appendChild(frameOuter);
     card.appendChild(meta);
 
-    // Float stagger
-    card.style.setProperty('--float-delay', `${(index * 0.45) % 3.5}s`);
+    // Initial shape generation
+    const seed = index * 137 + 19;
+    function updateFrameShape() {
+      const w = imgWindow.offsetWidth || 440;
+      const h = imgWindow.offsetHeight || 330;
+      renderCloudSVG(cloudSvg, w, h, seed);
+    }
 
-    // Interactive Handlers
-    card.addEventListener('click', function () {
-      openLightbox(url, index, host, file, card);
+    // ResizeObserver keeps cloud bumps proportionate
+    if (window.ResizeObserver) {
+      const ro = new ResizeObserver(() => updateFrameShape());
+      ro.observe(imgWindow);
+    } else {
+      updateFrameShape();
+    }
+
+    // React to AI detection
+    card.addEventListener('ai-detected', (e) => {
+      card.classList.add('is-ai-card');
+      const score = e.detail && e.detail.score;
+      if (score) {
+        badge.textContent = `AI GENERATED · ${score}`;
+        badge.setAttribute('aria-label', `Detected as AI Generated with confidence score ${score}`);
+      }
+      updateFrameShape();
     });
 
-    card.addEventListener('keydown', function (e) {
+    // Keyboard & Click interactions
+    card.addEventListener('click', () => openLightbox(url, index, host, file, card));
+    card.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         openLightbox(url, index, host, file, card);
       }
     });
 
+    // Reveal immediately if focused via keyboard tabbing
+    card.addEventListener('focus', () => {
+      card.classList.remove('is-hidden');
+      card.classList.add('is-revealed');
+    });
+
+    revealObserver.observe(card);
     return card;
   }
 });
