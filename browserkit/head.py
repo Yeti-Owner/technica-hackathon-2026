@@ -28,18 +28,20 @@ HUD_JS = r"""
 
   const CSS = `
     :host { all: initial; }
-    .wrap { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 2147483647;
+    .wrap { position: fixed; top: 86px; left: 50%; transform: translateX(-50%); z-index: 2147483647;
             display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none;
-            font: 600 14px/1.1 "Segoe UI", system-ui, sans-serif; }
-    .pill { display: flex; align-items: center; gap: 10px; padding: 9px 14px; border-radius: 999px;
-            color: #fff; background: rgba(22, 24, 30, 0.93); border: 2px solid var(--c, #8aa0b5);
-            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35); white-space: nowrap; transition: border-color 0.15s; }
-    .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c, #8aa0b5); }
-    .chip { font-size: 12px; padding: 4px 9px; border-radius: 999px; }
-    .chip.on { background: rgba(70, 190, 100, 0.25); color: #8ff0a8; }
-    .chip.off { background: rgba(230, 80, 70, 0.28); color: #ffb0a9; }
-    .toast { font-size: 18px; padding: 10px 20px; border-radius: 12px; color: #fff;
-             background: rgba(22, 24, 30, 0.95); box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+            font: 700 13px/1.2 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; }
+    .pill { display: flex; align-items: center; gap: 10px; padding: 7px 15px; border-radius: 999px;
+            color: #081c28; background: rgba(255, 255, 255, 0.92); border: 1.5px solid var(--c, #8aa0b5);
+            box-shadow: 0 6px 20px rgba(14, 52, 85, 0.14); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            white-space: nowrap; transition: border-color 0.18s ease, box-shadow 0.18s ease; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--c, #8aa0b5); }
+    .chip { font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 999px; letter-spacing: 0.04em; text-transform: uppercase; }
+    .chip.on { background: rgba(22, 122, 54, 0.15); color: #12632b; }
+    .chip.off { background: rgba(90, 105, 120, 0.15); color: #3a4b5c; }
+    .toast { font-size: 14px; font-weight: 700; padding: 8px 18px; border-radius: 999px; color: #081c28;
+             background: rgba(255, 255, 255, 0.95); box-shadow: 0 8px 24px rgba(14, 52, 85, 0.2);
+             border: 1.5px solid rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
              opacity: 0; transform: translateY(-6px); transition: opacity 0.2s, transform 0.2s; }
     .toast.show { opacity: 1; transform: none; }
   `;

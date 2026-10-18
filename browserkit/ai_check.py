@@ -254,6 +254,8 @@ class AICheck:
             print(f"ai: {error}; feature idle.")
             return
         values = read_env(ROOT / ".env")
+        if not values and (ROOT / "env").exists():
+            values = read_env(ROOT / "env")
         server = secret("AI_CHECK_SERVER_URL", values)
         key = secret("AI_CHECK_API_KEY", values)
         if not is_configured(server, key):

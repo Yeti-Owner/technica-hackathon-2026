@@ -137,14 +137,15 @@ async def main():
                 assert verdicts.get("a") and verdicts.get("b") and verdicts.get("e"), verdicts
                 assert not verdicts.get("c"), verdicts
                 assert not verdicts.get("d"), verdicts
-                outlines = await browser.page.evaluate("""() => Object.fromEntries(
+                cloud_marks = await browser.page.evaluate("""() => Object.fromEntries(
                     Array.from(document.querySelectorAll('img')).map(img => {
-                        const style = getComputedStyle(img);
-                        return [img.id, style.outlineColor + ' ' + style.outlineWidth];
+                        return [img.id, {
+                            verdict: img.dataset.aiVerdict || null,
+                            detected: img.classList.contains('ai-detected-img')
+                        }];
                     }))""")
                 for key in ("a", "b", "e"):
-                    assert "255, 23, 68" in outlines[key] or "#ff1744" in outlines[key], outlines
-                    assert "6px" in outlines[key], outlines
+                    assert cloud_marks[key]["detected"] and cloud_marks[key]["verdict"], cloud_marks
                 status = ai.status()
                 marked = int(status.split("marked ")[1].split(" ")[0])
                 assert marked >= 3, status

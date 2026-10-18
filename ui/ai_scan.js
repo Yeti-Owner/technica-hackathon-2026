@@ -52,12 +52,17 @@
     const item = records.get(img);
     if (!item) return;
     if (item.banner) item.banner.remove();
+    if (item.frame) item.frame.remove();
     if (item.timer) clearInterval(item.timer);
-    img.style.outline = item.outline;
-    img.style.outlineOffset = item.offset;
-    img.classList.remove('ai-mark-outline');
+    img.classList.remove('ai-detected-img');
     delete img.dataset.aiVerdict;
+    const card = img.closest('.lab-card');
+    if (card) {
+      card.classList.remove('is-ai-card');
+      delete card.dataset.aiScore;
+    }
     item.banner = null;
+    item.frame = null;
     item.timer = 0;
     item.reported = '';
   }
@@ -133,11 +138,18 @@
   function positionAll() {
     for (const img of Array.from(images)) {
       const item = records.get(img);
-      if (!item || !item.banner) continue;
+      if (!item) continue;
       if (!img.isConnected) { forget(img); continue; }
-      const rect = img.getBoundingClientRect();
-      item.banner.style.left = `${rect.left + scrollX}px`;
-      item.banner.style.top = `${rect.top + scrollY}px`;
+      if (item.frame && item.banner) {
+        const rect = img.getBoundingClientRect();
+        const pad = 16;
+        item.frame.style.left = `${rect.left + scrollX - pad}px`;
+        item.frame.style.top = `${rect.top + scrollY - pad}px`;
+        item.frame.style.width = `${rect.width + pad * 2}px`;
+        item.frame.style.height = `${rect.height + pad * 2}px`;
+        item.banner.style.left = `${rect.left + scrollX + Math.max(12, (rect.width - item.banner.offsetWidth) / 2)}px`;
+        item.banner.style.top = `${rect.bottom + scrollY - 14}px`;
+      }
     }
   }
 
@@ -174,30 +186,61 @@
   function __aiMark(img, score) {
     const item = record(img);
     if (item.banner) item.banner.remove();
+    if (item.frame) item.frame.remove();
     if (item.timer) clearInterval(item.timer);
-    img.style.outline = '6px solid #ff1744';
-    img.style.outlineOffset = '-1px';
-    img.classList.add('ai-mark-outline');
+
     img.dataset.aiVerdict = String(score);
-    const banner = document.createElement('div');
-    banner.className = 'ai-mark-banner';
-    banner.textContent = `AI GENERATED · ${score}`;
-    banner.style.position = 'absolute';
-    banner.style.background = '#ff1744';
-    banner.style.color = '#fff';
-    banner.style.fontWeight = '700';
-    banner.style.textTransform = 'uppercase';
-    banner.style.fontSize = '18px';
-    banner.style.padding = '6px 10px';
-    banner.style.zIndex = '2147483000';
-    banner.style.pointerEvents = 'none';
-    document.documentElement.append(banner);
-    item.banner = banner;
+    img.classList.add('ai-detected-img');
+
+    // If inside a picture lab card or custom component:
+    const card = img.closest('.lab-card');
+    if (card) {
+      card.classList.add('is-ai-card');
+      card.dataset.aiScore = String(score);
+      const badge = card.querySelector('.ai-cloud-badge');
+      if (badge) {
+        badge.textContent = `AI GENERATED · ${score}`;
+        badge.setAttribute('aria-label', `Detected as AI Generated with confidence score ${score}`);
+      }
+      return;
+    }
+
+    // Generic overlay for ordinary pages visited by browser:
+    const frame = document.createElement('div');
+    frame.className = 'ai-cloud-frame-overlay';
+    frame.setAttribute('aria-hidden', 'true');
+    frame.innerHTML = `
+      <span class="bump bump-top-1"></span>
+      <span class="bump bump-top-2"></span>
+      <span class="bump bump-top-3"></span>
+      <span class="bump bump-bottom-1"></span>
+      <span class="bump bump-bottom-2"></span>
+      <span class="bump bump-bottom-3"></span>
+      <span class="bump bump-left-1"></span>
+      <span class="bump bump-right-1"></span>
+    `;
+
+    const badge = document.createElement('div');
+    badge.className = 'ai-cloud-badge-overlay';
+    badge.textContent = `AI GENERATED · ${score}`;
+    badge.setAttribute('role', 'status');
+    badge.setAttribute('aria-label', `Detected as AI Generated with confidence score ${score}`);
+
+    document.documentElement.append(frame);
+    document.documentElement.append(badge);
+    item.frame = frame;
+    item.banner = badge;
+
     const place = () => {
-      if (!banner.isConnected || !img.isConnected) return;
+      if (!badge.isConnected || !frame.isConnected || !img.isConnected) return;
       const rect = img.getBoundingClientRect();
-      banner.style.left = `${rect.left + scrollX}px`;
-      banner.style.top = `${rect.top + scrollY}px`;
+      const pad = 16;
+      frame.style.left = `${rect.left + scrollX - pad}px`;
+      frame.style.top = `${rect.top + scrollY - pad}px`;
+      frame.style.width = `${rect.width + pad * 2}px`;
+      frame.style.height = `${rect.height + pad * 2}px`;
+      badge.style.left = `${rect.left + scrollX + Math.max(12, (rect.width - badge.offsetWidth) / 2)}px`;
+      badge.style.top = `${rect.bottom + scrollY - 14}px`;
     };
     place();
     item.timer = setInterval(place, 1000);

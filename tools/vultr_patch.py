@@ -43,6 +43,8 @@ NO_RESTART = "--no-restart" in sys.argv
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ENV_PATH = os.path.join(REPO_ROOT, ".env")
+if not os.path.isfile(ENV_PATH) and os.path.isfile(os.path.join(REPO_ROOT, "env")):
+    ENV_PATH = os.path.join(REPO_ROOT, "env")
 
 REMOTE_PATH = "/root/ai-check/app.py"
 REMOTE_BAK = "/root/ai-check/app.py.bak"
